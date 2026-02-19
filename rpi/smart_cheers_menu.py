@@ -6,10 +6,18 @@ from grove_rgb_lcd import *
 import serial
 import json
 
+# --- CONFIG RFID ---
+RFID_SERIAL_PORT = '/dev/serial0'
+RFID_BAUDRATE = 9600
+
 # --- CONFIG MQTT ---
-broker_ip = "192.168.68.77"
+#broker_ip = "192.168.68.72"
+broker_ip = "mqtt.smartcheers.local"
 broker_port = 1883
-mqtt_topic = "smartcheers/order/create"
+CREATE_ORDER_TOPIC = "smartcheers/order/create"
+DELIVER_ORDER_TOPIC = "smartcheers/order/deliver"
+MQTT_USERNAME = 'rpi-001'
+MQTT_PASSWORD = '29!pSubG'
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code", rc)
@@ -17,43 +25,22 @@ def on_connect(client, userdata, flags, rc):
 def on_publish(client, userdata, mid):
     print("Message published")
 
-def mqtt_publish(payload):
+def mqtt_publish(payload, mqtt_topic):
     client = paho.Client(client_id="smartcheers-pub-001")
-    client.username_pw_set(username="rpi-001",password='29!pSubG')
+    client.username_pw_set(username=MQTT_USERNAME,password=MQTT_PASSWORD)
     client.on_connect = on_connect
     client.on_publish = on_publish
     client.connect(broker_ip, broker_port, 60)
     client.loop_start()
-    client.publish(mqtt_topic, payload)
+    client.publish(mqtt_topic, payload, 0)
     time.sleep(1)
     client.loop_stop()
     client.disconnect()
 
 # --- CONFIG MQTT livraison ---
-deliver_topic = "smartcheers/order/deliver"
 delivery_received = False
 delivered_by = None
 
-def on_message(client, userdata, msg):
-    global delivery_received, delivered_by
-    try:
-        payload = json.loads(msg.payload.decode())
-        employee_id = payload.get("employeeId")
-        print(f"Commande livrée par le serveur {employee_id}")
-        delivered_by = employee_id
-        delivery_received = True
-    except Exception as e:
-        print("Erreur lors du traitement de la livraison :", e)
-
-def start_mqtt_listener():
-    client = paho.Client(client_id="smartcheers-sub-001")
-    client.username_pw_set(username='rpi-001',password='29!pSubG')
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(broker_ip, broker_port, 60)
-    client.subscribe(deliver_topic)
-    client.loop_start()
-    return client
 
 # --- CONFIG Joystick ---
 JOYSTICK_X = 0  # A0
@@ -118,7 +105,7 @@ def read_joystick():
     return x, y, sw
 
 # --- RFID ---
-ser = serial.Serial(port='/dev/serial0', baudrate=9600, timeout=1)
+ser = serial.Serial(port=RFID_SERIAL_PORT, baudrate=RFID_BAUDRATE, timeout=1)
 
 def wait_for_rfid():
     setRGB(255, 255, 0)
@@ -134,9 +121,41 @@ def wait_for_rfid():
                     setRGB(0, 255, 0)
                     setText(f"Bienvenue !\nID:{badge_id}")
                     time.sleep(2)
+                    data = None
                     return badge_id
             except Exception as e:
                 print("Erreur :", e)
+        time.sleep(0.5)
+
+
+def wait_for_rfid_deliver():
+    setRGB(255, 165, 0)
+    setText("En attente de   livraison")
+    print("🟢 En attente d'un badge RFID...")
+    while True:
+        data = ser.read(14)
+        if data:
+            try:
+                badge_id = data.decode('ascii', errors='ignore').strip()
+                if badge_id:
+                    print("📟 Badge détecté :", badge_id)
+                    # Afficher livraison et revenir à l'accueil
+                    payload = json.dumps({
+                        "clientUid": client_id,
+                        "employeeUid": badge_id
+                    })
+                    mqtt_publish(payload, DELIVER_ORDER_TOPIC)
+                    setRGB(0, 128, 255)
+                    setText(f"Livre par :\n{badge_id}")
+                    time.sleep(3)
+                    setRGB(0, 128, 100)
+                    setText("Pret pour nouvelle commande")
+                    time.sleep(1)
+                    data = None
+                    return badge_id
+            except Exception as e:
+                print("Erreur :", e)
+        time.sleep(0.5)
 
 # --- MAIN ---
 try:
@@ -212,47 +231,16 @@ try:
                                         "clientUid": client_id,
                                         "command": [{"produit": k, "quantite": v} for k, v in panier.items()]
                                     })
-                                    print(f"Commande envoyée : {payload}")
-                                    mqtt_publish(payload)
+                                    mqtt_publish(payload, CREATE_ORDER_TOPIC)
+                                    print(f"Commande envoyée : {payload} : {CREATE_ORDER_TOPIC}")
                                     setRGB(0, 255, 0)
                                     setText("Commande envoyee")
                                     time.sleep(2)
                                     confirmation = True
                                     commande_terminee = True
 
-                                    # Commande envoyée
-                                    setRGB(255, 165, 0)
-                                    setText("En attente de   livraison")
-
-                                    # Démarrer le listener MQTT
-                                    mqtt_client = start_mqtt_listener()
-
-                                    # Boucle d'attente active : on continue de scanner le badge
-                                    while not delivery_received:
-                                        badge_id = ser.read(14)
-                                        if badge_id:
-                                            try:
-                                                badge_id = badge_id.decode('ascii', errors='ignore').strip()
-                                                if badge_id:
-                                                    print(f"Badge rescanne : {badge_id}")
-                                                    # Considérer la livraison effectuée
-                                                    delivered_by = badge_id
-                                                    delivery_received = True
-                                            except:
-                                                passw
-                                        time.sleep(0.1)
-
-                                    # Afficher livraison et revenir à l'accueil
-                                    setRGB(0, 128, 255)
-                                    setText(f"Livre par :\n{delivered_by}")
-                                    time.sleep(3)
-                                    setRGB(0, 128, 100)
-                                    setText("Pret pour nouvelle commande")
-                                    time.sleep(1)
-
-                                    # Arrêter MQTT
-                                    mqtt_client.loop_stop()
-                                    mqtt_client.disconnect()
+                                    # Attendre le serveur
+                                    wait_for_rfid_deliver()
 
                                 # Joystick à gauche = annuler confirmation
                                 elif x_c < X_LEFT:
