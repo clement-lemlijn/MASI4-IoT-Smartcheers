@@ -36,12 +36,13 @@ SW_GPIO = 17    # Bouton joystick
 Y_UP = 300
 Y_DOWN = 700
 X_LEFT = 300
+X_RIGHT = 700  # Pour basculer vers le panier
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(SW_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # --- MENUS ---
-MAIN_MENU = ["Boissons", "Snacks"]
+MAIN_MENU = ["Boissons", "Snacks", "Confirmer"]
 DRINKS = ["Coca", "Fanta", "Sprite", "Bière"]
 SNACKS = ["Chips", "Saucisson", "Pizza"]
 
@@ -51,8 +52,37 @@ index = 0
 # --- LCD ---
 setRGB(0, 128, 100)
 
-def display_menu(menu, idx):
-    setText(f"> {menu[idx]}\n  {menu[(idx+1)%len(menu)]}")
+def format_item(item, panier):
+    """Retourne le texte formaté avec la quantité à droite"""
+    qty = panier.get(item, 0)
+    # Espace restant = 16 - longueur nom - longueur xN
+    txt = f"{item}"
+    suffix = f"x{qty}" if qty > 0 else ""
+    espace = 14 - len(txt) - len(suffix)
+    return f"{txt}{' '*espace}{suffix}"
+
+def display_menu(menu, idx, panier):
+    """Affiche le menu avec quantité à droite"""
+    item1 = format_item(menu[idx], panier)
+    item2 = format_item(menu[(idx+1)%len(menu)], panier)
+    setText(f"> {item1}\n  {item2}")
+
+def display_panier(panier):
+    """Affiche le panier de façon compacte"""
+    if not panier:
+        setText("Panier vide")
+        return
+    lignes = []
+    ligne = ""
+    for produit, quantite in panier.items():
+        abr = f"{produit[0]}:{quantite}"  # Ex: 'C:2' pour Coca 2
+        if len(ligne) + len(abr) + 1 <= 16:
+            ligne += " " + abr if ligne else abr
+        else:
+            lignes.append(ligne)
+            ligne = abr
+    lignes.append(ligne)
+    setText("\n".join(lignes[:2]))
 
 def read_joystick():
     x = grovepi.analogRead(JOYSTICK_X)
@@ -87,59 +117,99 @@ try:
         client_id = wait_for_rfid()
         index = 0
         menu_stack = [MAIN_MENU]
-        display_menu(menu_stack[-1], index)
+        panier = {}
+        show_panier = False
+        display_menu(menu_stack[-1], index, panier)
 
         commande_terminee = False
         while not commande_terminee:
             x, y, sw = read_joystick()
 
-            # Navigation BAS
-            if y > Y_DOWN:
-                index = (index + 1) % len(menu_stack[-1])
-                display_menu(menu_stack[-1], index)
+            # Bascule écran menu / panier
+            if x > X_RIGHT:
+                show_panier = True
+                display_panier(panier)
+                time.sleep(0.3)
+            elif x < X_LEFT:
+                show_panier = False
+                display_menu(menu_stack[-1], index, panier)
                 time.sleep(0.3)
 
-            # Navigation HAUT
-            elif y < Y_UP:
-                index = (index - 1) % len(menu_stack[-1])
-                display_menu(menu_stack[-1], index)
-                time.sleep(0.3)
+            if not show_panier:
+                # Navigation BAS
+                if y > Y_DOWN:
+                    index = (index + 1) % len(menu_stack[-1])
+                    display_menu(menu_stack[-1], index, panier)
+                    time.sleep(0.3)
 
-            # RETOUR
-            elif x < X_LEFT and len(menu_stack) > 1:
-                menu_stack.pop()
-                index = 0
-                display_menu(menu_stack[-1], index)
-                time.sleep(0.3)
+                # Navigation HAUT
+                elif y < Y_UP:
+                    index = (index - 1) % len(menu_stack[-1])
+                    display_menu(menu_stack[-1], index, panier)
+                    time.sleep(0.3)
 
-            # VALIDATION
-            elif sw == 0:
-                choice = menu_stack[-1][index]
-
-                if choice == "Boissons":
-                    menu_stack.append(DRINKS)
+                # RETOUR
+                elif x < X_LEFT and len(menu_stack) > 1:
+                    menu_stack.pop()
                     index = 0
-                    display_menu(DRINKS, index)
+                    display_menu(menu_stack[-1], index, panier)
+                    time.sleep(0.3)
 
-                elif choice == "Snacks":
-                    menu_stack.append(SNACKS)
-                    index = 0
-                    display_menu(SNACKS, index)
+                # VALIDATION
+                elif sw == 0:
+                    choice = menu_stack[-1][index]
 
-                else:
-                    # Prépare le JSON
-                    payload = json.dumps({
-                        "clientUid": client_id,
-                        "product": choice
-                    })
-                    print(f"Commande envoyée : {payload}")
-                    mqtt_publish(payload)
-                    setRGB(0, 255, 0)
-                    setText(f"Commande:\n{choice}")
-                    time.sleep(2)
+                    if choice == "Boissons":
+                        menu_stack.append(DRINKS)
+                        index = 0
+                        display_menu(DRINKS, index, panier)
 
-                    # Retour au menu principal pour un nouveau client
-                    commande_terminee = True
+                    elif choice == "Snacks":
+                        menu_stack.append(SNACKS)
+                        index = 0
+                        display_menu(SNACKS, index, panier)
+
+                    elif choice == "Confirmer":
+                        if panier:
+                            # Affichage de la page de confirmation abrégée
+                            setRGB(255, 255, 0)
+                            setText("Confirmer ?\n")
+                            display_panier(panier)
+                            time.sleep(0.5)
+                            confirmation = False
+                            while not confirmation:
+                                x_c, y_c, sw_c = read_joystick()
+                                # Bouton validation = confirmer
+                                if sw_c == 0:
+                                    payload = json.dumps({
+                                        "clientUid": client_id,
+                                        "command": [{"produit": k, "quantite": v} for k, v in panier.items()]
+                                    })
+                                    print(f"Commande envoyée : {payload}")
+                                    mqtt_publish(payload)
+                                    setRGB(0, 255, 0)
+                                    setText("Commande envoyée")
+                                    time.sleep(2)
+                                    confirmation = True
+                                    commande_terminee = True
+                                # Joystick à gauche = annuler confirmation
+                                elif x_c < X_LEFT:
+                                    display_menu(menu_stack[-1], index, panier)
+                                    confirmation = True
+                                    break
+                                time.sleep(0.05)
+                        else:
+                            setRGB(255, 0, 0)
+                            setText("Panier vide !")
+                            time.sleep(2)
+                            commande_terminee = True
+
+                    else:
+                        # Ajoute ou incrémente le produit dans le panier
+                        panier[choice] = panier.get(choice, 0) + 1
+                        display_menu(menu_stack[-1], index, panier)
+
+                    time.sleep(0.3)
 
             time.sleep(0.05)
 
