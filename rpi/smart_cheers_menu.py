@@ -7,7 +7,7 @@ import serial
 import json
 
 # --- CONFIG MQTT ---
-broker_ip = "192.168.68.75"
+broker_ip = "192.168.68.77"
 broker_port = 1883
 mqtt_topic = "smartcheers/order/create"
 
@@ -18,7 +18,8 @@ def on_publish(client, userdata, mid):
     print("Message published")
 
 def mqtt_publish(payload):
-    client = paho.Client()
+    client = paho.Client(client_id="smartcheers-pub-001")
+    client.username_pw_set(username="rpi-001",password='29!pSubG')
     client.on_connect = on_connect
     client.on_publish = on_publish
     client.connect(broker_ip, broker_port, 60)
@@ -27,6 +28,32 @@ def mqtt_publish(payload):
     time.sleep(1)
     client.loop_stop()
     client.disconnect()
+
+# --- CONFIG MQTT livraison ---
+deliver_topic = "smartcheers/order/deliver"
+delivery_received = False
+delivered_by = None
+
+def on_message(client, userdata, msg):
+    global delivery_received, delivered_by
+    try:
+        payload = json.loads(msg.payload.decode())
+        employee_id = payload.get("employeeId")
+        print(f"Commande livrée par le serveur {employee_id}")
+        delivered_by = employee_id
+        delivery_received = True
+    except Exception as e:
+        print("Erreur lors du traitement de la livraison :", e)
+
+def start_mqtt_listener():
+    client = paho.Client(client_id="smartcheers-sub-001")
+    client.username_pw_set(username='rpi-001',password='29!pSubG')
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(broker_ip, broker_port, 60)
+    client.subscribe(deliver_topic)
+    client.loop_start()
+    return client
 
 # --- CONFIG Joystick ---
 JOYSTICK_X = 0  # A0
@@ -43,7 +70,7 @@ GPIO.setup(SW_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # --- MENUS ---
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer"]
-DRINKS = ["Coca", "Fanta", "Sprite", "Bière"]
+DRINKS = ["Coca", "Fanta", "Sprite", "Biere"]
 SNACKS = ["Chips", "Saucisson", "Pizza"]
 
 menu_stack = [MAIN_MENU]
@@ -188,10 +215,45 @@ try:
                                     print(f"Commande envoyée : {payload}")
                                     mqtt_publish(payload)
                                     setRGB(0, 255, 0)
-                                    setText("Commande envoyée")
+                                    setText("Commande envoyee")
                                     time.sleep(2)
                                     confirmation = True
                                     commande_terminee = True
+
+                                    # Commande envoyée
+                                    setRGB(255, 165, 0)
+                                    setText("En attente de   livraison")
+
+                                    # Démarrer le listener MQTT
+                                    mqtt_client = start_mqtt_listener()
+
+                                    # Boucle d'attente active : on continue de scanner le badge
+                                    while not delivery_received:
+                                        badge_id = ser.read(14)
+                                        if badge_id:
+                                            try:
+                                                badge_id = badge_id.decode('ascii', errors='ignore').strip()
+                                                if badge_id:
+                                                    print(f"Badge rescanne : {badge_id}")
+                                                    # Considérer la livraison effectuée
+                                                    delivered_by = badge_id
+                                                    delivery_received = True
+                                            except:
+                                                passw
+                                        time.sleep(0.1)
+
+                                    # Afficher livraison et revenir à l'accueil
+                                    setRGB(0, 128, 255)
+                                    setText(f"Livre par :\n{delivered_by}")
+                                    time.sleep(3)
+                                    setRGB(0, 128, 100)
+                                    setText("Pret pour nouvelle commande")
+                                    time.sleep(1)
+
+                                    # Arrêter MQTT
+                                    mqtt_client.loop_stop()
+                                    mqtt_client.disconnect()
+
                                 # Joystick à gauche = annuler confirmation
                                 elif x_c < X_LEFT:
                                     display_menu(menu_stack[-1], index, panier)
