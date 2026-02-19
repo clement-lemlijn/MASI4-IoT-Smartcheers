@@ -13,7 +13,6 @@ mqtt_topic = "smartcheers"
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code", rc)
-    client.publish(mqtt_topic, "hello")
 
 def on_publish(client, userdata, mid):
     print("Message published")
@@ -24,7 +23,8 @@ def mqtt_publish(payload):
     client.on_publish = on_publish
     client.connect(broker_ip, broker_port, 60)
     client.loop_start()
-    time.sleep(2)
+    client.publish(mqtt_topic, payload)
+    time.sleep(1)
     client.loop_stop()
     client.disconnect()
 
@@ -104,7 +104,7 @@ try:
                 setRGB(0, 255, 0)
                 setText(f"Commande:\n{choice}")
                 print(f"Commande envoyée : {choice}")
-                mqtt_publish("Commande envoyée : ta maman")
+                mqtt_publish(f"Commande envoyée : {choice}")
                 time.sleep(2)
                 setRGB(0, 128, 255)
                 display_menu(menu_stack[-1], index)
