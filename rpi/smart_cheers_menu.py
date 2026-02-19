@@ -1,3 +1,4 @@
+import ssl
 import time
 import grovepi
 import RPi.GPIO as GPIO
@@ -13,7 +14,7 @@ RFID_BAUDRATE = 9600
 # --- CONFIG MQTT ---
 #broker_ip = "192.168.68.72"
 broker_ip = "mqtt.smartcheers.local"
-broker_port = 1883
+broker_port = 8883
 CREATE_ORDER_TOPIC = "smartcheers/order/create"
 DELIVER_ORDER_TOPIC = "smartcheers/order/deliver"
 MQTT_USERNAME = 'rpi-001'
@@ -26,8 +27,12 @@ def on_publish(client, userdata, mid):
     print("Message published")
 
 def mqtt_publish(payload, mqtt_topic):
-    client = paho.Client(client_id="smartcheers-pub-001")
+    client = paho.Client(client_id="smartcheers-pub-001",protocol=paho.MQTTv311)
     client.username_pw_set(username=MQTT_USERNAME,password=MQTT_PASSWORD)
+    client.tls_set(
+        ca_certs="/home/pi/mqtt-certs/ca.crt",
+        tls_version=ssl.PROTOCOL_TLSv1_2
+    )
     client.on_connect = on_connect
     client.on_publish = on_publish
     client.connect(broker_ip, broker_port, 60)
