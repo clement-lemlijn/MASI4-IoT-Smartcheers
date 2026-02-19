@@ -1,7 +1,32 @@
 import time
 import grovepi
 import RPi.GPIO as GPIO
+import paho.mqtt.client as paho
+import time
+from pymongo import MongoClient
 from grove_rgb_lcd import *
+
+# --- CONFIG MQTT ---
+broker_ip = "192.168.68.75"
+broker_port = 1883
+mqtt_topic = "smartcheers"
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code", rc)
+    client.publish(mqtt_topic, "hello")
+
+def on_publish(client, userdata, mid):
+    print("Message published")
+
+def mqtt_publish(payload):
+    client = paho.Client()
+    client.on_connect = on_connect
+    client.on_publish = on_publish
+    client.connect(broker_ip, broker_port, 60)
+    client.loop_start()
+    time.sleep(2)
+    client.loop_stop()
+    client.disconnect()
 
 # --- CONFIG ---
 JOYSTICK_X = 0  # A0
@@ -79,6 +104,7 @@ try:
                 setRGB(0, 255, 0)
                 setText(f"Commande:\n{choice}")
                 print(f"Commande envoyée : {choice}")
+                mqtt_publish("Commande envoyée : ta maman")
                 time.sleep(2)
                 setRGB(0, 128, 255)
                 display_menu(menu_stack[-1], index)
@@ -86,6 +112,7 @@ try:
             time.sleep(0.3)
 
         time.sleep(0.05)
+
 
 except KeyboardInterrupt:
     setText("Arrêt")
