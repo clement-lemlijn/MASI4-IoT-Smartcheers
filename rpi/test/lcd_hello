@@ -1,0 +1,11 @@
+from grove_rgb_lcd import *
+import time
+
+setRGB(0, 128, 255)
+setText("Hello World\nGrovePi")
+
+time.sleep(5)
+
+setText("Fin du script")
+setRGB(0, 255, 0)
+
