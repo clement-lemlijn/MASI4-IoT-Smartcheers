@@ -2,14 +2,14 @@ import time
 import grovepi
 import RPi.GPIO as GPIO
 import paho.mqtt.client as paho
-import time
-from pymongo import MongoClient
 from grove_rgb_lcd import *
+import serial
+import json
 
 # --- CONFIG MQTT ---
 broker_ip = "192.168.68.75"
 broker_port = 1883
-mqtt_topic = "smartcheers"
+mqtt_topic = "smartcheers/order/create"
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code", rc)
@@ -28,16 +28,15 @@ def mqtt_publish(payload):
     client.loop_stop()
     client.disconnect()
 
-# --- CONFIG ---
+# --- CONFIG Joystick ---
 JOYSTICK_X = 0  # A0
 JOYSTICK_Y = 1  # A1
-SW_GPIO = 17    # Bouton joysticj
+SW_GPIO = 17    # Bouton joystick
 
 Y_UP = 300
 Y_DOWN = 700
 X_LEFT = 300
 
-# --- GPIO ---
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(SW_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -61,58 +60,88 @@ def read_joystick():
     sw = GPIO.input(SW_GPIO)
     return x, y, sw
 
-display_menu(menu_stack[-1], index)
+# --- RFID ---
+ser = serial.Serial(port='/dev/serial0', baudrate=9600, timeout=1)
 
+def wait_for_rfid():
+    setRGB(255, 255, 0)
+    setText("Scannez votre badge")
+    print("🟢 En attente d'un badge RFID...")
+    while True:
+        data = ser.read(14)
+        if data:
+            try:
+                badge_id = data.decode('ascii', errors='ignore').strip()
+                if badge_id:
+                    print("📟 Badge détecté :", badge_id)
+                    setRGB(0, 255, 0)
+                    setText(f"Bienvenue !\nID:{badge_id}")
+                    time.sleep(2)
+                    return badge_id
+            except Exception as e:
+                print("Erreur :", e)
+
+# --- MAIN ---
 try:
     while True:
-        x, y, sw = read_joystick()
+        client_id = wait_for_rfid()
+        index = 0
+        menu_stack = [MAIN_MENU]
+        display_menu(menu_stack[-1], index)
 
-        # Navigation BAS
-        if y > Y_DOWN:
-            index = (index + 1) % len(menu_stack[-1])
-            display_menu(menu_stack[-1], index)
-            time.sleep(0.3)
+        commande_terminee = False
+        while not commande_terminee:
+            x, y, sw = read_joystick()
 
-        # Navigation HAUT
-        elif y < Y_UP:
-            index =  (index - 1) % len(menu_stack[-1])
-            display_menu(menu_stack[-1], index)
-            time.sleep(0.3)
-
-        # RETOUR
-        elif x < X_LEFT and len(menu_stack) > 1:
-            menu_stack.pop()
-            index = 0
-            display_menu(menu_stack[-1], index)
-            time.sleep(0.3)
-
-        # VALIDATION
-        elif sw == 0:
-            choice = menu_stack[-1][index]
-
-            if choice == "Boissons":
-                menu_stack.append(DRINKS)
-                index = 0
-                display_menu(DRINKS, index)
-
-            elif choice == "Snacks":
-                menu_stack.append(SNACKS)
-                index = 0
-                display_menu(SNACKS, index)
-
-            else:
-                setRGB(0, 255, 0)
-                setText(f"Commande:\n{choice}")
-                print(f"Commande envoyée : {choice}")
-                mqtt_publish(f"Commande envoyée : {choice}")
-                time.sleep(2)
-                setRGB(0, 128, 255)
+            # Navigation BAS
+            if y > Y_DOWN:
+                index = (index + 1) % len(menu_stack[-1])
                 display_menu(menu_stack[-1], index)
+                time.sleep(0.3)
 
-            time.sleep(0.3)
+            # Navigation HAUT
+            elif y < Y_UP:
+                index = (index - 1) % len(menu_stack[-1])
+                display_menu(menu_stack[-1], index)
+                time.sleep(0.3)
 
-        time.sleep(0.05)
+            # RETOUR
+            elif x < X_LEFT and len(menu_stack) > 1:
+                menu_stack.pop()
+                index = 0
+                display_menu(menu_stack[-1], index)
+                time.sleep(0.3)
 
+            # VALIDATION
+            elif sw == 0:
+                choice = menu_stack[-1][index]
+
+                if choice == "Boissons":
+                    menu_stack.append(DRINKS)
+                    index = 0
+                    display_menu(DRINKS, index)
+
+                elif choice == "Snacks":
+                    menu_stack.append(SNACKS)
+                    index = 0
+                    display_menu(SNACKS, index)
+
+                else:
+                    # Prépare le JSON
+                    payload = json.dumps({
+                        "clientUid": client_id,
+                        "product": choice
+                    })
+                    print(f"Commande envoyée : {payload}")
+                    mqtt_publish(payload)
+                    setRGB(0, 255, 0)
+                    setText(f"Commande:\n{choice}")
+                    time.sleep(2)
+
+                    # Retour au menu principal pour un nouveau client
+                    commande_terminee = True
+
+            time.sleep(0.05)
 
 except KeyboardInterrupt:
     setText("Arrêt")
