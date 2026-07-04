@@ -7,7 +7,7 @@ from grove_rgb_lcd import *
 import serial
 import json
 
-# --- CONFIG RFID ---
+# --- CONFIG RFID --- test deploy
 RFID_SERIAL_PORT = '/dev/serial0'
 RFID_BAUDRATE = 9600
 
