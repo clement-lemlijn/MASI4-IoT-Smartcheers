@@ -28,4 +28,5 @@ cd /home/pi/smartcheers && git pull origin main
 ```
 
 ## Dépannage
-Logs : Les logs du runner sont disponibles dans le dossier ~/smartcheers/actions-runner/_diag/
+- Logs : Les logs du runner sont disponibles dans le dossier ~/smartcheers/actions-runner/_diag/
+- Service : `` journalctl -u smartcheers.service -n 50 --no-pager ``
