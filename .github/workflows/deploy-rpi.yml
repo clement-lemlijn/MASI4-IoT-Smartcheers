@@ -1,0 +1,35 @@
+name: Deploy SmartCheers-Rpi
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Job 1 : Préparation du package
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Créer l'artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartcheers-rpi-build
+          path: rpi/  # On envoie uniquement le dossier de ton script
+
+  # Job 2 : Déploiement sur le Pi
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Nettoyer et installer
+        run: |
+          rm -rf /home/pi/smartcheers/rpi
+          mkdir -p /home/pi/smartcheers/rpi
+      - name: Télécharger le build
+        uses: actions/download-artifact@v4
+        with:
+          name: smartcheers-rpi-build
+          path: /home/pi/smartcheers/rpi/
+      - name: Relancer le service
+        run: sudo systemctl restart smartcheers.service
