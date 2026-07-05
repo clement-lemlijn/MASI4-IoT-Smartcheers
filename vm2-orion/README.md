@@ -11,3 +11,7 @@ Password : ""
 
 ## Services
 
+## Others 
+```
+sudo nano /etc/hosts
+```
