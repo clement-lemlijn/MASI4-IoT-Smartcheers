@@ -30,3 +30,15 @@ cd /home/pi/smartcheers && git pull origin main
 ## Dépannage
 - Logs : Les logs du runner sont disponibles dans le dossier ~/smartcheers/actions-runner/_diag/
 - Service : `` journalctl -u smartcheers.service -n 50 --no-pager ``
+
+### Runner corrompu
+```
+cd ~/smartcheers/actions-runner
+sudo ./svc.sh stop
+sudo ./svc.sh uninstall
+rm .runner .credentials .credentials_rsaparams
+# GitHub Settings > Actions > Runners, "New self-hosted runner"
+./config.sh --url https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers --token <NOUVEAU_TOKEN>
+sudo ./svc.sh install
+sudo ./svc.sh start
+```
