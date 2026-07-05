@@ -7,6 +7,16 @@
 sudo docker compose restart
 ```
 
+## Use : 
+### Sub
+```
+sudo docker exec -it mosquitto mosquitto_sub -t "test" -u clement-lemlijn -P mqtt-pwd
+```
+### Pub 
+```
+sudo docker exec -it mosquitto mosquitto_pub -t "test" -m "Test de connexion" -u clement-lemlijn -P mqtt-pwd
+```
+
 ## Service check : 
 ```
 sudo docker compose ps
