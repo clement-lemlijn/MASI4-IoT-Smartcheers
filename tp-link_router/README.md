@@ -15,3 +15,6 @@ Address: http://192.168.1.1/
 User: admin
 
 Pwd: admin
+
+
+Debug afficher les réseaux détectés par le rpi `sudo iwlist wlan0 scan | grep ESSID`
