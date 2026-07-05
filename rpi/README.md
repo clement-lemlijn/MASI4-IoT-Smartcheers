@@ -34,6 +34,10 @@ key_mgmt=WPA-PSK
 ### Ethernet
 On peut également s'y connecter en ethernet, son ip actuelle est `192.168.68.70`
 ```
+ssh pi@192.168.68.70
+```
+
+```
 2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
     link/ether dc:a6:32:31:98:98 brd ff:ff:ff:ff:ff:ff
     inet 192.168.68.70/22 brd 192.168.71.255 scope global dynamic noprefixroute eth0
