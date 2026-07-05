@@ -1,0 +1,23 @@
+# --- Mosquitto Data & Persistence ---
+# Ne pas versionner les données persistantes du broker
+data/
+logs/
+
+# --- Security & TLS ---
+# TRÈS IMPORTANT : Ne jamais versionner les clés privées (.key)
+# On garde les certificats publics (.crt) si besoin, mais les clés doivent rester privées.
+*.key
+
+# Si tu génères un fichier de mots de passe avec des credentials en clair ou hashés
+# et que tu ne veux pas qu'ils soient sur GitHub :
+pwfile
+
+# --- Environnement ---
+# Fichiers de variables d'environnement (souvent utilisés par Docker Compose)
+.env
+
+# --- Système & IDE ---
+.DS_Store
+*.swp
+.vscode/
+.idea/
