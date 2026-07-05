@@ -7,16 +7,6 @@
 sudo docker compose restart
 ```
 
-## Use : 
-### Sub
-```
-sudo docker exec -it mosquitto mosquitto_sub -t "test" -u clement-lemlijn -P mqtt-pwd
-```
-### Pub 
-```
-sudo docker exec -it mosquitto mosquitto_pub -t "test" -m "Test de connexion" -u clement-lemlijn -P mqtt-pwd
-```
-
 ## Service check : 
 ```
 sudo docker compose ps
@@ -28,3 +18,31 @@ docker exec -it mosquitto mosquitto_sub -t '$SYS/#' -C 1
 ```
 sudo docker exec -it mosquitto mosquitto_passwd -c /mosquitto/config/pwfile ton_user
 ```
+
+--- 
+
+## Use : 
+### Sub
+```
+sudo docker exec -it mosquitto mosquitto_sub -t "test" -u clement-lemlijn -P mqtt-pwd
+```
+### Pub 
+```
+sudo docker exec -it mosquitto mosquitto_pub -t "test" -m "Test de connexion" -u clement-lemlijn -P mqtt-pwd
+```
+
+### QoS 2 : 
+```
+sudo docker exec -it mosquitto mosquitto_sub -t "test/qos2" -q 2 -u clement-lemlijn -P mqtt-pwd -v
+sudo docker exec -it mosquitto mosquitto_pub -t "test/qos2" -m "Message QoS 2 garanti" -q 2 -u clement-lemlijn -P mqtt-pwd
+```
+La preuve technique :
+- Capture Wireshark sur ta machine (ou tcpdump sur la VM).
+- Filtre par mqtt.
+- 4 paquets caractéristiques de la transaction QoS 2 :
+  - PUBLISH (le message part)
+  - PUBREC (le broker dit "j'ai reçu")
+  - PUBREL (le client dit "je confirme la réception")
+  - PUBCOMP (le broker dit "transaction terminée")
+Si cette séquence apparaît, "QoS 2" valide
+
