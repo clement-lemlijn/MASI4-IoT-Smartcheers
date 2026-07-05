@@ -40,3 +40,8 @@ _`/etc/netplan/50-cloud-init.yaml`_
 ```
 sudo nano /etc/hosts
 ```
+
+### Port forwarding windows 
+```
+netsh interface portproxy add v4tov4 listenport=8884 listenaddress=0.0.0.0 connectport=8884 connectaddress=192.168.137.140
+```
