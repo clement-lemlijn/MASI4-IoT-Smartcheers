@@ -10,8 +10,8 @@ sudo docker compose restart
 ## Service check : 
 ```
 sudo docker compose ps
-sudo ss -tulpn | grep mosquitto
-docker exec -it mosquitto mosquitto_sub -t '$SYS/#' -C 1
+netstat -tulpn | grep 1883
+sudo docker exec -it mosquitto mosquitto_sub -t '$SYS/#' -C 1 -u clement-lemlijn -P mqtt-pwd
 ```
 
 ## add user : 
