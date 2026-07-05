@@ -20,3 +20,14 @@ smartcheers/
     ├── smart_cheers_menu.py    # Script principal de l'application
     └── test/                   # Scripts de test pour le projet
 ```
+
+## Service 🔧
+
+### Github runner :
+```
+sudo systemctl status actions.runner.clement-lemlijn-MASI4-IoT-Smartcheers.raspberrypi.service
+```
+### Smartcheers menu :
+```
+systemctl status smartcheers.service
+```
