@@ -29,7 +29,7 @@ psk="clement123"
 key_mgmt=WPA-PSK
 }
 ```
-
+_`/etc/wpa_supplicant/wpa_supplicant.conf`_ 
 
 ### Ethernet
 On peut également s'y connecter en ethernet, son ip actuelle est `192.168.68.70`
