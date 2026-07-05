@@ -41,9 +41,11 @@ def mqtt_publish(payload, mqtt_topic):
         client.loop_stop()
         client.disconnect()
         print("✅ Message envoyé avec succès")
+        return True
     except Exception as e:
         print(f"❌ Erreur MQTT : {e}")
         setText("Erreur MQTT")
+        return False
 
 # --- CONFIG MQTT livraison ---
 delivery_received = False
@@ -256,13 +258,24 @@ try:
                                         "clientUid": client_id,
                                         "command": [{"produit": k, "quantite": v} for k, v in panier.items()]
                                     })
-                                    mqtt_publish(payload, CREATE_ORDER_TOPIC)
-                                    print(f"Commande envoyée : {payload} : {CREATE_ORDER_TOPIC}")
-                                    safe_setRGB(0, 255, 0)
-                                    setText("Commande envoyee")
-                                    time.sleep(2)
-                                    confirmation = True
-                                    commande_terminee = True
+
+                                    success = mqtt_publish(payload, CREATE_ORDER_TOPIC)
+
+                                    if success:
+                                        print(f"Commande envoyée avec succès")
+                                        safe_setRGB(0, 255, 0)
+                                        setText("Commande envoyee")
+                                        time.sleep(2)
+                                        confirmation = True
+                                        commande_terminee = True
+                                        # Attendre le serveur uniquement si le MQTT a réussi
+                                        wait_for_rfid_deliver()
+                                    else:
+                                        print("Échec MQTT : Impossible d'envoyer la commande")
+                                        safe_setRGB(255, 0, 0)
+                                        setText("Erreur Serveur !")
+                                        time.sleep(2)
+                                        commande_terminee = False # On annule la progression
 
                                     # Attendre le serveur
                                     wait_for_rfid_deliver()
