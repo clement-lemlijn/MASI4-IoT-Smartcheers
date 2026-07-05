@@ -16,6 +16,18 @@ User: admin
 
 Pwd: admin
 
+## IP Address repartition: 
+
+
+|Equipment|Role|IP Address|
+| :--- | :--- | :--- |
+|TP-Link Nano|Gateway|192.168.1.1|
+|Raspberry Pi|Serveur SmartCheers|192.168.1.10|
+|ESP32 Vroom|Contrôleur IoT|192.168.1.11|
+|VM Orion|Serveur Service 1|192.168.1.12|
+|VM Artemis|Serveur Service 2|192.168.1.13|
+|PC Omen|Host principal|192.168.1.100|
+
 
 Debug afficher les réseaux détectés par le rpi `sudo iwlist wlan0 scan | grep ESSID`
 ```
