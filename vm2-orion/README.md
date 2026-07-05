@@ -26,7 +26,7 @@ network:
     ens33:
       dhcp4: no
       addresses:
-        - 192.168.87.140/24
+        - 192.168.137.140/24
       routes:
         - to: default
           via: 192.168.87.1
