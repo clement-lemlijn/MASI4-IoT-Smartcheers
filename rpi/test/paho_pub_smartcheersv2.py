@@ -2,8 +2,8 @@ import paho.mqtt.client as paho
 import time
 
 # --- CONFIGURATION ---
-broker_ip = "IP_DE_TA_VM"  # <--- METS L'IP ICI
-broker_port = 8884         # Port TLS
+broker_ip = "192.168.137.1" 
+broker_port = 8884
 mqtt_topic = "smartcheers/order/create"
 ca_cert_path = "/home/pi/mqtt-certs/ca.crt" # Ton certificat existant
 user = "clement-lemlijn"
