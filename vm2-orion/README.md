@@ -10,6 +10,12 @@ User : "LEMLIJN Clément"
 Password : ""
 
 ## Services
+### MQTT Broker
+```
+cd MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/
+sudo docker exec -it mosquitto mosquitto_sub -t '$SYS/#' -C 1 -u clement-lemlijn -P mqtt-pwd
+```
+
 
 ## Others 
 ```
