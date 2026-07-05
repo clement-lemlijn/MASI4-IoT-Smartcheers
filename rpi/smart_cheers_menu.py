@@ -277,9 +277,6 @@ try:
                                         time.sleep(2)
                                         commande_terminee = False # On annule la progression
 
-                                    # Attendre le serveur
-                                    wait_for_rfid_deliver()
-
                                 # Joystick à gauche = annuler confirmation
                                 elif x_c < X_LEFT:
                                     display_menu(menu_stack[-1], index, panier)
