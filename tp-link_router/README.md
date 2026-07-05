@@ -18,3 +18,8 @@ Pwd: admin
 
 
 Debug afficher les réseaux détectés par le rpi `sudo iwlist wlan0 scan | grep ESSID`
+```
+# More debug
+journalctl -f -u wpa_supplicant
+sudo wpa_supplicant -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf -d
+```
