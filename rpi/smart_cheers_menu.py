@@ -7,7 +7,7 @@ from grove_rgb_lcd import *
 import serial
 import json
 
-# --- CONFIG RFID --- test deploy
+# --- CONFIG RFID ---
 RFID_SERIAL_PORT = '/dev/serial0'
 RFID_BAUDRATE = 9600
 
@@ -69,7 +69,24 @@ menu_stack = [MAIN_MENU]
 index = 0
 
 # --- LCD ---
-setRGB(0, 128, 100)
+def safe_setRGB(r, g, b):
+    try:
+        setRGB(r, g, b)
+    except OSError:
+        pass
+
+# --- INITIALIZATION ---
+def init_lcd():
+    for i in range(5):  # Try 5 times
+        try:
+            safe_setRGB(0, 128, 100)
+            return
+        except OSError:
+            print(f"I2C failure, retrying... ({i+1}/5)")
+            time.sleep(1)
+    print("Could not initialize LCD, continuing anyway...")
+
+init_lcd()
 
 def format_item(item, panier):
     """Retourne le texte formaté avec la quantité à droite"""
@@ -113,7 +130,7 @@ def read_joystick():
 ser = serial.Serial(port=RFID_SERIAL_PORT, baudrate=RFID_BAUDRATE, timeout=1)
 
 def wait_for_rfid():
-    setRGB(255, 255, 0)
+    safe_setRGB(255, 255, 0)
     setText("Scannez votre badge")
     print("🟢 En attente d'un badge RFID...")
     while True:
@@ -123,7 +140,7 @@ def wait_for_rfid():
                 badge_id = data.decode('ascii', errors='ignore').strip()
                 if badge_id:
                     print("📟 Badge détecté :", badge_id)
-                    setRGB(0, 255, 0)
+                    safe_setRGB(0, 255, 0)
                     setText(f"Bienvenue !\nID:{badge_id}")
                     time.sleep(2)
                     data = None
@@ -134,7 +151,7 @@ def wait_for_rfid():
 
 
 def wait_for_rfid_deliver():
-    setRGB(255, 165, 0)
+    safe_setRGB(255, 165, 0)
     setText("En attente de   livraison")
     print("🟢 En attente d'un badge RFID...")
     while True:
@@ -150,10 +167,10 @@ def wait_for_rfid_deliver():
                         "employeeUid": badge_id
                     })
                     mqtt_publish(payload, DELIVER_ORDER_TOPIC)
-                    setRGB(0, 128, 255)
+                    safe_setRGB(0, 128, 255)
                     setText(f"Livre par :\n{badge_id}")
                     time.sleep(3)
-                    setRGB(0, 128, 100)
+                    safe_setRGB(0, 128, 100)
                     setText("Pret pour nouvelle commande")
                     time.sleep(1)
                     data = None
@@ -223,7 +240,7 @@ try:
                     elif choice == "Confirmer":
                         if panier:
                             # Affichage de la page de confirmation abrégée
-                            setRGB(255, 255, 0)
+                            safe_setRGB(255, 255, 0)
                             setText("Confirmer ?\n")
                             display_panier(panier)
                             time.sleep(0.5)
@@ -238,7 +255,7 @@ try:
                                     })
                                     mqtt_publish(payload, CREATE_ORDER_TOPIC)
                                     print(f"Commande envoyée : {payload} : {CREATE_ORDER_TOPIC}")
-                                    setRGB(0, 255, 0)
+                                    safe_setRGB(0, 255, 0)
                                     setText("Commande envoyee")
                                     time.sleep(2)
                                     confirmation = True
@@ -254,7 +271,7 @@ try:
                                     break
                                 time.sleep(0.05)
                         else:
-                            setRGB(255, 0, 0)
+                            safe_setRGB(255, 0, 0)
                             setText("Panier vide !")
                             time.sleep(2)
                             commande_terminee = True
@@ -270,7 +287,7 @@ try:
 
 except KeyboardInterrupt:
     setText("Arrêt")
-    setRGB(255, 0, 0)
+    safe_setRGB(255, 0, 0)
 
 finally:
     GPIO.cleanup()
