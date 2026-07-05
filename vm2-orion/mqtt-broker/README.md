@@ -9,6 +9,7 @@ sudo docker compose restart
 
 ## Service check : 
 ```
+cd MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/
 sudo docker compose ps
 netstat -tulpn | grep 1883
 sudo docker exec -it mosquitto mosquitto_sub -t '$SYS/#' -C 1 -u clement-lemlijn -P mqtt-pwd
