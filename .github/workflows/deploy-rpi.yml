@@ -33,3 +33,18 @@ jobs:
           path: /home/pi/smartcheers/rpi/
       - name: Relancer le service
         run: sudo systemctl restart smartcheers.service
+
+  # Job 3 : Vérification de la santé du service
+  health-check:
+    needs: deploy
+    runs-on: self-hosted
+    steps:
+      - name: Vérifier le status systemd
+        run: |
+          echo "Vérification du statut du service..."
+          if ! systemctl is-active --quiet smartcheers.service; then
+            echo "Erreur : Le service n'est pas actif !"
+            systemctl status smartcheers.service --no-pager
+            exit 1
+          fi
+          echo "Service actif détecté."
