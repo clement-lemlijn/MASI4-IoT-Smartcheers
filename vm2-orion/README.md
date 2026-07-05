@@ -17,19 +17,20 @@ sudo docker exec -it mosquitto mosquitto_sub -t '$SYS/#' -C 1 -u clement-lemlijn
 ```
 
 ## Network
-Configuration netplan pour avoir une ip statique `192.168.87.140`.
+Configuration netplan pour avoir une ip statique `192.168.1.12`.
 
 ```yaml
 network:
   version: 2
+  renderer: networkd
   ethernets:
     ens33:
       dhcp4: no
       addresses:
-        - 192.168.137.140/24
+        - 192.168.1.12/24
       routes:
         - to: default
-          via: 192.168.87.1
+          via: 192.168.1.1
       nameservers:
         addresses:
           - 8.8.8.8
