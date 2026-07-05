@@ -14,6 +14,7 @@ Une solution quick & dirty est donc de monter le dossier du Pi avec [WinFsp](htt
 </p>
 
 <img src="../assets/MASI4-IoT-Smartcheers-Remote_Mount_Rpi.png" alt="Remote config RPI" width="800">
+
 ```
 \\sshfs\pi@192.168.68.70
 ```
