@@ -26,21 +26,24 @@ def on_connect(client, userdata, flags, rc):
 def on_publish(client, userdata, mid):
     print("Message published")
 
+
 def mqtt_publish(payload, mqtt_topic):
-    client = paho.Client(client_id="smartcheers-pub-001",protocol=paho.MQTTv311)
-    client.username_pw_set(username=MQTT_USERNAME,password=MQTT_PASSWORD)
-    client.tls_set(
-        ca_certs="/home/pi/mqtt-certs/ca.crt",
-        tls_version=ssl.PROTOCOL_TLSv1_2
-    )
-    client.on_connect = on_connect
-    client.on_publish = on_publish
-    client.connect(broker_ip, broker_port, 60)
-    client.loop_start()
-    client.publish(mqtt_topic, payload, 0)
-    time.sleep(1)
-    client.loop_stop()
-    client.disconnect()
+    client = paho.Client(client_id="smartcheers-pub-001", protocol=paho.MQTTv311)
+    client.username_pw_set(username=MQTT_USERNAME, password=MQTT_PASSWORD)
+    client.tls_set(ca_certs="/home/pi/mqtt-certs/ca.crt", tls_version=ssl.PROTOCOL_TLSv1_2)
+
+    try:
+        # On réduit le timeout pour éviter de bloquer le script trop longtemps
+        client.connect(broker_ip, broker_port, 10)
+        client.loop_start()
+        client.publish(mqtt_topic, payload, 0)
+        time.sleep(1)
+        client.loop_stop()
+        client.disconnect()
+        print("✅ Message envoyé avec succès")
+    except Exception as e:
+        print(f"❌ Erreur MQTT : {e}")
+        setText("Erreur MQTT")
 
 # --- CONFIG MQTT livraison ---
 delivery_received = False
