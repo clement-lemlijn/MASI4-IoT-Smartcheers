@@ -15,4 +15,4 @@ services:
 
 networks:
   mqtt_network:
-    external: true
+    driver: bridge
