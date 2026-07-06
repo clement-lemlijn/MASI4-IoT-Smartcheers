@@ -14,7 +14,8 @@ RFID_BAUDRATE = 9600
 # --- CONFIG MQTT ---
 #broker_ip = "192.168.68.72"
 broker_ip = "mqtt.smartcheers.local"
-broker_port = 8883
+# broker_port = 8883
+broker_port = 8884
 CREATE_ORDER_TOPIC = "smartcheers/order/create"
 DELIVER_ORDER_TOPIC = "smartcheers/order/deliver"
 MQTT_USERNAME = 'rpi-001'
@@ -276,6 +277,7 @@ try:
                                         setText("Erreur Serveur !")
                                         time.sleep(2)
                                         commande_terminee = False # On annule la progression
+                                        # TODO ? en cas d'erreur serveur reset le panier ?
 
                                 # Joystick à gauche = annuler confirmation
                                 elif x_c < X_LEFT:
