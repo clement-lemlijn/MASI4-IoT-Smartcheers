@@ -14,8 +14,7 @@ RFID_BAUDRATE = 9600
 # --- CONFIG MQTT ---
 #broker_ip = "192.168.68.72"
 broker_ip = "mqtt.smartcheers.local"
-# broker_port = 8883
-broker_port = 8884 # port correct
+broker_port = 8883
 CREATE_ORDER_TOPIC = "smartcheers/order/create"
 DELIVER_ORDER_TOPIC = "smartcheers/order/deliver"
 MQTT_USERNAME = 'rpi-001'
