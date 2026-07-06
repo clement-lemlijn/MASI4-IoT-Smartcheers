@@ -10,6 +10,7 @@ services:
       - ./data:/data
     environment:
       - TZ=Europe/Brussels
+      - NODE_RED_BIND_ADDRESS=0.0.0.0
     networks:
       - mqtt_network
 
