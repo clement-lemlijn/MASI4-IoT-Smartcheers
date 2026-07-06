@@ -28,6 +28,13 @@ Accès interface depuis vm : [http://127.0.0.1:1880/](http://127.0.0.1:1880/)
 
 Accès interface depuis pc : [http://192.168.1.12:1880/ui](http://192.168.1.12:1880/)
 
+
+## Palettes installées
+Voici les palettes installées sur ma session node-red :
+- `node-red-dashboard`
+- `node-red-node-mongodb`
+
+
 ### Définir les bons droits après installation 
 
 ```
