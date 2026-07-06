@@ -25,6 +25,7 @@ sudo docker stats
 ```
 
 Accès interface depuis vm : [http://127.0.0.1:1880/](http://127.0.0.1:1880/)
+
 Accès interface depuis pc : [http://192.168.1.12:1880/ui](http://192.168.1.12:1880/ui)
 
 ### Définir les bons droits après installation 
