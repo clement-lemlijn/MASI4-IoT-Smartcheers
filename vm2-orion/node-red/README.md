@@ -25,3 +25,10 @@ sudo docker stats
 ```
 
 Accès interface : [http://192.168.1.12:1880/ui](http://192.168.1.12:1880/ui)
+
+### Définir les bons droits après installation 
+
+```
+sudo chown -R $USER:$USER ./data
+sudo chmod -R 775 ./data
+```
