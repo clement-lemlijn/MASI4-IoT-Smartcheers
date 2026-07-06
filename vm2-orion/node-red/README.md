@@ -14,3 +14,14 @@ Le projet est organisé comme suit :
 ~/docker/node-red/
 ├── docker-compose.yml
 └── data/           # Volumes persistants (flows, config)
+```
+
+## Service
+
+```
+sudo docker compose ps
+sudo docker compose logs -f
+sudo docker stats
+```
+
+Accès interface : [http://192.168.1.12:1880/ui](http://192.168.1.12:1880/ui)
