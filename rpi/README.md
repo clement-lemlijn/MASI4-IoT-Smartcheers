@@ -24,8 +24,8 @@ ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=BE
 network={
-ssid="OMEN-CLEMENT 9147"
-psk="clement123"
+ssid="TP-Link_3384"
+psk="50165391"
 key_mgmt=WPA-PSK
 }
 ```
@@ -35,7 +35,7 @@ _`sudo wpa_cli -i wlan0 reconfigure`_
 ### Ethernet
 On peut également s'y connecter en ethernet, son ip actuelle est `192.168.68.70`
 ```
-ssh pi@192.168.68.70
+ssh pi@192.168.68.75
 ```
 
 ```
