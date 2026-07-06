@@ -31,7 +31,12 @@ def on_publish(client, userdata, mid):
 def mqtt_publish(payload, mqtt_topic):
     client = paho.Client(client_id="smartcheers-pub-001", protocol=paho.MQTTv311)
     client.username_pw_set(username=MQTT_USERNAME, password=MQTT_PASSWORD)
-    client.tls_set(ca_certs="/home/pi/mqtt-certs/ca.crt", tls_version=ssl.PROTOCOL_TLSv1_2)
+    client.tls_set(
+        ca_certs="/home/pi/mqtt-certs/ca.crt",
+        certfile="/home/pi/mqtt-certs/client.crt",
+        keyfile="/home/pi/mqtt-certs/client.key",
+        tls_version=ssl.PROTOCOL_TLSv1_2
+    )
 
     try:
         # On réduit le timeout pour éviter de bloquer le script trop longtemps
