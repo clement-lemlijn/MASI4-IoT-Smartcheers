@@ -10,10 +10,10 @@ Le Raspberry Pi est configuré sur une base système spécifique :
 
 ## Connexion
 
-Le Raspberry PI a une ip statique `192.168.137.83`. Ses paramètres WiFi sont définis sur : (Hostspot de mon ordinateur)
+Le Raspberry PI a une ip statique `192.168.1.10`. Ses paramètres WiFi sont définis sur : (Hostspot de mon ordinateur)
 Pour s'y connecter, entrer dans un invite de commande : 
 ```
-ssh pi@192.168.137.83
+ssh pi@192.168.1.10
 ```
 Password : `hepl`
 
