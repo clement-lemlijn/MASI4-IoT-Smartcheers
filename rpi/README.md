@@ -57,6 +57,17 @@ smartcheers/
     └── test/                   # Scripts de test pour le projet
 ```
 
+## Certificats
+
+```
+home/pi/
+└── mqtt-certs/
+    ├── ca.crt
+    ├── client.crt
+    └── client.key
+```
+test distant : `openssl s_client -connect mqtt.smartcheers.local:8884 -showcerts`
+
 ## Service 🔧
 
 ### Github runner :
