@@ -26,6 +26,7 @@ sudo docker exec -it mosquitto mosquitto_passwd -c /mosquitto/config/pwfile ton_
 ### Sub
 ```
 sudo docker exec -it mosquitto mosquitto_sub -t "smartcheers/order/create" -u clement-lemlijn -P mqtt-pwd
+sudo docker exec -it mosquitto mosquitto_sub -t "smartcheers/orders/new" -u clement-lemlijn -P mqtt-pwd
 ```
 ### Pub 
 ```
