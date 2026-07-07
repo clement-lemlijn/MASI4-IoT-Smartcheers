@@ -18,9 +18,12 @@ services:
 
   mongo:
     image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
     container_name: mongodb
     restart: always
-    command: ["--noauth", "--bind_ip_all"]
+    command: ["--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
