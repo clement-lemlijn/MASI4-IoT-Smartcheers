@@ -48,3 +48,13 @@ La preuve technique :
   - PUBCOMP (le broker dit "transaction terminée")
 Si cette séquence apparaît, "QoS 2" valide
 
+### Acccess rights 
+
+```
+sudo chown -R 1883:1883 ./config/certs
+
+sudo chmod 755 ./config/certs
+sudo chmod 644 ./config/certs/certs/ca.crt
+sudo chmod 644 ./config/certs/server.crt
+sudo chmod 600 ./config/certs/server.key
+```
