@@ -13,3 +13,12 @@
   ]
 }
 ```
+```
+{
+  "clientUid": "\u000227004228D09D\u0003",
+  "command": [
+    {"produit": "Biere", "quantite": 2},
+    {"produit": "Saucisson", "quantite": 1}
+  ]
+}
+```
