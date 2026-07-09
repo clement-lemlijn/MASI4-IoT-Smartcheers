@@ -4,3 +4,16 @@
 
 ## Hardware & OS
 
+
+
+```
+python -m serial.tools.miniterm COM6 115200
+```
+## Erasing
+```
+pip install esptool
+esptool erase_flash
+
+
+esptool.py --baud 460800 write_flash 0 ESP32_BOARD_NAME-DATE-VERSION.bin
+```
