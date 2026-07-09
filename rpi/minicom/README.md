@@ -54,3 +54,24 @@ AT+RECV: Print last receive message, RSSI and SNR
 AT+RXDAFORM: Get or Set Format received by RX
 AT+WAITTIME: Get or set the takes time to return ACK in ms
 ```
+
+AT+CFG
+```
+AT+CFG
+AT+FCU=0
+AT+FCD=0
+AT+FRE=868.100,868.100
+AT+GROUPMOD=0,0
+AT+BW=0,0
+AT+SF=7,7
+AT+POWER=14
+AT+CRC=1,0
+AT+HEADER=0,0
+AT+CR=1,1
+AT+IQ=0,0
+AT+PREAMBLE=8,8
+AT+SYNCWORD=0
+AT+RXMOD=65535,2
+AT+RXDAFORM=0
+AT+WAITTIME=33554640
+```
