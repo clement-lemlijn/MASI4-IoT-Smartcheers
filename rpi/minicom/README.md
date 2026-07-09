@@ -1,6 +1,6 @@
 # 🍻 SmartCheers – RaspberryPI - MINICOM
 
-<img src="assets/minicom.png" alt="Screenshot minicom" width="400" style="display: block; margin-left: auto; margin-right: auto;"/>
+<img src="../assets/minicom.png" alt="Screenshot minicom" width="400" style="display: block; margin-left: auto; margin-right: auto;"/>
 
 ## Version
 Le Raspberry Pi possède une ancienne version de minicom :
