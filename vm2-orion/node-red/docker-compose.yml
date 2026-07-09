@@ -31,6 +31,18 @@ services:
     networks:
       - mqtt_network
 
+  mongo_secondary:
+    image: mongo:latest
+    container_name: mongodb_secondary
+    restart: always
+    command: ["--bind_ip_all"]
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./mongo_data_secondary:/data/db
+    networks:
+      - mqtt_network
+
 networks:
   mqtt_network:
     driver: bridge
