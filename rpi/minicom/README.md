@@ -12,3 +12,4 @@ LoRA-WAN branché sur le port `/dev/ttyUSB0`
 ```
 ls -l /dev/ttyUSB0
 ```
+`crw-rw---- 1 root dialout 188, 0 Jul  7 03:17 /dev/ttyUSB0`
