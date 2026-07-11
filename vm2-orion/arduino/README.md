@@ -7,6 +7,14 @@ sudo apt update
 sudo apt install python3-serial
 sudo apt install python3-pip
 pip install esptool
+
+# télécharger sur arduino.cc/en/software la version linux 64 bits :
+ arduino-1.8.19-linux64.tar.xz
+# extraire par :
+tar -xf arduino-1.8.19-linux64.tar.xz
+# dans le répertoire arduino-1.8.19 :
+sudo ./install.sh
+# supprimer l’archive arduino-1.8.19-linux64.tar.xz
 ```
 ## Installation software Heltec-esp32s3-lora (dans arduino)
 
