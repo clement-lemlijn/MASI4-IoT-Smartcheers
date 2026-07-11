@@ -15,5 +15,5 @@ pip install esptool
 esptool erase_flash
 
 
-esptool --baud 460800 write_flash 0 LA66_P2P_v1.2.bin
+esptool --baud 460800 write_flash 0 ESP32_GENERIC_S3-20260406-v1.28.0.bin
 ```
