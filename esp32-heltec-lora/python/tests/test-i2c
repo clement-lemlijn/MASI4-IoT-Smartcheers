@@ -1,0 +1,22 @@
+from machine import Pin, SoftI2C
+import time
+
+# Activation alimentation OLED
+vext = Pin(36, Pin.OUT)
+vext.value(0)
+
+# Reset OLED
+rst = Pin(21, Pin.OUT)
+rst.value(0)
+time.sleep(0.1)
+rst.value(1)
+time.sleep(1)
+
+# I2C logiciel
+i2c = SoftI2C(
+    scl=Pin(18),
+    sda=Pin(17),
+    freq=100000
+)
+
+print(i2c.scan())
