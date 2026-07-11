@@ -34,7 +34,16 @@ print("En écoute...")
 buffer = bytearray(SX126X_MAX_PACKET_LENGTH)
 
 
+
+    
+    
 while True:
+
+    irq = radio.getIrqStatus()
+
+    if irq:
+        print("IRQ:", hex(irq))
+
     data = radio.receive(
         buffer,
         255,
@@ -45,4 +54,5 @@ while True:
     if data:
         print("Reçu :", data)
 
-    time.sleep(0.1)
+    time.sleep(0.1)    
+
