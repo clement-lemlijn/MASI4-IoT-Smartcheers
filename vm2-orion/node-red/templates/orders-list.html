@@ -1,0 +1,50 @@
+<script>
+(function(scope) {
+    // Protège le tableau : on ne met à jour que si le payload reçu est bien une liste (array)
+    scope.$watch('msg.payload', function(newVal) {
+        if (Array.isArray(newVal)) {
+            scope.tableData = newVal;
+        }
+    });
+
+    // Gestion de la sélection
+    scope.selectedIndex = -1;
+    scope.selectRow = function(row, index) {
+        scope.selectedIndex = index;
+        // Envoie la ligne sélectionnée au template de détails
+        scope.send({payload: row}); 
+    };
+})(scope);
+</script>
+
+<table style="width:100%; border-collapse: collapse; border: 1px solid #ddd; font-family: Arial, sans-serif;">
+    <thead>
+        <tr style="background-color: #f2f2f2;">
+            <th style="padding: 8px; border: 1px solid #ddd;">Table</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Commande</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in tableData track by $index" 
+            ng-click="selectRow(row, $index)"
+            ng-style="{
+                'background-color': selectedIndex === $index ? '#e0e0e0' : 'transparent', 
+                'color': selectedIndex === $index ? '#555' : 'inherit',
+                'cursor': 'pointer'
+            }">
+
+            <td style="padding: 8px; border: 1px solid #ddd; vertical-align: top;">{{row.payload.client}}</td>
+
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <div ng-repeat="item in row.payload.items | limitTo: 2">
+                    • {{item.produit}} ({{item.quantite}})
+                </div>
+            </td>
+
+            <td style="padding: 8px; border: 1px solid #ddd; vertical-align: top;">
+                {{row.payload.status}}
+            </td>
+        </tr>
+    </tbody>
+</table>
