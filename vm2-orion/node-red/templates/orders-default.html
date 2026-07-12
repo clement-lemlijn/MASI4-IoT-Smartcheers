@@ -1,0 +1,39 @@
+<div ng-if="!msg.payload"
+    style="padding: 20px; text-align: center; color: #888; border: 2px dashed #ddd; border-radius: 10px;">
+    <i class="fa fa-mouse-pointer" style="font-size: 24px; margin-bottom: 10px;"></i>
+    <p>Sélectionnez une commande dans le tableau ci-dessous pour voir les détails.</p>
+</div>
+
+<div ng-if="msg.payload"
+    style="font-family: 'Segoe UI', Arial, sans-serif; background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #eee;">
+    <div
+        style="background: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 18px;">Détails : {{msg.payload.payload.client}}</h3>
+        <span style="background: #f39c12; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+            {{msg.payload.payload.status}}
+        </span>
+    </div>
+
+    <div style="display: flex; gap: 15px; padding: 20px; background: #f8f9fa;">
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #3498db;">
+            <small style="color: #7f8c8d; text-transform: uppercase; font-size: 10px; font-weight: bold;">Total Articles</small>
+            <div style="font-size: 20px; font-weight: bold; color: #2c3e50;">{{msg.payload.payload.items.length}}</div>
+        </div>
+        <div style="flex: 1; background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #2ecc71;">
+            <small style="color: #7f8c8d; text-transform: uppercase; font-size: 10px; font-weight: bold;">Heure Sélection</small>
+            <div style="font-size: 20px; font-weight: bold; color: #2c3e50;">{{ (new Date()).toLocaleTimeString() }}
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 0 20px 20px 20px;">
+        <h4 style="border-bottom: 1px solid #eee; padding-bottom: 10px; color: #34495e;">Liste des produits</h4>
+        <div style="max-height: 200px; overflow-y: auto;">
+            <div ng-repeat="item in msg.payload.payload.items"
+                style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f1f1;">
+                <span style="font-weight: 500;">{{item.produit}}</span>
+                <span style="color: #e67e22; font-weight: bold;">x {{item.quantite}}</span>
+            </div>
+        </div>
+    </div>
+</div>
