@@ -1,18 +1,16 @@
 <script>
-(function(scope) {
-    // Protège le tableau : on ne met à jour que si le payload reçu est bien une liste (array)
-    scope.$watch('msg.payload', function(newVal) {
-        if (Array.isArray(newVal)) {
-            scope.tableData = newVal;
-        }
-    });
-
-    // Gestion de la sélection
-    scope.selectedIndex = -1;
-    scope.selectRow = function(row, index) {
-        scope.selectedIndex = index;
-        // Envoie la ligne sélectionnée au template de détails
-        scope.send({payload: row}); 
+    (function(scope) {
+    scope.selectOrder = function(row) {
+        // 1. Réinitialise la sélection pour tout le monde
+        scope.msg.payload.forEach(function(o) {
+            o.selected = false;
+        });
+        
+        // 2. Sélectionne la ligne cliquée
+        row.selected = true;
+        
+        // 3. Envoie au flux Node-RED
+        scope.send({payload: {selectedOrder: row}});
     };
 })(scope);
 </script>
@@ -26,11 +24,9 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="row in tableData track by $index" 
-            ng-click="selectRow(row, $index)"
-            ng-style="{
-                'background-color': selectedIndex === $index ? '#e0e0e0' : 'transparent', 
-                'color': selectedIndex === $index ? '#555' : 'inherit',
+        <tr ng-repeat="row in msg.payload track by $index" ng-click="selectOrder(row)" ng-style="{
+                'background-color': row.selected ? '#e0e0e0' : 'transparent',
+                'color': row.selected ? '#555' : 'inherit',
                 'cursor': 'pointer'
             }">
 
