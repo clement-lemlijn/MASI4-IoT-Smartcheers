@@ -7,14 +7,6 @@ assignees: clement-lemlijn
 
 ---
 
----
-name: Smartcheers - Subissue - ISSUE_NAME
-about: Créer une nouvelle fonctionnalité sous une _epic issue_
-title: "Smartcheers - Subissue - ISSUE_NAME"
-labels: enhancement
-assignees: ''
----
-
 ## Description
 
 Décrire l'objectif de cette partie du projet.
@@ -23,7 +15,5 @@ Décrire l'objectif de cette partie du projet.
 - 
 - 
 
-## Critères de validation :
-- [ ] 
-- [ ] 
+## Critère(s) de validation :
 - [ ]
