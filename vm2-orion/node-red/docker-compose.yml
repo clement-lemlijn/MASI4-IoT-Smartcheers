@@ -15,7 +15,23 @@ services:
       - mqtt_network
     depends_on:
       - mongo
-
+  
+  node-red-employee:
+    image: nodered/node-red:latest
+    container_name: node-red-employee
+    restart: unless-stopped
+    ports:
+      - "1881:1880"
+    volumes:
+      - ./data-employee:/data
+    environment:
+      - TZ=Europe/Brussels
+      - NODE_RED_BIND_ADDRESS=0.0.0.0
+    networks:
+      - mqtt_network
+    depends_on:
+      - mongo
+  
   mongo:
     image: mongo:latest
     environment:
