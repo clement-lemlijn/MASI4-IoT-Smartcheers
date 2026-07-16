@@ -238,15 +238,72 @@ ou de démarrer un container manuellement...
 
 ## 4. A RENDRE LE JOUR DE L’EXAMEN EN JANVIER.
 
+- Le matériel prêté (tout le matériel prêté devra être rentré le jour de l’examen)
+- Un dossier de quelques pages **agrafées** reprenant (présentation et orthographe soignées svp ):
+  - Une page de garde reprenant au minimum : Nom+Prénom+Date+Nom de votre projet
+  - Descriptif de votre projet : Description du problème - Description de votre solution –
+    Pourquoi nous avons choisi ce projet (1 page A4)
+  - Ce document-ci imprimé sur lequel vous aurez surligné en fluo toutes les contraintes que vous
+    avez respectées. Rappel, comme ce sont les contraintes minimales, il doit y avoir bcp de fluo!
+    Attention : du fluo sur une ligne qui n’a pas été implémentée est considéré comme une
+    tentative de fraude et sera lourdement sanctionné. Toutes les contraintes minimales doivent
+    être implémentées. Il est donc inacceptable d’arriver à l’examen avec ce document non
+    surligné.
+  - Le schéma en couleurs (1 page A4 ou A3) de l’architecture de votre solution reprenant les
+    composants hardware et software utilisés. Attention, vous avez reçu un feedback concernant
+    votre dossier. Il est essentiel de tenir compte des remarques qui ont été faites!
+  - Un screenshot de vos dashboards.
+  - Les diagrammes utilisant le modèle C4 vu au cours :
+    - Le niveau 3 (composant) du modèle C4 pour les ESP32 + Raspberry Pi
+    - Le niveau 4 (code) du modèle C4 : Les diagrammes de séquence et d’état des éléments
+      pertinents du niveau 3. (Par exemple : appui sur un bouton par l’utilisateur, diagramme
+      d’état de l’afficheur LCD, des LEDs….)
+  - Aspect sécurité : Relevé des actions prises pour sécuriser votre solution + utilisez
+    https://sectigostore.com/blog/owasp-iot-top-10-iot-vulnerabilities/ et décrivez (Min 1 page et
+    Max 2 pages) comment vous adressez le Top10 des IoT vulnerabilities. Soyez précis : il ne
+    suffit pas par exemple de dire : “j’utilise des mots de passe complexes”. Il convient
+    d’expliquer comment vous pensez gérer les mots de passe (rappel : vous avez de nombreux
+    clients). 
+  - Une conclusion : quel était votre niveau de compétence en IoT avant de démarrer ce projet ?
+    quel est votre niveau de compétence à la fin du projet ? Quelles ont été les difficultés
+    rencontrées lors de ce projet ?
+ - Une archive (.rar ou .zip ou .7z) reprenant votre contribution personnelle : 6 répertoires : un
+   répertoire RPi avec le code que vous avez écrit sur le RPi (node-red + python + …), un répertoire
+   ESP32-WiFi avec le code que vous avez utilisé sur votre ESP32, un répertoire ESP32-LoRa avec
+   le code que vous avez utilisé sur votre ESP32-LoRa, un répertoire ESP32-H2-Thread, un
+   répertoire Ubuntu avec le code qui tourne sur vos VMs Ubuntu et un répertoire Dossier avec votre
+   dossier au format pdf et également un fichier pdf séparé avec votre schéma d’architecture. Cette
+   archive doit être prête avant l’examen sur votre ordinateur. (Il n’est donc pas acceptable de se
+   présenter à l’examen sans cette archive prête).
+   
+
+Attention : la démonstration que vous ferez le jour de l’examen doit être **fonctionnelle** et comprendre **au
+strict minimum toutes** les contraintes techniques minimales décrites ci-dessus. Vous disposerez d’un
+peu de temps pour préparer votre démo (max 1h).
+Pensez également à un packaging (boîtes en carton, en plastique,….) : c’est un prototype, mais il doit être
+présenté de manière correcte et adaptée à votre projet (il n’est pas acceptable d’avoir des capteurs reliés
+au Rpi, aux ESP32 sans aucun packaging). Par expl, si c’est un bracelet connecté, imaginez une manière
+d’attacher votre objet au poignet.
+Les critères suivants seront également utilisés pour l’évaluation : originalité/ingéniosité du projet,
+pertinence du projet (would I buy it ?), utilité de l’objet, fiabilité de la solution, technologie(s)
+supplémentaire(s), niveau de difficulté + votre dossier.
+L’ordre de passage vous sera envoyé par l’école virtuelle.
 
 
+Remarque importante: ce n’est pas parce que votre projet est fonctionnel à **100%** et respecte toutes les
+contraintes minimales de ce document et que votre dossier technique est impeccable que l’examen sera
+réussi. Un projet fonctionnel à **100%** avec toutes les démos concluantes et un respect de toutes les
+consignes est nécessaire, mais ce n’est que **le point de départ de l’évaluation**. L’étudiant doit maîtriser
+toutes les facettes de son projet, dont le code et doit être capable d’apporter rapidement de petites
+modifications dans son code. Le code sera de qualité, digne d’un étudiant master en informatique. Un
+étudiant qui ne connaît pas son code ou qui ne sait pas y apporter de petites modifications ne réussit pas
+l’examen. Il n’y a pas une cote pour le projet et une cote pour la défense orale, mais une seule cote
+globale pour l’examen de laboratoire. 
 
 
+## 5. CONSIGNES POUR LA PARTIE EVALUATION ECRITE DU COURS
 
-
-
-
-
-
+Le même jour que la présentation de votre projet, vous recevrez un questionnaire écrit portant sur la
+théorie (matière vue au cours) et sur votre projet.
 
 
