@@ -46,3 +46,6 @@ utilisateur node-red UID 1000.
 ```
 sudo chown -R 1000:1000 client_data employee_data
 ```
+
+pour activer l'authentification : ex employee_data/setting.js/"adminAuth: {.."
+
