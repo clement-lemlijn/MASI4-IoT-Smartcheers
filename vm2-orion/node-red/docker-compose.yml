@@ -27,20 +27,36 @@ services:
     networks:
       - mqtt_network
 
-  node-red-client:
+  node-red:
     image: nodered/node-red:latest
-    container_name: node-red-client
+    container_name: node-red
     restart: unless-stopped
     ports:
       - "1880:1880"
     volumes:
-      - ./client_data:/data
+      - ./data:/data
     environment:
       - TZ=Europe/Brussels
+      - NODE_RED_BIND_ADDRESS=0.0.0.0
     networks:
       - mqtt_network
     depends_on:
       - mongo
+
+#  node-red-client:
+#    image: nodered/node-red:latest
+#    container_name: node-red-client
+#    restart: unless-stopped
+#    ports:
+#      - "1880:1880"
+#    volumes:
+#      - ./client_data:/data
+#    environment:
+#      - TZ=Europe/Brussels
+#    networks:
+#      - mqtt_network
+#    depends_on:
+#      - mongo
 
   node-red-employee:
     image: nodered/node-red:latest
@@ -70,18 +86,3 @@ networks:
 
 
 
-#  node-red:
-#    image: nodered/node-red:latest
-#    container_name: node-red
-#    restart: unless-stopped
-#    ports:
-#      - "1880:1880"
-#    volumes:
-#      - ./data:/data
-#    environment:
-#      - TZ=Europe/Brussels
-#      - NODE_RED_BIND_ADDRESS=0.0.0.0
-#    networks:
-#      - mqtt_network
-#    depends_on:
-#      - mongo
