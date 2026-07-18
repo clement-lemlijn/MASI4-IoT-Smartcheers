@@ -1,20 +1,53 @@
 version: '3.8'
 services:
-  node-red:
+#  node-red:
+#    image: nodered/node-red:latest
+#    container_name: node-red
+#    restart: unless-stopped
+#    ports:
+#      - "1880:1880"
+#    volumes:
+#      - ./data:/data
+#    environment:
+#      - TZ=Europe/Brussels
+#      - NODE_RED_BIND_ADDRESS=0.0.0.0
+#    networks:
+#      - mqtt_network
+#    depends_on:
+#      - mongo
+
+
+  node-red-client:
     image: nodered/node-red:latest
-    container_name: node-red
+    container_name: node-red-client
     restart: unless-stopped
     ports:
       - "1880:1880"
     volumes:
-      - ./data:/data
+      - ./client_data:/data
     environment:
       - TZ=Europe/Brussels
-      - NODE_RED_BIND_ADDRESS=0.0.0.0
+    networks:
+      - mqtt_network
+    depends_on:
+      - mosquitto
+
+  node-red-employee:
+    image: nodered/node-red:latest
+    container_name: node-red-employee
+    restart: unless-stopped
+    ports:
+      - "1881:1880"
+    volumes:
+      - ./employee_data:/data
+      - ./certs/employee:/certs
+    environment:
+      - TZ=Europe/Brussels
     networks:
       - mqtt_network
     depends_on:
       - mongo
+      - mosquitto
 
   mongo:
     image: mongo:latest
