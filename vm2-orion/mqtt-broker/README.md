@@ -48,6 +48,16 @@ La preuve technique :
   - PUBCOMP (le broker dit "transaction terminée")
 Si cette séquence apparaît, "QoS 2" valide
 
+
+## MQTT channels 
+
+```mermaid
+sequenceDiagram
+    RaspberryPi->>VM_Orion: /smartcheers/order/new
+    VM_Orion->>RaspberryPi: /smartcheers/order/ready
+    RaspberryPi-->>VM_Orion: /smartcheers/order/delivered
+```
+
 ### Acccess rights 
 
 ```
