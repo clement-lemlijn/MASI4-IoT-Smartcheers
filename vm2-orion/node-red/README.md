@@ -41,3 +41,8 @@ Voici les palettes installées sur ma session node-red :
 sudo chown -R $USER:$USER ./data
 sudo chmod -R 775 ./data
 ```
+
+utilisateur node-red UID 1000.
+```
+sudo chown -R 1000:1000 client_data employee_data
+```
