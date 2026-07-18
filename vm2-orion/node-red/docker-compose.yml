@@ -58,30 +58,22 @@ services:
     depends_on:
       - mongo
 
+  node-red:
+    image: nodered/node-red:latest
+    container_name: node-red
+    restart: unless-stopped
+    ports:
+      - "1885:1880"
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Europe/Brussels
+      - NODE_RED_BIND_ADDRESS=0.0.0.0
+    networks:
+      - mqtt_network
+    depends_on:
+      - mongo
+
 networks:
   mqtt_network:
     driver: bridge
-
-
-
-
-
-
-
-
-
-#  node-red:
-#    image: nodered/node-red:latest
-#    container_name: node-red
-#    restart: unless-stopped
-#    ports:
-#      - "1880:1880"
-#    volumes:
-#      - ./data:/data
-#    environment:
-#      - TZ=Europe/Brussels
-#      - NODE_RED_BIND_ADDRESS=0.0.0.0
-#    networks:
-#      - mqtt_network
-#    depends_on:
-#      - mongo
