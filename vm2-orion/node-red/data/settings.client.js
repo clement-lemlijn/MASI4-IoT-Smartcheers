@@ -122,11 +122,11 @@ module.exports = {
         }
     },
 
-    //contextStorage: {
-    //    default: {
-    //        module:"localfilesystem"
-    //    },
-    //},
+    contextStorage: {
+        default: {
+            module: "localfilesystem"
+        },
+    },
 
     exportGlobalContextKeys: false,
 
