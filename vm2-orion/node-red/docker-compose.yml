@@ -35,6 +35,7 @@ services:
       - "1880:1880"
     volumes:
       - ./client_data:/data
+      - ./certs/client:/certs
     environment:
       - TZ=Europe/Brussels
     networks:
