@@ -17,8 +17,8 @@ module.exports = {
     },
 
     https: {
-        key: require("fs").readFileSync('/home/lemlijn-clement/MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/config/certs/node-red.key'),
-        cert: require("fs").readFileSync('/home/lemlijn-clement/MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/config/certs/node-red.crt')
+        key: require("fs").readFileSync('/certs/node-red.key'),
+        cert: require("fs").readFileSync('/certs/node-red.crt')
     },
 
     // https: function() {
