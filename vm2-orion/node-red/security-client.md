@@ -25,3 +25,10 @@ httpNodeAuth: {
 
 # 3. HTTPS pour l'éditeur et les dashboards
 
+# 4. Persistance des seuils utilisateur contextStorage
+
+contextStorage: {
+    default: {
+        module: "localfilesystem"
+    },
+},
