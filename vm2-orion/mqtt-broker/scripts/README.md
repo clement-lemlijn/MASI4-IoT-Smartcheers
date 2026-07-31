@@ -1,5 +1,8 @@
 sudo chown -R lemlijn-clement:lemlijn-clement ../config/certs
 
+lemlijn-clement@VM-Orion:~/copy-certs$ sudo chown -R lemlijn-clement:lemlijn-clement certs
+
+
 chmod +x generate-certs.sh
 ./generate-certs.sh
 
