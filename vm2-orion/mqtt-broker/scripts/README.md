@@ -1,5 +1,7 @@
 sudo chown -R lemlijn-clement:lemlijn-clement ../config/certs
 
+
+lemlijn-clement@VM-Orion:~/copy-certs$ sudo cp -r ~/MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/config/certs ~/copy-certs/
 lemlijn-clement@VM-Orion:~/copy-certs$ sudo chown -R lemlijn-clement:lemlijn-clement certs
 
 
