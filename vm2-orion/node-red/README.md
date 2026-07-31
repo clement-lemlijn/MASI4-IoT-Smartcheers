@@ -50,5 +50,16 @@ sudo chown -R 1000:1000 client_data employee_data
 pour activer l'authentification : ex employee_data/setting.js/"adminAuth: {.."
 pour générer un mot de passe : `sudo docker exec -it node-red-employee node-red admin hash-pw` 
 
+### Access rights
+
+```
+sudo chown -R 1883:1883 ./config/certs
+
+sudo chmod 755 ./config/certs
+sudo chmod 644 ./config/certs/certs/ca.crt
+sudo chmod 644 ./config/certs/node-red.crt
+sudo chmod 600 ./config/certs/node-red.key
+```
+
 "httpNodeAuth: [.. " pour bloquer /ui
 
