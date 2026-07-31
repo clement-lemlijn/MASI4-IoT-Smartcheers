@@ -16,10 +16,10 @@ module.exports = {
        }]
     },
 
-    //https: {
-    //  key: require("fs").readFileSync('privkey.pem'),
-    //  cert: require("fs").readFileSync('cert.pem')
-    //},
+    https: {
+        key: require("fs").readFileSync('/home/lemlijn-clement/MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/config/certs/node-red.key'),
+        cert: require("fs").readFileSync('/home/lemlijn-clement/MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/config/certs/node-red.crt')
+    },
 
     // https: function() {
     //     // This function should return the options object, or a Promise
@@ -32,7 +32,7 @@ module.exports = {
 
     //httpsRefreshInterval : 12,
 
-    //requireHttps: true,
+    requireHttps: true,
 
     httpNodeAuth: {user:"client",pass:"$2y$08$oPfmZftaczdKUATtmcbRQu0odGRRVNyQOa7irY4T9j/XF7jS2Kc.e"},
     //httpStaticAuth: {user:"user",pass:"$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN."},
