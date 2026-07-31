@@ -17,8 +17,8 @@ module.exports = {
     },
 
     https: {
-        key: require("fs").readFileSync('/certs/node-red.key'),
-        cert: require("fs").readFileSync('/certs/node-red.crt')
+        key: require("fs").readFileSync('/config/certs/node-red.key'),
+        cert: require("fs").readFileSync('/config/certs/node-red.crt')
     },
 
     // https: function() {
