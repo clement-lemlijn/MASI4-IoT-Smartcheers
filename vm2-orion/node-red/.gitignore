@@ -1,2 +1,7 @@
 
 /config/certs
+/client_data
+/employee_data
+/mongo_data
+/mongo_data_backup
+/mongo_data_secondary
