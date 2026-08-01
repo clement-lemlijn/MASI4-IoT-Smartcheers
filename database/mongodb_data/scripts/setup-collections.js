@@ -106,7 +106,7 @@ db.createCollection("produits", {
       required: ["nom", "categorieId", "prix", "disponible", "stock"],
       properties: {
         nom: { bsonType: "string" },
-        categorieId: { bsonType: "objectId" },
+        categorieId: { bsonType: "string" },
         prix: { bsonType: "number" },
         tauxTVA: { bsonType: "number" },
         stock: { bsonType: "int" },
@@ -146,8 +146,8 @@ db.createCollection("visites", {
       bsonType: "object",
       required: ["badgeId", "clientId", "tableNumero", "dateArrivee", "statut"],
       properties: {
-        badgeId: { bsonType: "objectId", description: "quel badge physique a été prêté" },
-        clientId: { bsonType: "objectId", description: "quel client a réservé ce badge" },
+        badgeId: { bsonType: "string", description: "quel badge physique a été prêté" },
+        clientId: { bsonType: "string", description: "quel client a réservé ce badge" },
         tableNumero: { bsonType: "number" },
         dateArrivee: { bsonType: "date" },
         dateDepart: { bsonType: ["date", "null"] },
@@ -179,8 +179,8 @@ db.createCollection("commandes", {
       bsonType: "object",
       required: ["visiteId", "dateCommande", "statut", "lignes", "montantTotal"],
       properties: {
-        visiteId: { bsonType: "objectId" },
-        employeId: { bsonType: ["objectId", "null"] },
+        visiteId: { bsonType: "string" },
+        employeId: { bsonType: ["string", "null"] },
         dateCommande: { bsonType: "date" },
         statut: {
           enum: ["en_attente", "acceptee", "en_preparation", "prete", "servie", "annulee"]
@@ -194,7 +194,7 @@ db.createCollection("commandes", {
             bsonType: "object",
             required: ["produitId", "produitNomSnapshot", "quantite", "prixUnitaireSnapshot"],
             properties: {
-              produitId: { bsonType: "objectId" },
+              produitId: { bsonType: "string" },
               produitNomSnapshot: { bsonType: "string" },
               quantite: { bsonType: "int", minimum: 1 },
               prixUnitaireSnapshot: { bsonType: "number" },
@@ -220,7 +220,7 @@ db.createCollection("transactions_credit", {
       bsonType: "object",
       required: ["clientId", "montant", "type", "date"],
       properties: {
-        clientId: { bsonType: "objectId" },
+        clientId: { bsonType: "string" },
         montant: { bsonType: "number" },
         type: { enum: ["recharge", "debit", "remboursement"] },
         date: { bsonType: "date" },
