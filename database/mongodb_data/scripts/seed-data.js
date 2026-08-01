@@ -140,10 +140,12 @@ const lignes = payloadRPI.command.map(item => {
   };
 });
 
-const montantTotal = lignes.reduce(
-  (acc, l) => acc + (l.prixUnitaireSnapshot * l.quantite),
-  NumberDecimal("0.00")
+const montant = lignes.reduce(
+  (acc, l) => acc + Number(l.prixUnitaireSnapshot.toString()) * l.quantite,
+  0
 );
+
+const montantTotal = NumberDecimal(montant.toFixed(2));
 
 db.commandes.insertOne({
   visiteId: visiteActive._id, // <-- seul lien conservé, jamais badgeId/clientId en direct
