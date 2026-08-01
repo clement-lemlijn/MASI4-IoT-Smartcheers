@@ -51,7 +51,7 @@ db.createCollection("clients", {
         prenom: { bsonType: "string" },
         email: { bsonType: ["string", "null"] },
         telephone: { bsonType: ["string", "null"] },
-        solde: { bsonType: "decimal", description: "solde cashless en euros" },
+        solde: { bsonType: "number", description: "solde cashless en euros" },
         dateCreation: { bsonType: "date" },
         actif: { bsonType: "bool" },
         banni: { bsonType: "bool" }
@@ -107,8 +107,8 @@ db.createCollection("produits", {
       properties: {
         nom: { bsonType: "string" },
         categorieId: { bsonType: "objectId" },
-        prix: { bsonType: "decimal" },
-        tauxTVA: { bsonType: "decimal" },
+        prix: { bsonType: "number" },
+        tauxTVA: { bsonType: "number" },
         stock: { bsonType: "int" },
         seuilAlerteStock: { bsonType: "int" },
         unite: { bsonType: "string" },
@@ -156,7 +156,7 @@ db.createCollection("visites", {
         paiement: {
           bsonType: ["object", "null"],
           properties: {
-            montant: { bsonType: "decimal" },
+            montant: { bsonType: "number" },
             mode: { enum: ["especes", "carte", "credit_client", null] },
             statut: { enum: ["en_attente", "valide", "refuse", "rembourse", null] },
             datePaiement: { bsonType: ["date", "null"] }
@@ -185,7 +185,7 @@ db.createCollection("commandes", {
         statut: {
           enum: ["en_attente", "acceptee", "en_preparation", "prete", "servie", "annulee"]
         },
-        montantTotal: { bsonType: "decimal" },
+        montantTotal: { bsonType: "number" },
         source: { enum: ["rpi", "caisse", "appli"] },
         lignes: {
           bsonType: "array",
@@ -197,7 +197,7 @@ db.createCollection("commandes", {
               produitId: { bsonType: "objectId" },
               produitNomSnapshot: { bsonType: "string" },
               quantite: { bsonType: "int", minimum: 1 },
-              prixUnitaireSnapshot: { bsonType: "decimal" },
+              prixUnitaireSnapshot: { bsonType: "number" },
               statutPreparation: { enum: ["attente", "prepa", "pret", "annule"] },
               poste: { enum: ["bar", "cuisine"] }
             }
@@ -221,7 +221,7 @@ db.createCollection("transactions_credit", {
       required: ["clientId", "montant", "type", "date"],
       properties: {
         clientId: { bsonType: "objectId" },
-        montant: { bsonType: "decimal" },
+        montant: { bsonType: "number" },
         type: { enum: ["recharge", "debit", "remboursement"] },
         date: { bsonType: "date" },
         moyenRecharge: { enum: ["cb", "especes", null] }

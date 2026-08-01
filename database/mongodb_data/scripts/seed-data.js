@@ -25,13 +25,13 @@ const clients = [
   {
     nom: "Dupont", prenom: "Julien",
     email: "julien.dupont@example.com", telephone: "0032470012345",
-    solde: NumberDecimal("25.00"), dateCreation: new Date(),
+    solde: 25.00, dateCreation: new Date(),
     actif: true, banni: false
   },
   {
     nom: "Martin", prenom: "Léa",
     email: "lea.martin@example.com", telephone: "0032470098765",
-    solde: NumberDecimal("10.50"), dateCreation: new Date(),
+    solde: 10.50, dateCreation: new Date(),
     actif: true, banni: false
   }
 ];
@@ -56,13 +56,13 @@ const catSnackId = db.categories_produits.insertOne({ nom: "Snack", poste: "cuis
 const catPlatId = db.categories_produits.insertOne({ nom: "Plat", poste: "cuisine" }).insertedId;
 
 db.produits.insertMany([
-  { nom: "Coca", categorieId: catBoissonId, prix: NumberDecimal("2.50"), tauxTVA: NumberDecimal("0.21"), stock: 120, seuilAlerteStock: 20, unite: "canette", disponible: true },
-  { nom: "Fanta", categorieId: catBoissonId, prix: NumberDecimal("2.50"), tauxTVA: NumberDecimal("0.21"), stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
-  { nom: "Sprite", categorieId: catBoissonId, prix: NumberDecimal("2.50"), tauxTVA: NumberDecimal("0.21"), stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
-  { nom: "Biere", categorieId: catBoissonId, prix: NumberDecimal("3.00"), tauxTVA: NumberDecimal("0.21"), stock: 200, seuilAlerteStock: 40, unite: "bouteille", disponible: true },
-  { nom: "Chips", categorieId: catSnackId, prix: NumberDecimal("2.00"), tauxTVA: NumberDecimal("0.06"), stock: 50, seuilAlerteStock: 10, unite: "sachet", disponible: true },
-  { nom: "Saucisson", categorieId: catSnackId, prix: NumberDecimal("4.50"), tauxTVA: NumberDecimal("0.06"), stock: 30, seuilAlerteStock: 5, unite: "planche", disponible: true },
-  { nom: "Pizza", categorieId: catPlatId, prix: NumberDecimal("8.00"), tauxTVA: NumberDecimal("0.06"), stock: 25, seuilAlerteStock: 5, unite: "piece", disponible: true }
+  { nom: "Coca", categorieId: catBoissonId, prix: 2.50, tauxTVA: 0.21, stock: 120, seuilAlerteStock: 20, unite: "canette", disponible: true },
+  { nom: "Fanta", categorieId: catBoissonId, prix: 2.50, tauxTVA: 0.21, stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
+  { nom: "Sprite", categorieId: catBoissonId, prix: 2.50, tauxTVA: 0.21, stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
+  { nom: "Biere", categorieId: catBoissonId, prix: 3.00, tauxTVA: 0.21, stock: 200, seuilAlerteStock: 40, unite: "bouteille", disponible: true },
+  { nom: "Chips", categorieId: catSnackId, prix: 2.00, tauxTVA: 0.06, stock: 50, seuilAlerteStock: 10, unite: "sachet", disponible: true },
+  { nom: "Saucisson", categorieId: catSnackId, prix: 4.50, tauxTVA: 0.06, stock: 30, seuilAlerteStock: 5, unite: "planche", disponible: true },
+  { nom: "Pizza", categorieId: catPlatId, prix: 8.00, tauxTVA: 0.06, stock: 25, seuilAlerteStock: 5, unite: "piece", disponible: true }
 ]);
 
 // ------------------------------------------------------------
@@ -96,7 +96,7 @@ const visiteId = db.visites.insertOne({
   dateArrivee: new Date(),
   dateDepart: null,
   statut: "ouverte",
-  montantTotalVisite: NumberDecimal("0.00"),
+  montantTotalVisite: 0.00,
   paiement: null
 }).insertedId;
 
@@ -145,7 +145,7 @@ const montant = lignes.reduce(
   0
 );
 
-const montantTotal = NumberDecimal(montant.toFixed(2));
+const montantTotal = montant;
 
 db.commandes.insertOne({
   visiteId: visiteActive._id, // <-- seul lien conservé, jamais badgeId/clientId en direct
