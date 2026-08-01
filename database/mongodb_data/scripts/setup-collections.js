@@ -29,6 +29,7 @@ db.createCollection("badges", {
       required: ["badgeUid", "statut"],
       properties: {
         badgeUid: { bsonType: "string", description: "UID physique du tag, unique" },
+        comment: { bsonType: "string", description: "description du badge, hs, etc..." },
         statut: { enum: ["disponible", "attribue", "perdu", "hors_service"] }
       }
     }
