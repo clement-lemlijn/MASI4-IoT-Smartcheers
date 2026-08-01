@@ -1,20 +1,23 @@
 
-
-
 ```mermaid
 erDiagram
+    BADGE ||--o{ VISITE : est_utilise_dans
     CLIENT ||--o{ VISITE : effectue
     TABLE ||--o{ VISITE : accueille
     VISITE ||--o{ COMMANDE : genere
-    COMMANDE ||--|{ LIGNE_COMMANDE : contient
-    PRODUIT ||--o{ LIGNE_COMMANDE : reference
-    COMMANDE ||--o| PAIEMENT : reglee_par
-    EMPLOYE ||--o{ COMMANDE : traite
+    PRODUIT ||--o{ COMMANDE : reference
+    COMMANDE }o--|| EMPLOYE : traite_par
     CLIENT ||--o{ TRANSACTION_CREDIT : credite
     PRODUIT }o--|| CATEGORIE_PRODUIT : appartient
 
+    BADGE {
+        ObjectId id PK
+        string badgeUid UK "UID physique du tag RFID"
+        string statut "disponible, attribue, perdu, hors_service"
+    }
+
     CLIENT {
-        string clientUid PK "badge RFID/NFC"
+        ObjectId id PK
         string nom
         string prenom
         string email
@@ -28,13 +31,14 @@ erDiagram
     TABLE {
         int numero PK
         int capacite
-        string zone "terrasse, salle, bar"
+        string zone
         string statut "libre, occupee, reservee"
     }
 
     VISITE {
         ObjectId id PK
-        string clientUid FK
+        ObjectId badgeId FK "quel badge physique"
+        ObjectId clientId FK "quel client"
         int tableNumero FK
         datetime dateArrivee
         datetime dateDepart
@@ -44,7 +48,7 @@ erDiagram
 
     COMMANDE {
         ObjectId id PK
-        ObjectId visiteId FK
+        ObjectId visiteId FK "seul lien vers client/table/badge"
         ObjectId employeId FK
         datetime dateCommande
         string statut "en_attente, acceptee, en_preparation, prete, servie, annulee"
@@ -52,59 +56,34 @@ erDiagram
         string source "rpi, caisse, appli"
     }
 
-    LIGNE_COMMANDE {
-        ObjectId id PK
-        ObjectId commandeId FK
-        ObjectId produitId FK
-        string produitNomSnapshot
-        int quantite
-        decimal prixUnitaireSnapshot
-        string statutPreparation "attente, prepa, pret, annule"
-        string poste "bar, cuisine"
-    }
-
     PRODUIT {
         ObjectId id PK
         string nom
-        string categorieId FK
+        ObjectId categorieId FK
         decimal prix
         decimal tauxTVA
         int stock
-        int seuilAlerteStock
-        string unite
         boolean disponible
     }
 
     CATEGORIE_PRODUIT {
         ObjectId id PK
-        string nom "boisson, snack, plat"
+        string nom
         string poste "bar, cuisine"
-    }
-
-    PAIEMENT {
-        ObjectId id PK
-        ObjectId commandeId FK
-        ObjectId visiteId FK
-        decimal montant
-        string mode "especes, carte, credit_client"
-        string statut "en_attente, valide, refuse, rembourse"
-        datetime datePaiement
     }
 
     EMPLOYE {
         ObjectId id PK
         string nom
-        string role "serveur, barman, cuisinier, gerant"
-        string pin
+        string role
         boolean actif
     }
 
     TRANSACTION_CREDIT {
         ObjectId id PK
-        string clientUid FK
+        ObjectId clientId FK "lié au client, jamais au badge"
         decimal montant
         string type "recharge, debit, remboursement"
         datetime date
-        string moyenRecharge "cb, especes"
     }
 ```
