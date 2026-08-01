@@ -209,6 +209,7 @@ module.exports = {
     functionTimeout: 0,
 
     functionGlobalContext: {
+        mongodb: require('mongodb')
         // os:require('os'),
     },
 
