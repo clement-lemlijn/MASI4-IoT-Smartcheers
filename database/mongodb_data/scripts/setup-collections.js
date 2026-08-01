@@ -148,11 +148,11 @@ db.createCollection("visites", {
       properties: {
         badgeId: { bsonType: "objectId", description: "quel badge physique a été prêté" },
         clientId: { bsonType: "objectId", description: "quel client a réservé ce badge" },
-        tableNumero: { bsonType: "int" },
+        tableNumero: { bsonType: "number" },
         dateArrivee: { bsonType: "date" },
         dateDepart: { bsonType: ["date", "null"] },
         statut: { enum: ["ouverte", "fermee", "annulee"] },
-        montantTotalVisite: { bsonType: "decimal" },
+        montantTotalVisite: { bsonType: "number" },
         paiement: {
           bsonType: ["object", "null"],
           properties: {
