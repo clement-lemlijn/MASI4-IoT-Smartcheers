@@ -108,3 +108,8 @@ erDiagram
         string moyenRecharge "cb, especes"
     }
 ```
+
+
+db.getCollectionInfos({ name: "visites" })
+
+
