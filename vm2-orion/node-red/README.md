@@ -50,16 +50,55 @@ sudo chown -R 1000:1000 client_data employee_data
 pour activer l'authentification : ex employee_data/setting.js/"adminAuth: {.."
 pour générer un mot de passe : `sudo docker exec -it node-red-employee node-red admin hash-pw` 
 
-### Access rights
+"httpNodeAuth: [.. " pour bloquer /ui
 
+
+## Instances Node-RED
+
+Deux instances Node-RED distinctes tournent en parallèle, chacune avec son propre rôle, ses propres flows et sa propre authentification :
+
+| Instance | Rôle | Port | Volume `/data` | Certificat TLS |
+|---|---|---|---|---|
+| `node-red-client` | Interface client final (niveau 2) | `1880` | `./client_data` & `config/certs` | `node-red.crt` / `.key` |
+| `node-red-employee` | Interface employé / entreprise (niveau 2) | `1881` | `./employee_data` & `config/certs/employee` | `node-red-employee.crt` / `.key` |
+
+les certificats sont générés grâce aux scripts `MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker
+/scripts/generate-node-red-certs.sh` & `MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker
+/scripts/generate-node-red-employee-certs.sh`
+
+Chaque instance possède son propre mot de passe (`adminAuth`/`httpNodeAuth`) **et** son propre certificat TLS, afin qu'une compromission éventuelle d'une clé n'impacte pas l'autre instance.
+
+## Certificats HTTPS
+
+Les certificats sont stockés sur la VM dans :
+`~/MASI4-IoT-Smartcheers/vm2-orion/mqtt-broker/config/certs/`
+
+et montés dans chaque conteneur via un bind mount Docker :
+```yaml
+volumes:
+  - ../mqtt-broker/config/certs:/certs
+```
+
+Dans chaque `settings.js` correspondant :
+```js
+https: {
+    key: require("fs").readFileSync('/certs/node-red-employee.key'),
+    cert: require("fs").readFileSync('/certs/node-red-employee.crt')
+},
+requireHttps: true,
+```
+
+### Droits sur les certificats
+commandes : 
 ```
 sudo chown -R 1000:1000 ./config/certs
-
 sudo chmod 755 ./config/certs
 sudo chmod 644 ./config/certs/ca.crt
 sudo chmod 644 ./config/certs/node-red.crt
 sudo chmod 600 ./config/certs/node-red.key
 ```
 
-"httpNodeAuth: [.. " pour bloquer /ui
+### Confiance navigateur
+Les certificats sont auto-signés (CA interne `ca.crt`). Pour éviter l'avertissement "site dangereux", il faudrait importer `ca.crt` dans le magasin de certificats de confiance du navigateur utilisé.
+
 
