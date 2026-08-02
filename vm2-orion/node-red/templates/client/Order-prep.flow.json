@@ -1,0 +1,860 @@
+[
+    {
+        "id": "5a5712cb8a4e9fe2",
+        "type": "tab",
+        "label": "Order prep",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "e6b5a2a1ff850f29",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "7b0b0c8708135aea",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "orders waiting...",
+        "label": "Orders waiting : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 780,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "6f0c8c33d1f26af1",
+        "type": "inject",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 340,
+        "wires": [
+            [
+                "a7c08d56fd700dc8",
+                "87499acb18813544",
+                "1c37c4ca895318e3"
+            ]
+        ]
+    },
+    {
+        "id": "9fad3f143017181e",
+        "type": "ui_button",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "",
+        "group": "7b0b0c8708135aea",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "refresh",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 240,
+        "y": 300,
+        "wires": [
+            [
+                "a7c08d56fd700dc8",
+                "87499acb18813544",
+                "1c37c4ca895318e3"
+            ]
+        ]
+    },
+    {
+        "id": "a7c08d56fd700dc8",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 11",
+        "func": "msg.payload = { statut: \"en_attente\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 340,
+        "wires": [
+            [
+                "e5262b5db308f501"
+            ]
+        ]
+    },
+    {
+        "id": "e5262b5db308f501",
+        "type": "mongodb in",
+        "z": "5a5712cb8a4e9fe2",
+        "mongodb": "783a5e3707db0d32",
+        "name": "count orders",
+        "collection": "commandes",
+        "operation": "count",
+        "x": 610,
+        "y": 340,
+        "wires": [
+            [
+                "e6b5a2a1ff850f29"
+            ]
+        ]
+    },
+    {
+        "id": "87499acb18813544",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 12",
+        "func": "msg.payload = \"\";\nmsg.payload = [\n    {\n        $match: {\n            statut: \"en_attente\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            localField: \"visiteId\",\n            foreignField: \"_id\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        $project: {\n            _id: 1,\n            dateCommande: 1,\n            statut: 1,\n            montantTotal: 1,\n            lignes: 1,\n            tableNumero: \"$visite.tableNumero\"\n        }\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 420,
+        "wires": [
+            [
+                "b5d27908f9e2c8c4"
+            ]
+        ]
+    },
+    {
+        "id": "b5d27908f9e2c8c4",
+        "type": "mongodb in",
+        "z": "5a5712cb8a4e9fe2",
+        "mongodb": "783a5e3707db0d32",
+        "name": "find orders",
+        "collection": "commandes",
+        "operation": "aggregate",
+        "x": 620,
+        "y": 420,
+        "wires": [
+            [
+                "bc5427385503ea66"
+            ]
+        ]
+    },
+    {
+        "id": "bc5427385503ea66",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 13",
+        "func": "msg.payload = msg.payload.map(commande => {\n\n    // const date = new Date(commande.dateCommande)\n    //     .toLocaleString(\"fr-BE\", {\n    //         day:\"2-digit\",\n    //         month:\"2-digit\",\n    //         hour:\"2-digit\",\n    //         minute:\"2-digit\"\n    //     });\n\n    const date = new Date(commande.dateCommande)\n        .toLocaleString(\"fr-BE\", {\n            hour: \"2-digit\",\n            minute: \"2-digit\"\n        });\n\n    const items = commande.lignes.reduce(\n        (sum,l) => sum + l.quantite,\n        0\n    );\n\n    commande.affichage =\n        `${date} - ${items} article(s) - Table ${commande.tableNumero}`;\n\n    return commande;\n\n});\n\nmsg.options = msg.payload.map(commande => {\n    return { [commande.affichage]: commande._id };\n});\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 420,
+        "wires": [
+            [
+                "8532c2d6471d0922"
+            ]
+        ]
+    },
+    {
+        "id": "8532c2d6471d0922",
+        "type": "ui_dropdown",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "",
+        "label": "",
+        "tooltip": "",
+        "place": "Select order",
+        "group": "1197726a177976b6",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 960,
+        "y": 420,
+        "wires": [
+            [
+                "95952adbebed8b2d"
+            ]
+        ]
+    },
+    {
+        "id": "95952adbebed8b2d",
+        "type": "mongodb in",
+        "z": "5a5712cb8a4e9fe2",
+        "mongodb": "783a5e3707db0d32",
+        "name": "findbyid",
+        "collection": "commandes",
+        "operation": "find",
+        "x": 300,
+        "y": 560,
+        "wires": [
+            [
+                "3d9c50c169413f16",
+                "1339a5260f7b92c4",
+                "8456df9f66d7b036",
+                "1fe9b55664960364",
+                "26136f6358bd07e5",
+                "3f1c7f2020e4ac62",
+                "27222792a71d0c5e",
+                "520f28145f201978",
+                "44427b66ac3e85c9",
+                "be1e1d1da6581e20"
+            ]
+        ]
+    },
+    {
+        "id": "823cec961fcbc779",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb coca",
+        "label": "Coca : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "3d9c50c169413f16",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb coca",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Coca\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 560,
+        "wires": [
+            [
+                "823cec961fcbc779"
+            ]
+        ]
+    },
+    {
+        "id": "1339a5260f7b92c4",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb fanta",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Fanta\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 600,
+        "wires": [
+            [
+                "f0b4f0fb7c325d0f"
+            ]
+        ]
+    },
+    {
+        "id": "8456df9f66d7b036",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb sprite",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Sprite\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 640,
+        "wires": [
+            [
+                "342db54c72a7fe28"
+            ]
+        ]
+    },
+    {
+        "id": "1fe9b55664960364",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb biere",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Biere\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 579.9856567382812,
+        "y": 680.3554077148438,
+        "wires": [
+            [
+                "9586c670f24c650a"
+            ]
+        ]
+    },
+    {
+        "id": "26136f6358bd07e5",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb chips",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Chips\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 720,
+        "wires": [
+            [
+                "a2c0871d165496e6"
+            ]
+        ]
+    },
+    {
+        "id": "3f1c7f2020e4ac62",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb sauci",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Saucisson\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 760,
+        "wires": [
+            [
+                "8f535138a0f233f4"
+            ]
+        ]
+    },
+    {
+        "id": "27222792a71d0c5e",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "f nb pizza",
+        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Pizza\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 800,
+        "wires": [
+            [
+                "1d48b53e3824d9eb"
+            ]
+        ]
+    },
+    {
+        "id": "f0b4f0fb7c325d0f",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb fanta",
+        "label": "Fanta : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "1d48b53e3824d9eb",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb pizza",
+        "label": "Pizza : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "342db54c72a7fe28",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb sprite",
+        "label": "Sprite : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "9586c670f24c650a",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb biere",
+        "label": "Bière : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 739.9856567382812,
+        "y": 680.3554077148438,
+        "wires": []
+    },
+    {
+        "id": "a2c0871d165496e6",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb chips",
+        "label": "Chips : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "8f535138a0f233f4",
+        "type": "ui_text",
+        "z": "5a5712cb8a4e9fe2",
+        "group": "1197726a177976b6",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "nb sauci",
+        "label": "Saucisson  : ",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 740,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "44427b66ac3e85c9",
+        "type": "ui_button",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "",
+        "group": "1197726a177976b6",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Send command",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "commande",
+        "payloadType": "flow",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 600,
+        "y": 860,
+        "wires": [
+            [
+                "7ad2d141c0e95bc9",
+                "80351c716a03798b"
+            ]
+        ]
+    },
+    {
+        "id": "1c37c4ca895318e3",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "refresh",
+        "func": "msg.payload = \"0x\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 520,
+        "wires": [
+            [
+                "823cec961fcbc779",
+                "f0b4f0fb7c325d0f",
+                "342db54c72a7fe28",
+                "9586c670f24c650a",
+                "a2c0871d165496e6",
+                "8f535138a0f233f4",
+                "1d48b53e3824d9eb"
+            ]
+        ]
+    },
+    {
+        "id": "7ad2d141c0e95bc9",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 14",
+        "func": "msg.query = {\n    _id: msg.payload._id\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"prete\"\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 860,
+        "wires": [
+            [
+                "8fd843d7653e479e",
+                "6fe9625a516e04ad",
+                "1ada2be22d569d96",
+                "9e577004a7c332d6"
+            ]
+        ]
+    },
+    {
+        "id": "520f28145f201978",
+        "type": "debug",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 260,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "80351c716a03798b",
+        "type": "debug",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "be1e1d1da6581e20",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 15",
+        "func": "flow.set(\"commande\", msg.payload[0])",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 250,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8fd843d7653e479e",
+        "type": "debug",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "6fe9625a516e04ad",
+        "type": "mongodb out",
+        "z": "5a5712cb8a4e9fe2",
+        "mongodb": "783a5e3707db0d32",
+        "name": "set ready",
+        "collection": "commandes",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 980,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "143a1425a47b4ce8",
+        "type": "mqtt out",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "send mqtt ready",
+        "topic": "",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e97212349fb30e64",
+        "x": 1160,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "1ada2be22d569d96",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 16",
+        "func": "var command_id = flow.get(\"commande\")._id\nmsg.topic = \"smartcheers/orders/ready\"\nmsg.payload = command_id;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 800,
+        "wires": [
+            [
+                "143a1425a47b4ce8"
+            ]
+        ]
+    },
+    {
+        "id": "856ee9fd0be6ddb6",
+        "type": "mqtt out",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "send mqtt ready",
+        "topic": "",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e97212349fb30e64",
+        "x": 1160,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "9e577004a7c332d6",
+        "type": "function",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "function 17",
+        "func": "var command_id = flow.get(\"commande\")._id\nmsg.topic = \"smartcheers/command/visit/\" + flow.get(\"commande\").visitId\nmsg.payload = command_id;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 990,
+        "y": 760,
+        "wires": [
+            [
+                "856ee9fd0be6ddb6"
+            ]
+        ]
+    },
+    {
+        "id": "7b0b0c8708135aea",
+        "type": "ui_group",
+        "name": "Header",
+        "tab": "2b17d02c34e78f35",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "783a5e3707db0d32",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": 27017,
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "1197726a177976b6",
+        "type": "ui_group",
+        "name": "Preparation",
+        "tab": "2b17d02c34e78f35",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "e97212349fb30e64",
+        "type": "mqtt-broker",
+        "name": "raspberrypi-hepl",
+        "broker": "192.168.1.12",
+        "port": "8883",
+        "tls": "6ced756f5ea7330e",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "3",
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "2b17d02c34e78f35",
+        "type": "ui_tab",
+        "name": "Order prep",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "6ced756f5ea7330e",
+        "type": "tls-config",
+        "name": "",
+        "certType": "files",
+        "cert": "",
+        "key": "",
+        "p12": "",
+        "p12name": "",
+        "ca": "",
+        "certname": "client.crt",
+        "keyname": "client.key",
+        "caname": "ca.crt",
+        "servername": "mqtt.smartcheers.local",
+        "verifyservercert": false,
+        "alpnprotocol": "",
+        "certEnv": "",
+        "keyEnv": "",
+        "caEnv": ""
+    },
+    {
+        "id": "d86272e2fb43855b",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-mongodb": "0.2.5"
+        }
+    }
+]
