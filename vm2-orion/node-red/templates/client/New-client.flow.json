@@ -1,0 +1,161 @@
+[
+    {
+        "id": "c8e2d660105acf62",
+        "type": "tab",
+        "label": "New Client",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "13ce2c87063a85f0",
+        "type": "ui_form",
+        "z": "c8e2d660105acf62",
+        "name": "client form",
+        "label": "",
+        "group": "3c4d42eebe5627d3",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "Nom",
+                "value": "nom",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Prenom",
+                "value": "prenom",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Email",
+                "value": "email",
+                "type": "email",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "GSM",
+                "value": "telephone",
+                "type": "text",
+                "required": true,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "nom": "",
+            "prenom": "",
+            "email": "",
+            "telephone": ""
+        },
+        "payload": "",
+        "submit": "submit",
+        "cancel": "cancel",
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": false,
+        "className": "",
+        "x": 250,
+        "y": 200,
+        "wires": [
+            [
+                "e157ae143e95c554",
+                "e6091829ca48772f"
+            ]
+        ]
+    },
+    {
+        "id": "e157ae143e95c554",
+        "type": "debug",
+        "z": "c8e2d660105acf62",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "e6091829ca48772f",
+        "type": "function",
+        "z": "c8e2d660105acf62",
+        "name": "function 1",
+        "func": "const crypto = global.get(\"crypto\");\n\nlet client = msg.payload;\n\nmsg.payload = {\n    _id: crypto.randomUUID(),\n\n    nom: client.nom,\n    prenom: client.prenom,\n    email: client.email,\n    telephone: client.telephone,\n\n    solde: 0,\n\n    dateCreation: new Date(),\n\n    actif: true,\n    banni: false\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 200,
+        "wires": [
+            [
+                "e7592bf7e882624a"
+            ]
+        ]
+    },
+    {
+        "id": "e7592bf7e882624a",
+        "type": "mongodb out",
+        "z": "c8e2d660105acf62",
+        "mongodb": "783a5e3707db0d32",
+        "name": "insert client",
+        "collection": "clients",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 630,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "3c4d42eebe5627d3",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "bdd9564747ab92a5",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "783a5e3707db0d32",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": 27017,
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "bdd9564747ab92a5",
+        "type": "ui_tab",
+        "name": "New client",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "171e5950504ae191",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-mongodb": "0.2.5"
+        }
+    }
+]
