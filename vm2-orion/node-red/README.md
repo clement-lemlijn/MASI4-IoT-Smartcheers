@@ -28,6 +28,9 @@ Accès interface depuis vm : [http://127.0.0.1:1880/](http://127.0.0.1:1880/)
 
 Accès interface depuis pc : [http://192.168.1.12:1880/](http://192.168.1.12:1880/)
 
+Accès interface depuis pc (https - client) : [https://192.168.1.12:1880/](https://192.168.1.12:1880/)
+Accès interface depuis pc (https - employee) : [https://192.168.1.12:1881/](https://192.168.1.12:1881/)
+
 
 ## Palettes installées
 Voici les palettes installées sur ma session node-red :
