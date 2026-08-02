@@ -1,0 +1,239 @@
+[
+    {
+        "id": "bb678ccee4044b0b",
+        "type": "tab",
+        "label": "Visit",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3b111b4d204697dd",
+        "type": "inject",
+        "z": "bb678ccee4044b0b",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 360,
+        "wires": [
+            [
+                "748640eb71cbbf30",
+                "54b9138e173fa163"
+            ]
+        ]
+    },
+    {
+        "id": "abd091274ecd60ce",
+        "type": "ui_gauge",
+        "z": "bb678ccee4044b0b",
+        "name": "",
+        "group": "4ec9668789d29416",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Occupied tables",
+        "label": "",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "4",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 800,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "748640eb71cbbf30",
+        "type": "function",
+        "z": "bb678ccee4044b0b",
+        "name": "select occupation",
+        "func": "msg.payload = { statut: \"occupee\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "c5ad1437aa529c8e"
+            ]
+        ]
+    },
+    {
+        "id": "c5ad1437aa529c8e",
+        "type": "mongodb in",
+        "z": "bb678ccee4044b0b",
+        "mongodb": "783a5e3707db0d32",
+        "name": "get occupation count",
+        "collection": "tables",
+        "operation": "count",
+        "x": 580,
+        "y": 240,
+        "wires": [
+            [
+                "abd091274ecd60ce"
+            ]
+        ]
+    },
+    {
+        "id": "54b9138e173fa163",
+        "type": "function",
+        "z": "bb678ccee4044b0b",
+        "name": "select ouvertes",
+        "func": "msg.payload = [\n    {\n        $match: {\n            statut: \"ouverte\"\n        }\n    },\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 420,
+        "wires": [
+            [
+                "2d2dd4e384da05db"
+            ]
+        ]
+    },
+    {
+        "id": "2d2dd4e384da05db",
+        "type": "mongodb in",
+        "z": "bb678ccee4044b0b",
+        "mongodb": "783a5e3707db0d32",
+        "name": "get visit",
+        "collection": "visites",
+        "operation": "aggregate",
+        "x": 540,
+        "y": 420,
+        "wires": [
+            [
+                "35ab1405811d0af1"
+            ]
+        ]
+    },
+    {
+        "id": "35ab1405811d0af1",
+        "type": "ui_template",
+        "z": "bb678ccee4044b0b",
+        "group": "4ec9668789d29416",
+        "name": "visit list",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "    <div ng-if=\"msg.payload.length\">\n        \n        <div class=\"visit-card\" ng-repeat=\"visite in msg.payload\">\n            <div class=\"header\">\n                <span class=\"table\">Table {{visite.tableNumero}}</span>\n                <span class=\"status\">{{visite.statut}}</span>\n            </div>\n    \n            <div class=\"line\">\n                <strong>Badge</strong>\n                <span>{{visite.badge.comment}}</span>\n            </div>\n    \n            <div class=\"line\">\n                <strong>Client</strong>\n                <span>{{visite.client.prenom}} {{visite.client.nom}}</span>\n            </div>\n    \n            <div class=\"line\">\n                <strong>Arrivée</strong>\n                <span>{{visite.dateArrivee | date:'dd/MM/yyyy HH:mm:ss'}}</span>\n            </div>\n    \n            <div class=\"line\">\n                <strong>Total</strong>\n                <span>{{visite.montantTotalVisite}} €</span>\n            </div>\n    \n        </div>\n    \n    </div>\n    \n    <div ng-if=\"!msg.payload.length\" class=\"empty\">\n        Aucune visite.\n    </div>\n    \n<style>\n    .visit-card {\n        background: var(--nr-dashboard-cardColor);\n        color: var(--nr-dashboard-textColor);\n        border-radius: 10px;\n        padding: 14px;\n        margin-bottom: 12px;\n        border-left: 4px solid #4caf50;\n    }\n\n    .header {\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n        margin-bottom: 10px;\n        font-weight: bold;\n    }\n\n    .table {\n        font-size: 18px;\n    }\n\n    .status {\n        background: #4caf50;\n        color: white;\n        padding: 3px 10px;\n        border-radius: 20px;\n        font-size: 12px;\n    }\n\n    .line {\n        display: flex;\n        justify-content: space-between;\n        margin: 6px 0;\n        font-size: 14px;\n        word-break: break-all;\n    }\n\n    .empty {\n        text-align: center;\n        color: #888;\n        padding: 20px;\n    }\n</style>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 720,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "23c521ad751d112d",
+        "type": "ui_button",
+        "z": "bb678ccee4044b0b",
+        "name": "",
+        "group": "116f62efaca14969",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "refresh",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 100,
+        "y": 300,
+        "wires": [
+            [
+                "748640eb71cbbf30",
+                "54b9138e173fa163"
+            ]
+        ]
+    },
+    {
+        "id": "4ec9668789d29416",
+        "type": "ui_group",
+        "name": "Visits list",
+        "tab": "46446ff295bbccb2",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "783a5e3707db0d32",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": 27017,
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "116f62efaca14969",
+        "type": "ui_group",
+        "name": "Visit form",
+        "tab": "46446ff295bbccb2",
+        "order": 2,
+        "disp": false,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "46446ff295bbccb2",
+        "type": "ui_tab",
+        "name": "Visits",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "f34a4f267bbca1b6",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-mongodb": "0.2.5"
+        }
+    }
+]
