@@ -1,0 +1,569 @@
+[
+    {
+        "id": "790d1ef794ba3c12",
+        "type": "tab",
+        "label": "Create Visit",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "962085619def393f",
+        "type": "ui_dropdown",
+        "z": "790d1ef794ba3c12",
+        "name": "dropdown_client",
+        "label": "Client : ",
+        "tooltip": "",
+        "place": "Select a client",
+        "group": "8b5aad705f2582f7",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1020,
+        "y": 240,
+        "wires": [
+            [
+                "42f031a33bb86455"
+            ]
+        ]
+    },
+    {
+        "id": "c4317e69a094c60a",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 18",
+        "func": "msg.options = msg.payload.map(c => {\n    const label = `${c.prenom} ${c.nom}`;\n    return { [label]: c._id };\n});\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 240,
+        "wires": [
+            [
+                "962085619def393f"
+            ]
+        ]
+    },
+    {
+        "id": "104a53695bca9ef9",
+        "type": "mongodb in",
+        "z": "790d1ef794ba3c12",
+        "mongodb": "783a5e3707db0d32",
+        "name": "",
+        "collection": "clients",
+        "operation": "aggregate",
+        "x": 610,
+        "y": 240,
+        "wires": [
+            [
+                "c4317e69a094c60a"
+            ]
+        ]
+    },
+    {
+        "id": "f1c792a080df0bd6",
+        "type": "inject",
+        "z": "790d1ef794ba3c12",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "0e30f1a93661d133",
+                "1b4cb1f5080cf535",
+                "cec4604e40f50ed9"
+            ]
+        ]
+    },
+    {
+        "id": "d375326a177cd2bc",
+        "type": "mongodb in",
+        "z": "790d1ef794ba3c12",
+        "mongodb": "783a5e3707db0d32",
+        "name": "",
+        "collection": "badges",
+        "operation": "find",
+        "x": 610,
+        "y": 300,
+        "wires": [
+            [
+                "42452c0d1b0f8495"
+            ]
+        ]
+    },
+    {
+        "id": "42452c0d1b0f8495",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 19",
+        "func": "msg.options = msg.payload.map(b => {\n    return { [b.comment]: b.badgeUid };\n});\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 300,
+        "wires": [
+            [
+                "473b7d827202325f"
+            ]
+        ]
+    },
+    {
+        "id": "473b7d827202325f",
+        "type": "ui_dropdown",
+        "z": "790d1ef794ba3c12",
+        "name": "dropdown_badges",
+        "label": "Badge :",
+        "tooltip": "",
+        "place": "Select a badge",
+        "group": "8b5aad705f2582f7",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1030,
+        "y": 300,
+        "wires": [
+            [
+                "8efd6a2e70860b49"
+            ]
+        ]
+    },
+    {
+        "id": "d84e95943b2f9b96",
+        "type": "mongodb in",
+        "z": "790d1ef794ba3c12",
+        "mongodb": "783a5e3707db0d32",
+        "name": "",
+        "collection": "tables",
+        "operation": "find",
+        "x": 610,
+        "y": 360,
+        "wires": [
+            [
+                "8873d30abd48dd05"
+            ]
+        ]
+    },
+    {
+        "id": "0e30f1a93661d133",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "select libre",
+        "func": "msg.payload = { statut: \"libre\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "d84e95943b2f9b96"
+            ]
+        ]
+    },
+    {
+        "id": "8873d30abd48dd05",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 20",
+        "func": "msg.options = msg.payload.map(t => {\n    const label = `${t.numero} - ${t.zone} (${t.capacite})`;\n    return { [label]: t.numero };\n});\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 360,
+        "wires": [
+            [
+                "93aaf375ee584a90"
+            ]
+        ]
+    },
+    {
+        "id": "93aaf375ee584a90",
+        "type": "ui_dropdown",
+        "z": "790d1ef794ba3c12",
+        "name": "dropdown_table",
+        "label": "",
+        "tooltip": "",
+        "place": "Select table",
+        "group": "8b5aad705f2582f7",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1020,
+        "y": 360,
+        "wires": [
+            [
+                "0816112f019b0b05"
+            ]
+        ]
+    },
+    {
+        "id": "42f031a33bb86455",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 21",
+        "func": "flow.set('visite_clientId', msg.payload);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8efd6a2e70860b49",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 22",
+        "func": "flow.set('visite_badgeId', msg.payload);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0816112f019b0b05",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 23",
+        "func": "flow.set('visite_tableNumero', msg.payload);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1200,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4304ef91a298b7d8",
+        "type": "ui_button",
+        "z": "790d1ef794ba3c12",
+        "name": "btn_creer_visite",
+        "group": "8b5aad705f2582f7",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Create visit",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 360,
+        "y": 480,
+        "wires": [
+            [
+                "c4f943f3fdae1d68"
+            ]
+        ]
+    },
+    {
+        "id": "c4f943f3fdae1d68",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "build_visite",
+        "func": "const clientId = flow.get('visite_clientId');\nconst badgeId = flow.get('visite_badgeId');\nconst tableNumero = flow.get('visite_tableNumero');\n\nif (!clientId || !badgeId || !tableNumero) {\n    node.warn(\"Formulaire incomplet\" + !clientId + !badgeId + !tableNumero);\n    return null;\n}\n\n// Génère un token unique pour cette visite (accès dashboard client)\nconst crypto = global.get('crypto') || require('crypto');\nconst token = crypto.randomBytes(4).toString('hex');\n\nmsg.payload = {\n    badgeId: String(badgeId),\n    clientId: String(clientId),\n    token: token,\n    tableNumero: Number(tableNumero),\n    dateArrivee: new Date(),\n    dateDepart: null,\n    statut: \"ouverte\",\n    montantTotalVisite: Number(0),\n    paiement: null\n};\n\nflow.set('pending_badgeId', badgeId);\nflow.set('pending_tableNumero', Number(tableNumero));\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 480,
+        "wires": [
+            [
+                "9a2de516f83545d9",
+                "2e1b184ab833c728",
+                "c3560d0259bf9d68",
+                "fe5e313e9f20b0c1"
+            ]
+        ]
+    },
+    {
+        "id": "9a2de516f83545d9",
+        "type": "mongodb out",
+        "z": "790d1ef794ba3c12",
+        "mongodb": "783a5e3707db0d32",
+        "name": "insert visite",
+        "collection": "visites",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 750,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "2e1b184ab833c728",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 24",
+        "func": "const badgeId = flow.get('pending_badgeId');\n\nmsg.query = {\n    badgeUid: badgeId\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"attribue\"\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 540,
+        "wires": [
+            [
+                "14d84b9f399ec5f4"
+            ]
+        ]
+    },
+    {
+        "id": "c3560d0259bf9d68",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "function 25",
+        "func": "const tableNumero = flow.get('pending_tableNumero');\n\nmsg.query = {\n    numero: tableNumero\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"occupee\"\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 600,
+        "wires": [
+            [
+                "851aa3c958d88a36"
+            ]
+        ]
+    },
+    {
+        "id": "851aa3c958d88a36",
+        "type": "mongodb out",
+        "z": "790d1ef794ba3c12",
+        "mongodb": "783a5e3707db0d32",
+        "name": "update tables",
+        "collection": "tables",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 900,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "14d84b9f399ec5f4",
+        "type": "mongodb out",
+        "z": "790d1ef794ba3c12",
+        "mongodb": "783a5e3707db0d32",
+        "name": "update badges",
+        "collection": "badges",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 900,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "1b4cb1f5080cf535",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "select dispo",
+        "func": "msg.payload = { statut: \"disponible\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 300,
+        "wires": [
+            [
+                "d375326a177cd2bc"
+            ]
+        ]
+    },
+    {
+        "id": "e3f0f149a5e756fc",
+        "type": "ui_button",
+        "z": "790d1ef794ba3c12",
+        "name": "",
+        "group": "8b5aad705f2582f7",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "refresh",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 120,
+        "y": 180,
+        "wires": [
+            [
+                "104a53695bca9ef9",
+                "d375326a177cd2bc",
+                "d84e95943b2f9b96"
+            ]
+        ]
+    },
+    {
+        "id": "cec4604e40f50ed9",
+        "type": "function",
+        "z": "790d1ef794ba3c12",
+        "name": "select clients",
+        "func": "msg.payload = [\n    {\n        $match: {\n            banni: false\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            let: { clientId: \"$_id\" },\n            pipeline: [\n                {\n                    $match: {\n                        $expr: {\n                            $and: [\n                                { $eq: [\"$clientId\", \"$$clientId\"] },\n                                { $eq: [\"$statut\", \"ouverte\"] }\n                            ]\n                        }\n                    }\n                }\n            ],\n            as: \"visitesActives\"\n        }\n    },\n    {\n        $match: {\n            visitesActives: {\n                $size: 0\n            }\n        }\n    },\n    {\n        $project: {\n            visitesActives: 0\n        }\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "104a53695bca9ef9"
+            ]
+        ]
+    },
+    {
+        "id": "fe5e313e9f20b0c1",
+        "type": "ui_text",
+        "z": "790d1ef794ba3c12",
+        "group": "8b5aad705f2582f7",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "token à copier au client : ",
+        "format": "https://192.168.1.12:1880/dashboard?t={{msg.payload.token}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 790,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "8b5aad705f2582f7",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "6303e5c26872cab9",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "783a5e3707db0d32",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": 27017,
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "6303e5c26872cab9",
+        "type": "ui_tab",
+        "name": "Create visit",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "d0a0c362304b5bf5",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-mongodb": "0.2.5"
+        }
+    }
+]
