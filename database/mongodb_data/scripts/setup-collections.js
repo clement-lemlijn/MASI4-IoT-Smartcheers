@@ -233,4 +233,30 @@ db.createCollection("transactions_credit", {
 });
 db.transactions_credit.createIndex({ clientId: 1, date: -1 });
 
+// ------------------------------------------------------------
+// MENU
+// Collection dediee a l'affichage cote client (dashboard Node-RED).
+// Distincte de "produits" (qui gere stock/TVA/seuils cote back-office) :
+// le menu ne contient QUE ce qui doit etre montre au client (nom, prix,
+// description, photo, disponibilite simple).
+// ------------------------------------------------------------
+db.createCollection("menu", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["nom", "categorie", "prix", "disponible"],
+      properties: {
+        nom: { bsonType: "string" },
+        description: { bsonType: ["string", "null"] },
+        categorie: { bsonType: "string", description: "ex: Boisson, Snack, Plat" },
+        prix: { bsonType: "number" },
+        imageUrl: { bsonType: ["string", "null"], description: "URL de la photo de l'item" },
+        disponible: { bsonType: "bool" }
+      }
+    }
+  }
+});
+db.menu.createIndex({ nom: 1 }, { unique: true });
+
+
 print(">> Collections et index créés avec succès.");
