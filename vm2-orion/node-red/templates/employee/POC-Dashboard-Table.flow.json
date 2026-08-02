@@ -1,0 +1,142 @@
+[
+    {
+        "id": "tab_poc",
+        "type": "tab",
+        "label": "POC Dashboard Table",
+        "disabled": false,
+        "info": "POC : isolation des tables via token dans l'URL.\n\nTest :\n/dashboard?t=<token>\n\nLes tokens de test sont générés au démarrage par le noeud 'Init tables (démo)'.\nRegarde le debug pour voir les tokens générés, puis colle l'URL dans ton navigateur.",
+        "env": []
+    },
+    {
+        "id": "http_in_dashboard",
+        "type": "http in",
+        "z": "tab_poc",
+        "name": "GET /dashboard",
+        "url": "/dashboard",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 220,
+        "wires": [
+            [
+                "e8746cec02fb2e8c"
+            ]
+        ]
+    },
+    {
+        "id": "fn_render_html",
+        "type": "function",
+        "z": "tab_poc",
+        "name": "Générer HTML table",
+        "func": "const html = `\n<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Table ${msg.tableNumber}</title>\n<style>\n  body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }\n  .card { background: white; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\n  h1 { font-size: 1.4em; color: #333; }\n  .statut { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #ffedcc; color: #a05a00; font-weight: bold; }\n  ul { padding-left: 20px; }\n</style>\n</head>\n<body>\n  <div class=\"card\">\n    <h1>Table ${msg.tableNumber}</h1>\n    <p>Statut : <span class=\"statut\">${msg.commande.statut}</span></p>\n    <p>Votre commande :</p>\n    <ul>\n      ${msg.commande.articles.map(a => `<li>${a}</li>`).join('')}\n    </ul>\n  </div>\n</body>\n</html>\n`;\n\nmsg.payload = html;\nmsg.headers = { 'Content-Type': 'text/html; charset=utf-8' };\nmsg.statusCode = 200;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "http_response_ok",
+        "type": "http response",
+        "z": "tab_poc",
+        "name": "Réponse OK",
+        "statusCode": "",
+        "headers": {},
+        "x": 980,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "http_response_error",
+        "type": "http response",
+        "z": "tab_poc",
+        "name": "Réponse erreur",
+        "statusCode": "403",
+        "headers": {},
+        "x": 920,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "e8746cec02fb2e8c",
+        "type": "function",
+        "z": "tab_poc",
+        "name": "function 1",
+        "func": "// Prépare la requête d'agrégation MongoDB\n// Récupère le token demandé dans l'URL\nconst token = msg.req.query.t;\n\nif (!token) {\n    msg.statusCode = 403;\n    msg.payload = \"<h1>Accès refusé</h1><p>Lien invalide ou expiré.</p>\";\n    msg.headers = { 'Content-Type': 'text/html' };\n    return [null, msg]; // sort par la 2e sortie (erreur)\n}\n\n// On garde le token pour le comparer après la requête Mongo\nflow.set('lookup_token', token);\n\nmsg.payload = [\n    {\n        $match: {\n            token: token,\n            statut: \"ouverte\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"commandes\",\n            localField: \"_id\",\n            foreignField: \"visiteId\",\n            as: \"commandes\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            badgeId: 1,\n            clientId: 1,\n            dateArrivee: 1,\n            montantTotalVisite: 1,\n            commandes: 1\n        }\n    }\n];\n\nreturn [msg, null];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 240,
+        "y": 160,
+        "wires": [
+            [
+                "d2d1a4d625b88bec"
+            ]
+        ]
+    },
+    {
+        "id": "d2d1a4d625b88bec",
+        "type": "mongodb in",
+        "z": "tab_poc",
+        "mongodb": "3cfdbcebb776dcac",
+        "name": "get visite",
+        "collection": "visites",
+        "operation": "aggregate",
+        "x": 420,
+        "y": 160,
+        "wires": [
+            [
+                "f226cde86fadcb14"
+            ]
+        ]
+    },
+    {
+        "id": "f226cde86fadcb14",
+        "type": "function",
+        "z": "tab_poc",
+        "name": "function 2",
+        "func": "const visite = msg.payload[0];\n\nif (!visite) {\n    msg.payload = \"Aucune visite trouvée\";\n    return msg;\n}\n\nconst commandes = visite.commandes || [];\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Table ${visite.tableNumero}</title>\n\n<style>\n  body { \n    font-family: sans-serif; \n    background: #f4f4f4; \n    margin: 0; \n    padding: 20px; \n  }\n\n  .card { \n    background: white; \n    border-radius: 12px; \n    padding: 20px; \n    max-width: 400px; \n    margin: 0 auto; \n    box-shadow: 0 2px 8px rgba(0,0,0,0.1); \n  }\n\n  h1 { \n    font-size: 1.4em; \n    color: #333; \n  }\n\n  .info {\n    color: #555;\n  }\n\n  .commande {\n    border-top: 1px solid #ddd;\n    margin-top: 15px;\n    padding-top: 10px;\n  }\n\n  .statut { \n    display: inline-block; \n    padding: 4px 12px; \n    border-radius: 20px; \n    background: #ffedcc; \n    color: #a05a00; \n    font-weight: bold; \n  }\n\n  ul { \n    padding-left: 20px; \n  }\n</style>\n\n</head>\n\n<body>\n\n<div class=\"card\">\n\n<h1>Table ${visite.tableNumero}</h1>\n\n<p class=\"info\">\nArrivée : ${new Date(visite.dateArrivee).toLocaleString(\"fr-FR\")}\n</p>\n\n<p class=\"info\">\nTotal : ${visite.montantTotalVisite} €\n</p>\n\n\n<h2>Commandes</h2>\n\n${commandes.length === 0 ? \n    \"<p>Aucune commande</p>\" \n    :\n    commandes.map(cmd => `\n        <div class=\"commande\">\n            <p>\n                Statut :\n                <span class=\"statut\">\n                    ${cmd.statut || \"En attente\"}\n                </span>\n            </p>\n\n            <ul>\n                ${(cmd.articles || []).map(article => \n                    `<li>${article}</li>`\n                ).join('')}\n            </ul>\n        </div>\n    `).join('')\n}\n\n</div>\n\n</body>\n</html>\n`;\n\nmsg.payload = html;\nmsg.headers = {\n    'Content-Type': 'text/html; charset=utf-8'\n};\nmsg.statusCode = 200;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 140,
+        "wires": [
+            [
+                "http_response_ok",
+                "http_response_error"
+            ]
+        ]
+    },
+    {
+        "id": "3cfdbcebb776dcac",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": "27017",
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "5ef3922c7b227fa0",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mongodb": "0.2.5"
+        }
+    }
+]
