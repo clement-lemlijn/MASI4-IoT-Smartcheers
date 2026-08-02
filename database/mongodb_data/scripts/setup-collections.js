@@ -144,10 +144,11 @@ db.createCollection("visites", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["badgeId", "clientId", "tableNumero", "dateArrivee", "statut"],
+      required: ["badgeId", "clientId", "token", "tableNumero", "dateArrivee", "statut"],
       properties: {
         badgeId: { bsonType: "string", description: "quel badge physique a été prêté" },
         clientId: { bsonType: "string", description: "quel client a réservé ce badge" },
+        token: { bsonType: "string", description: "pour accès à l'interface" },
         tableNumero: { bsonType: "number" },
         dateArrivee: { bsonType: "date" },
         dateDepart: { bsonType: ["date", "null"] },
@@ -168,6 +169,7 @@ db.createCollection("visites", {
 });
 db.visites.createIndex({ badgeId: 1, statut: 1 });
 db.visites.createIndex({ clientId: 1, statut: 1 });
+db.visites.createIndex({ token: 1, statut: 1 });
 db.visites.createIndex({ tableNumero: 1, statut: 1 });
 
 // ------------------------------------------------------------
