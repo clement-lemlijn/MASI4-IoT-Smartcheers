@@ -180,7 +180,7 @@ db.menu.insertMany([
     description: "Boisson gazeuse au cola servie fraîche",
     categorie: "Boisson",
     prix: 2.50,
-    imageUrl: "https://placehold.co/120x120?text=Coca",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_coca.png",
     disponible: true
   },
   {
@@ -188,7 +188,7 @@ db.menu.insertMany([
     description: "Boisson gazeuse à l'orange servie fraîche",
     categorie: "Boisson",
     prix: 2.50,
-    imageUrl: "https://placehold.co/120x120?text=Fanta",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_fanta.png",
     disponible: true
   },
   {
@@ -196,7 +196,7 @@ db.menu.insertMany([
     description: "Boisson gazeuse citron-lime servie fraîche",
     categorie: "Boisson",
     prix: 2.50,
-    imageUrl: "https://placehold.co/120x120?text=Sprite",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_sprite.png",
     disponible: true
   },
   {
@@ -204,15 +204,15 @@ db.menu.insertMany([
     description: "Bière belge blonde, 5.2%",
     categorie: "Boisson",
     prix: 4.50,
-    imageUrl: "https://placehold.co/120x120?text=Jupiler",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_jupiler.png",
     disponible: true
   },
   {
     nom: "Chips",
-    description: "Sachet de chips croustillantes",
+    description: "Plat de chips croustillantes",
     categorie: "Snack",
     prix: 2.00,
-    imageUrl: "https://placehold.co/120x120?text=Chips",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_chips.png",
     disponible: true
   },
   {
@@ -220,7 +220,7 @@ db.menu.insertMany([
     description: "Tranches de saucisson sec à partager",
     categorie: "Snack",
     prix: 3.50,
-    imageUrl: "https://placehold.co/120x120?text=Saucisson",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_saucisson.png",
     disponible: true
   },
   {
@@ -228,7 +228,7 @@ db.menu.insertMany([
     description: "Morceaux de pizza à partager pour l'apéritif",
     categorie: "Snack",
     prix: 5.00,
-    imageUrl: "https://placehold.co/120x120?text=Pizza",
+    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_pizza.png",
     disponible: true
   }
 ]);
