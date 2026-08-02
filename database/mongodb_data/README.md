@@ -87,3 +87,8 @@ erDiagram
         datetime date
     }
 ```
+
+
+db.getCollectionInfos({ name: "visites" })
+
+
