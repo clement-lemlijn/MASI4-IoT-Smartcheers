@@ -1,0 +1,342 @@
+[
+    {
+        "id": "37ad7ff4acb2cba6",
+        "type": "tab",
+        "label": "Chkout visit",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "e0609c249df211e6",
+        "type": "ui_dropdown",
+        "z": "37ad7ff4acb2cba6",
+        "name": "",
+        "label": "",
+        "tooltip": "",
+        "place": "Select visit to checkout",
+        "group": "7aa864ad2d36d4fc",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 1020,
+        "y": 520,
+        "wires": [
+            [
+                "8af7b92892672361",
+                "f99ad556583eb3cd"
+            ]
+        ]
+    },
+    {
+        "id": "c13478cbefbf2056",
+        "type": "inject",
+        "z": "37ad7ff4acb2cba6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 310,
+        "y": 400,
+        "wires": [
+            [
+                "5350f2a3584703a3"
+            ]
+        ]
+    },
+    {
+        "id": "5350f2a3584703a3",
+        "type": "function",
+        "z": "37ad7ff4acb2cba6",
+        "name": "select ouvertes",
+        "func": "msg.payload = [\n    {\n        $match: {\n            statut: \"ouverte\"\n        }\n    },\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 460,
+        "wires": [
+            [
+                "0f0afcf7dbc53dd1"
+            ]
+        ]
+    },
+    {
+        "id": "0f0afcf7dbc53dd1",
+        "type": "mongodb in",
+        "z": "37ad7ff4acb2cba6",
+        "mongodb": "783a5e3707db0d32",
+        "name": "get visit",
+        "collection": "visites",
+        "operation": "aggregate",
+        "x": 740,
+        "y": 460,
+        "wires": [
+            [
+                "7d0e550baa91f567"
+            ]
+        ]
+    },
+    {
+        "id": "b0efb213d4162538",
+        "type": "ui_button",
+        "z": "37ad7ff4acb2cba6",
+        "name": "",
+        "group": "7aa864ad2d36d4fc",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "refresh",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 300,
+        "y": 340,
+        "wires": [
+            [
+                "5350f2a3584703a3"
+            ]
+        ]
+    },
+    {
+        "id": "7d0e550baa91f567",
+        "type": "function",
+        "z": "37ad7ff4acb2cba6",
+        "name": "function 2",
+        "func": "msg.payload = msg.payload.map(visite => {\n\n    const date = new Date(visite.dateArrivee)\n        .toLocaleString(\"fr-BE\", {\n            hour: \"2-digit\",\n            minute: \"2-digit\"\n        });\n\n    visite.affichage =\n        `${date} - Table ${visite.tableNumero} - ${visite.statut}`;\n\n    return visite;\n\n});\n\nmsg.options = msg.payload.map(visite => {\n    return { [visite.affichage]: visite };\n});\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 540,
+        "wires": [
+            [
+                "e0609c249df211e6"
+            ]
+        ]
+    },
+    {
+        "id": "8cd6fba682763bf8",
+        "type": "ui_button",
+        "z": "37ad7ff4acb2cba6",
+        "name": "",
+        "group": "7aa864ad2d36d4fc",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Checkout",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "visiteId",
+        "payloadType": "flow",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1240,
+        "y": 500,
+        "wires": [
+            [
+                "027e921d07cf83b7",
+                "70d3641fbf7b5335",
+                "9eca2fabf642ec03",
+                "b0efb213d4162538"
+            ]
+        ]
+    },
+    {
+        "id": "8af7b92892672361",
+        "type": "function",
+        "z": "37ad7ff4acb2cba6",
+        "name": "function 4",
+        "func": "flow.set(\"visiteId\", msg.payload._id)\nflow.set(\"tableNumero\", msg.payload.tableNumero)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 600,
+        "wires": [
+            [
+                "8cd6fba682763bf8"
+            ]
+        ]
+    },
+    {
+        "id": "8dae0192d66e8f51",
+        "type": "mongodb out",
+        "z": "37ad7ff4acb2cba6",
+        "mongodb": "783a5e3707db0d32",
+        "name": "",
+        "collection": "visites",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 1430,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "027e921d07cf83b7",
+        "type": "function",
+        "z": "37ad7ff4acb2cba6",
+        "name": "function 5",
+        "func": "const visiteId = flow.get(\"visiteId\");\n\nnode.warn(\"set \" + visiteId + \" to fermee\");\n\nmsg.query = {\n    _id: visiteId\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"fermee\"\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1340,
+        "y": 660,
+        "wires": [
+            [
+                "8dae0192d66e8f51"
+            ]
+        ]
+    },
+    {
+        "id": "f99ad556583eb3cd",
+        "type": "debug",
+        "z": "37ad7ff4acb2cba6",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1160,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "70d3641fbf7b5335",
+        "type": "function",
+        "z": "37ad7ff4acb2cba6",
+        "name": "function 6",
+        "func": "var tableNumero = flow.get(\"tableNumero\");\n\nnode.warn(\"set \" + tableNumero + \" to libre\");\n\nmsg.query = {\n    numero: tableNumero\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"libre\"\n    }\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1000,
+        "y": 840,
+        "wires": [
+            [
+                "647097bcb814af8d"
+            ]
+        ]
+    },
+    {
+        "id": "647097bcb814af8d",
+        "type": "mongodb out",
+        "z": "37ad7ff4acb2cba6",
+        "mongodb": "783a5e3707db0d32",
+        "name": "",
+        "collection": "tables",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "update",
+        "x": 1330,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "9eca2fabf642ec03",
+        "type": "debug",
+        "z": "37ad7ff4acb2cba6",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1380,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "7aa864ad2d36d4fc",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "073a662ce27912e4",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "783a5e3707db0d32",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": 27017,
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "073a662ce27912e4",
+        "type": "ui_tab",
+        "name": "Chkout visit",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "91ddcd16c45027e3",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-node-mongodb": "0.2.5"
+        }
+    }
+]
