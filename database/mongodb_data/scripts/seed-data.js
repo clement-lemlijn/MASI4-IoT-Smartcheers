@@ -168,6 +168,72 @@ db.commandes.insertOne({
   lignes: lignes
 });
 
+
+// ------------------------------------------------------------
+// MENU (affichage client, avec image)
+// Les URLs d'images sont des placeholders de demo (placehold.co) :
+// remplace-les par tes vraies photos une fois disponibles.
+// ------------------------------------------------------------
+db.menu.insertMany([
+  {
+    nom: "Coca-Cola 33cl",
+    description: "Boisson gazeuse au cola servie fraîche",
+    categorie: "Boisson",
+    prix: 2.50,
+    imageUrl: "https://placehold.co/120x120?text=Coca",
+    disponible: true
+  },
+  {
+    nom: "Fanta Orange 33cl",
+    description: "Boisson gazeuse à l'orange servie fraîche",
+    categorie: "Boisson",
+    prix: 2.50,
+    imageUrl: "https://placehold.co/120x120?text=Fanta",
+    disponible: true
+  },
+  {
+    nom: "Sprite 33cl",
+    description: "Boisson gazeuse citron-lime servie fraîche",
+    categorie: "Boisson",
+    prix: 2.50,
+    imageUrl: "https://placehold.co/120x120?text=Sprite",
+    disponible: true
+  },
+  {
+    nom: "Bière Jupiler 33cl",
+    description: "Bière belge blonde, 5.2%",
+    categorie: "Boisson",
+    prix: 4.50,
+    imageUrl: "https://placehold.co/120x120?text=Jupiler",
+    disponible: true
+  },
+  {
+    nom: "Chips",
+    description: "Sachet de chips croustillantes",
+    categorie: "Snack",
+    prix: 2.00,
+    imageUrl: "https://placehold.co/120x120?text=Chips",
+    disponible: true
+  },
+  {
+    nom: "Saucisson",
+    description: "Tranches de saucisson sec à partager",
+    categorie: "Snack",
+    prix: 3.50,
+    imageUrl: "https://placehold.co/120x120?text=Saucisson",
+    disponible: true
+  },
+  {
+    nom: "Pizza apéritive",
+    description: "Morceaux de pizza à partager pour l'apéritif",
+    categorie: "Snack",
+    prix: 5.00,
+    imageUrl: "https://placehold.co/120x120?text=Pizza",
+    disponible: true
+  }
+]);
+
+
 print(">> Données de seed insérées avec succès.");
 print(">> Badge attribué : " + badgeAttribue.badgeUid);
 print(">> Visite créée   : " + visiteId);
