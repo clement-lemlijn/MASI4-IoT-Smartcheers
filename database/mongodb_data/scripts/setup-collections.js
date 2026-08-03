@@ -103,10 +103,11 @@ db.createCollection("produits", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["nom", "categorieId", "prix", "disponible", "stock"],
+      required: ["nom", "categorieId", "produitId", "prix", "disponible", "stock"],
       properties: {
         nom: { bsonType: "string" },
         categorieId: { bsonType: "string" },
+        produitId: { bsonType: "string" },
         prix: { bsonType: "number" },
         tauxTVA: { bsonType: "number" },
         stock: { bsonType: "int" },

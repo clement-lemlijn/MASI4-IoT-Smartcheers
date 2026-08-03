@@ -178,6 +178,7 @@ db.menu.insertMany([
   {
     nom: "Coca-Cola 33cl",
     description: "Boisson gazeuse au cola servie fraîche",
+    produitId: "a2138356-7baf-4142-b468-02b7fbca4253",
     categorie: "Boisson",
     prix: 2.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_coca.png",
@@ -186,6 +187,7 @@ db.menu.insertMany([
   {
     nom: "Fanta Orange 33cl",
     description: "Boisson gazeuse à l'orange servie fraîche",
+    produitId: "9e16479d-5211-4270-912b-9b590c8180df",
     categorie: "Boisson",
     prix: 2.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_fanta.png",
@@ -194,6 +196,7 @@ db.menu.insertMany([
   {
     nom: "Sprite 33cl",
     description: "Boisson gazeuse citron-lime servie fraîche",
+    produitId: "11a8568f-966b-4466-a51b-198edc020a68",
     categorie: "Boisson",
     prix: 2.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_sprite.png",
@@ -202,6 +205,7 @@ db.menu.insertMany([
   {
     nom: "Bière Jupiler 33cl",
     description: "Bière belge blonde, 5.2%",
+    produitId: "d0b5af66-994e-40b9-8ca7-7904b9c395b4",
     categorie: "Boisson",
     prix: 4.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_jupiler.png",
@@ -210,6 +214,7 @@ db.menu.insertMany([
   {
     nom: "Chips",
     description: "Plat de chips croustillantes",
+    produitId: "e24a1365-c421-46a3-960f-462a14580008",
     categorie: "Snack",
     prix: 2.00,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_chips.png",
@@ -218,6 +223,7 @@ db.menu.insertMany([
   {
     nom: "Saucisson",
     description: "Tranches de saucisson sec à partager",
+    produitId: "dfde3f18-9679-44d6-9335-c283fb92bd95",
     categorie: "Snack",
     prix: 3.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_saucisson.png",
@@ -226,6 +232,7 @@ db.menu.insertMany([
   {
     nom: "Pizza apéritive",
     description: "Morceaux de pizza à partager pour l'apéritif",
+    produitId: "35ba79f7-e6a9-4dbf-9e28-0492b249b44e",
     categorie: "Snack",
     prix: 5.00,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_pizza.png",
