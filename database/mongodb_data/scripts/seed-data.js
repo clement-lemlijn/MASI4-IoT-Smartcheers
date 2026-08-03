@@ -10,6 +10,24 @@ db = db.getSiblingDB("smartpub_db");
 const { randomUUID } = require("crypto");
 
 // ------------------------------------------------------------
+// RPIS
+// Parc des Raspberry Pi utilisés comme bornes de commande
+// ------------------------------------------------------------
+
+const raspberrypi = [
+  {
+    _id: randomUUID(),
+    rpiId: "rpi-002",
+    nom: "Borne Table 2",
+    emplacement: "Table 2",
+    statut: "actif",
+    derniereConnexion: null
+  },
+];
+
+db.raspberrypi.insertMany(rpis);
+
+// ------------------------------------------------------------
 // BADGES (parc limité, réutilisable, indépendant des clients)
 // ------------------------------------------------------------
 const badges = [
