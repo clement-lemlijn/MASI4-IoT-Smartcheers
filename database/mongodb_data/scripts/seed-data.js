@@ -27,14 +27,17 @@ const raspberrypis = [
 
 db.raspberrypi.insertMany(raspberrypis);
 
+const rpi2 = db.raspberrypi.findOne({ rpiId: "rpi-002" });
+const rpi2Id = rpi2._id;
+
 // ------------------------------------------------------------
 // BADGES (parc limité, réutilisable, indépendant des clients)
 // ------------------------------------------------------------
 const badges = [
   { _id: randomUUID(), badgeUid: "1800723C5701", comment: "Badge Jaunee", statut: "disponible" },
   { _id: randomUUID(), badgeUid: "3500EB273EC7", comment: "Badge Bleu", statut: "disponible" },
-  { _id: randomUUID(), badgeUid: "0200AC091FB8", comment: "Badge Rouge", statut: "disponible" },
-  { _id: randomUUID(), badgeUid: "27004228D09D", comment: "Carte RFID", statut: "hors_service" }
+  { _id: randomUUID(), badgeUid: "0200AC091FB8", comment: "Badge Rouge", statut: "hors_service" },
+  { _id: randomUUID(), badgeUid: "27004228D09D", comment: "Carte RFID", statut: "disponible" }
 ];
 db.badges.insertMany(badges);
 
@@ -64,8 +67,8 @@ const clientDupont = db.clients.findOne({ nom: "Dupont" });
 // TABLES
 // ------------------------------------------------------------
 db.tables.insertMany([
-  { numero: 1, capacite: 4, zone: "salle", statut: "occupee" },
-  { numero: 2, capacite: 6, zone: "terrasse", statut: "libre" },
+  { numero: 1, capacite: 4, zone: "salle", statut: "libre" },
+  { numero: 2, capacite: 6, rpiId: rpi2Id, zone: "terrasse", statut: "libre" },
   { numero: 3, capacite: 2, zone: "bar", statut: "libre" },
   { numero: 4, capacite: 8, zone: "vip", statut: "libre" }
 ]);
@@ -105,7 +108,7 @@ db.employes.insertMany([
 //  on lui prête un badge disponible pour la durée de sa présence)
 // ------------------------------------------------------------
 const badgeAttribue = db.badges.findOne({
-  badgeUid: "1800723C5701",
+  badgeUid: "27004228D09D",
   statut: "disponible"
 });
 if (!badgeAttribue) {
@@ -121,13 +124,15 @@ db.visites.insertOne({
   badgeId: badgeAttribue._id,
   clientId: clientDupont._id,
   token: "d3775d49",   // <-------------------------------------------------- static token for now 
-  tableNumero: 1,
+  tableNumero: 2,
   dateArrivee: new Date(),
   dateDepart: null,
   statut: "ouverte",
   montantTotalVisite: 0.00,
   paiement: null
 }).insertedId;
+
+db.tables.updateOne({ numero: 2 }, { $set: { statut: "occupee" } });
 
 // ------------------------------------------------------------
 // COMMANDE d'exemple : le RPI envoie le badgeUid scanné,
@@ -139,7 +144,7 @@ function getProduit(nom) {
 }
 
 const payloadRPI = {
-  badgeUid: "1800723C5701", // <-- champ physiquement scanné par le RPI
+  badgeUid: "27004228D09D", // <-- champ physiquement scanné par le RPI
   command: [
     { produit: "Coca", quantite: 1 },
     { produit: "Fanta", quantite: 1 },

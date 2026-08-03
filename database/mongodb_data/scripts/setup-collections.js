@@ -129,6 +129,7 @@ db.createCollection("tables", {
       properties: {
         numero: { bsonType: "int" },
         capacite: { bsonType: "int" },
+        rpiId: { bsonType: "string" }, // ------------------------------------------------------- rpidId => not mandatory
         zone: { enum: ["terrasse", "salle", "bar", "vip"] },
         statut: { enum: ["libre", "occupee", "reservee", "hors_service"] }
       }
