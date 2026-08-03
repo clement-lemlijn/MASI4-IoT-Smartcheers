@@ -31,6 +31,22 @@ sudo docker exec -it mosquitto mosquitto_sub -t "smartcheers/orders/new" -u clem
 ### Pub 
 ```
 sudo docker exec -it mosquitto mosquitto_pub -t "test" -m "Test de connexion" -u clement-lemlijn -P mqtt-pwd
+
+sudo docker exec -it mosquitto mosquitto_pub   -t "smartcheers/orders/new"   -m '{
+    "rpiId":"rpi-002",
+    "badgeUid":"0200AC091FB8",
+    "command":[
+      {
+        "produitId":"e24a1365-c421-46a3-960f-462a14580008",
+        "quantite":2
+      },
+      {
+        "produitId":"35ba79f7-e6a9-4dbf-9e28-0492b249b44e",
+        "quantite":1
+      }
+    ]
+  }'   -u clement-lemlijn   -P mqtt-pwd
+
 ```
 
 ### QoS 2 : 
