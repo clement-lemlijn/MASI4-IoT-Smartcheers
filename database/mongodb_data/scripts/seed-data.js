@@ -67,7 +67,7 @@ const clientDupont = db.clients.findOne({ nom: "Dupont" });
 // TABLES
 // ------------------------------------------------------------
 db.tables.insertMany([
-  { numero: 1, capacite: 4, zone: "salle", statut: "occupee" },
+  { numero: 1, capacite: 4, zone: "salle", statut: "libre" },
   { numero: 2, capacite: 6, rpiId: rpi2Id, zone: "terrasse", statut: "libre" },
   { numero: 3, capacite: 2, zone: "bar", statut: "libre" },
   { numero: 4, capacite: 8, zone: "vip", statut: "libre" }
@@ -131,6 +131,8 @@ db.visites.insertOne({
   montantTotalVisite: 0.00,
   paiement: null
 }).insertedId;
+
+db.tables.updateOne({ numero: tableNumero }, { $set: { statut: "occupee" } });
 
 // ------------------------------------------------------------
 // COMMANDE d'exemple : le RPI envoie le badgeUid scanné,
