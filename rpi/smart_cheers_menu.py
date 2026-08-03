@@ -129,9 +129,13 @@ init_lcd()
 #     suffix = f"x{qty}" if qty > 0 else ""
 #     espace = 14 - len(txt) - len(suffix)
 #     return f"{txt}{' '*espace}{suffix}"
-def format_item(product, panier):
-    product_id = product["id"]
-    label = product["label"]
+def format_item(item, panier):
+    # Menu principal
+    if isinstance(item, str):
+        return item
+    # Produit
+    product_id = item["id"]
+    label = item["label"]
     qty = panier.get(product_id, 0)
     suffix = f"x{qty}" if qty > 0 else ""
     espace = 14 - len(label) - len(suffix)
@@ -150,7 +154,7 @@ def display_panier(panier):
         return
     lignes = []
     ligne = ""
-    for produit, quantite in panier.items():
+    for produit_id, quantite in panier.items():
         # abr = f"{produit[0]}:{quantite}"  # Ex: 'C:2' pour Coca 2
         produit = next(
             p for p in PRODUCTS
@@ -208,21 +212,9 @@ def wait_for_rfid_deliver():
                 if badge_id:
                     print("📟 Badge détecté :", badge_id)
                     # Afficher livraison et revenir à l'accueil
-                    # payload = json.dumps({
-                    #     "clientUid": client_id,
-                    #     "employeeUid": badge_id
-                    # })
                     payload = json.dumps({
-                        "rpiId": RPI_ID,
-                        "badgeUid": client_id,
-                        "command": [
-                            {
-                                "produitId": produit_id,
-                                "quantite": quantite
-                            }
-                            for produit_id, quantite
-                            in panier.items()
-                        ]
+                        "clientUid": client_id,
+                        "employeeUid": badge_id
                     })
                     mqtt_publish(payload, DELIVER_ORDER_TOPIC)
                     safe_setRGB(0, 128, 255)
@@ -307,11 +299,21 @@ try:
                                 x_c, y_c, sw_c = read_joystick()
                                 # Bouton validation = confirmer
                                 if sw_c == 0:
+                                    # payload = json.dumps({
+                                    #     "clientUid": client_id,
+                                    #     "command": [{"produit": k, "quantite": v} for k, v in panier.items()]
+                                    # })
                                     payload = json.dumps({
-                                        "clientUid": client_id,
-                                        "command": [{"produit": k, "quantite": v} for k, v in panier.items()]
+                                        "rpiId": RPI_ID,
+                                        "badgeUid": client_id,
+                                        "command": [
+                                            {
+                                                "produitId": produit_id,
+                                                "quantite": quantite
+                                            }
+                                            for produit_id, quantite in panier.items()
+                                        ]
                                     })
-
                                     success = mqtt_publish(payload, CREATE_ORDER_TOPIC)
 
                                     if success:
