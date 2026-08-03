@@ -10,10 +10,67 @@ print(`>> Initialisation de la base ${dbName}`);
 // ------------------------------------------------------------
 // Nettoyage (optionnel, pratique en dev)
 // ------------------------------------------------------------
-["badges", "clients", "tables", "categories_produits", "produits", "employes",
- "visites", "commandes", "transactions_credit"].forEach(c => {
+["raspberrypis", "badges", "clients", "tables", "categories_produits", "produits", "employes",
+ "visites", "commandes", "transactions_credit", "menu"].forEach(c => {
   db[c].drop();
 });
+
+// ------------------------------------------------------------
+// RPIS
+// Terminaux physiques de commande.
+// Chaque Raspberry possède un identifiant unique.
+// Le RPI communique cet ID avec chaque commande.
+// ------------------------------------------------------------
+
+db.createCollection("raspberrypis", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: [
+        "rpiId",
+        "nom",
+        "statut"
+      ],
+      properties: {
+
+        rpiId: {
+          bsonType: "string",
+          description: "Identifiant unique du Raspberry Pi"
+        },
+
+        nom: {
+          bsonType: "string",
+          description: "Nom lisible du terminal"
+        },
+
+        emplacement: {
+          bsonType: "string",
+          description: "Emplacement physique du RPI"
+        },
+
+        statut: {
+          enum: [
+            "actif",
+            "maintenance",
+            "hors_service"
+          ]
+        },
+
+        derniereConnexion: {
+          bsonType: [
+            "date",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+});
+
+db.raspberrypis.createIndex(
+  { rpiId: 1 },
+  { unique: true }
+);
 
 // ------------------------------------------------------------
 // BADGES
