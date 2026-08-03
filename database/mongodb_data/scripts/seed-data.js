@@ -36,8 +36,8 @@ const rpi2Id = rpi2._id;
 const badges = [
   { _id: randomUUID(), badgeUid: "1800723C5701", comment: "Badge Jaunee", statut: "disponible" },
   { _id: randomUUID(), badgeUid: "3500EB273EC7", comment: "Badge Bleu", statut: "disponible" },
-  { _id: randomUUID(), badgeUid: "0200AC091FB8", comment: "Badge Rouge", statut: "disponible" },
-  { _id: randomUUID(), badgeUid: "27004228D09D", comment: "Carte RFID", statut: "hors_service" }
+  { _id: randomUUID(), badgeUid: "0200AC091FB8", comment: "Badge Rouge", statut: "hors_service" },
+  { _id: randomUUID(), badgeUid: "27004228D09D", comment: "Carte RFID", statut: "disponible" }
 ];
 db.badges.insertMany(badges);
 
