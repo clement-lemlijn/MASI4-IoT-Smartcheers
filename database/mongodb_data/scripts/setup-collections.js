@@ -125,11 +125,11 @@ db.createCollection("tables", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["numero", "capacite", "rpiId", "zone", "statut"],
+      required: ["numero", "capacite", "zone", "statut"],
       properties: {
         numero: { bsonType: "int" },
         capacite: { bsonType: "int" },
-        rpiId: { bsonType: "string" },
+        rpiId: { bsonType: "string" }, // ------------------------------------------------------- rpidId => not mandatory
         zone: { enum: ["terrasse", "salle", "bar", "vip"] },
         statut: { enum: ["libre", "occupee", "reservee", "hors_service"] }
       }
