@@ -192,7 +192,7 @@ db.commandes.insertOne({
 // Les URLs d'images sont des placeholders de demo (placehold.co) :
 // remplace-les par tes vraies photos une fois disponibles.
 // ------------------------------------------------------------
-db.menu.insertMany([
+db.produits.insertMany([
   {
     nom: "Coca-Cola 33cl",
     description: "Boisson gazeuse au cola servie fraîche",
