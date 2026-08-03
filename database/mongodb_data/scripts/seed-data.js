@@ -81,13 +81,13 @@ const catPlatId = randomUUID();
     db.categories_produits.insertOne({ _id: catPlatId, nom: "Plat", poste: "cuisine" });
 
 db.produits.insertMany([
-  { _id: randomUUID(), nom: "Coca", categorieId: catBoissonId, prix: 2.50, tauxTVA: 0.21, stock: 120, seuilAlerteStock: 20, unite: "canette", disponible: true },
-  { _id: randomUUID(), nom: "Fanta", categorieId: catBoissonId, prix: 2.50, tauxTVA: 0.21, stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
-  { _id: randomUUID(), nom: "Sprite", categorieId: catBoissonId, prix: 2.50, tauxTVA: 0.21, stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
-  { _id: randomUUID(), nom: "Biere", categorieId: catBoissonId, prix: 3.00, tauxTVA: 0.21, stock: 200, seuilAlerteStock: 40, unite: "bouteille", disponible: true },
-  { _id: randomUUID(), nom: "Chips", categorieId: catSnackId, prix: 2.00, tauxTVA: 0.06, stock: 50, seuilAlerteStock: 10, unite: "sachet", disponible: true },
-  { _id: randomUUID(), nom: "Saucisson", categorieId: catSnackId, prix: 4.50, tauxTVA: 0.06, stock: 30, seuilAlerteStock: 5, unite: "planche", disponible: true },
-  { _id: randomUUID(), nom: "Pizza", categorieId: catPlatId, prix: 8.00, tauxTVA: 0.06, stock: 25, seuilAlerteStock: 5, unite: "piece", disponible: true }
+  { _id: randomUUID(), nom: "Coca", categorieId: catBoissonId, produitId: "a2138356-7baf-4142-b468-02b7fbca4253", prix: 2.50, tauxTVA: 0.21, stock: 120, seuilAlerteStock: 20, unite: "canette", disponible: true },
+  { _id: randomUUID(), nom: "Fanta", categorieId: catBoissonId, produitId: "9e16479d-5211-4270-912b-9b590c8180df", prix: 2.50, tauxTVA: 0.21, stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
+  { _id: randomUUID(), nom: "Sprite", categorieId: catBoissonId, produitId: "11a8568f-966b-4466-a51b-198edc020a68", prix: 2.50, tauxTVA: 0.21, stock: 100, seuilAlerteStock: 20, unite: "canette", disponible: true },
+  { _id: randomUUID(), nom: "Biere", categorieId: catBoissonId, produitId: "d0b5af66-994e-40b9-8ca7-7904b9c395b4", prix: 3.00, tauxTVA: 0.21, stock: 200, seuilAlerteStock: 40, unite: "bouteille", disponible: true },
+  { _id: randomUUID(), nom: "Chips", categorieId: catSnackId, produitId: "e24a1365-c421-46a3-960f-462a14580008", prix: 2.00, tauxTVA: 0.06, stock: 50, seuilAlerteStock: 10, unite: "sachet", disponible: true },
+  { _id: randomUUID(), nom: "Saucisson", categorieId: catSnackId, produitId: "dfde3f18-9679-44d6-9335-c283fb92bd95", prix: 4.50, tauxTVA: 0.06, stock: 30, seuilAlerteStock: 5, unite: "planche", disponible: true },
+  { _id: randomUUID(), nom: "Pizza", categorieId: catPlatId, produitId: "35ba79f7-e6a9-4dbf-9e28-0492b249b44e", prix: 8.00, tauxTVA: 0.06, stock: 25, seuilAlerteStock: 5, unite: "piece", disponible: true }
 ]);
 
 // ------------------------------------------------------------
@@ -186,17 +186,15 @@ db.commandes.insertOne({
   lignes: lignes
 });
 
-
 // ------------------------------------------------------------
 // MENU (affichage client, avec image)
 // Les URLs d'images sont des placeholders de demo (placehold.co) :
 // remplace-les par tes vraies photos une fois disponibles.
 // ------------------------------------------------------------
-db.produits.insertMany([
+db.menu.insertMany([
   {
     nom: "Coca-Cola 33cl",
     description: "Boisson gazeuse au cola servie fraîche",
-    produitId: "a2138356-7baf-4142-b468-02b7fbca4253",
     categorie: "Boisson",
     prix: 2.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_coca.png",
@@ -205,7 +203,6 @@ db.produits.insertMany([
   {
     nom: "Fanta Orange 33cl",
     description: "Boisson gazeuse à l'orange servie fraîche",
-    produitId: "9e16479d-5211-4270-912b-9b590c8180df",
     categorie: "Boisson",
     prix: 2.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_fanta.png",
@@ -214,7 +211,6 @@ db.produits.insertMany([
   {
     nom: "Sprite 33cl",
     description: "Boisson gazeuse citron-lime servie fraîche",
-    produitId: "11a8568f-966b-4466-a51b-198edc020a68",
     categorie: "Boisson",
     prix: 2.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_sprite.png",
@@ -223,7 +219,6 @@ db.produits.insertMany([
   {
     nom: "Bière Jupiler 33cl",
     description: "Bière belge blonde, 5.2%",
-    produitId: "d0b5af66-994e-40b9-8ca7-7904b9c395b4",
     categorie: "Boisson",
     prix: 4.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_jupiler.png",
@@ -232,7 +227,6 @@ db.produits.insertMany([
   {
     nom: "Chips",
     description: "Plat de chips croustillantes",
-    produitId: "e24a1365-c421-46a3-960f-462a14580008",
     categorie: "Snack",
     prix: 2.00,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_chips.png",
@@ -241,7 +235,6 @@ db.produits.insertMany([
   {
     nom: "Saucisson",
     description: "Tranches de saucisson sec à partager",
-    produitId: "dfde3f18-9679-44d6-9335-c283fb92bd95",
     categorie: "Snack",
     prix: 3.50,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_saucisson.png",
@@ -250,7 +243,6 @@ db.produits.insertMany([
   {
     nom: "Pizza apéritive",
     description: "Morceaux de pizza à partager pour l'apéritif",
-    produitId: "35ba79f7-e6a9-4dbf-9e28-0492b249b44e",
     categorie: "Snack",
     prix: 5.00,
     imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_pizza.png",
