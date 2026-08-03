@@ -16,8 +16,8 @@ RFID_BAUDRATE = 9600
 RPI_ID = "rpi-002"
 # broker_ip = "mqtt.smartcheers.local"
 # broker_port = 8883
-CREATE_ORDER_TOPIC = "smartcheers/order/new"
-DELIVER_ORDER_TOPIC = "smartcheers/order/deliver"
+CREATE_ORDER_TOPIC = "smartcheers/orders/new"
+DELIVER_ORDER_TOPIC = "smartcheers/orders/deliver"
 # MQTT_USERNAME = 'rpi-001'
 # MQTT_PASSWORD = '29!pSubG'
 
