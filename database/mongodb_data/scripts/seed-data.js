@@ -108,7 +108,7 @@ db.employes.insertMany([
 //  on lui prête un badge disponible pour la durée de sa présence)
 // ------------------------------------------------------------
 const badgeAttribue = db.badges.findOne({
-  badgeUid: "1800723C5701",
+  badgeUid: "27004228D09D",
   statut: "disponible"
 });
 if (!badgeAttribue) {
