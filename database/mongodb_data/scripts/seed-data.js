@@ -27,6 +27,9 @@ const raspberrypis = [
 
 db.raspberrypi.insertMany(raspberrypis);
 
+const rpi2 = db.raspberrypi.findOne({ rpiId: "rpi-002" });
+const rpi2Id = rpi2._id;
+
 // ------------------------------------------------------------
 // BADGES (parc limité, réutilisable, indépendant des clients)
 // ------------------------------------------------------------
@@ -65,7 +68,7 @@ const clientDupont = db.clients.findOne({ nom: "Dupont" });
 // ------------------------------------------------------------
 db.tables.insertMany([
   { numero: 1, capacite: 4, zone: "salle", statut: "occupee" },
-  { numero: 2, capacite: 6, zone: "terrasse", statut: "libre" },
+  { numero: 2, capacite: 6, rpiId: rpi2Id, zone: "terrasse", statut: "libre" },
   { numero: 3, capacite: 2, zone: "bar", statut: "libre" },
   { numero: 4, capacite: 8, zone: "vip", statut: "libre" }
 ]);
@@ -139,7 +142,7 @@ function getProduit(nom) {
 }
 
 const payloadRPI = {
-  badgeUid: "1800723C5701", // <-- champ physiquement scanné par le RPI
+  badgeUid: "27004228D09D", // <-- champ physiquement scanné par le RPI
   command: [
     { produit: "Coca", quantite: 1 },
     { produit: "Fanta", quantite: 1 },
