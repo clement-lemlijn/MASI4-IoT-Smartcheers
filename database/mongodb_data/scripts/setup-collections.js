@@ -10,7 +10,7 @@ print(`>> Initialisation de la base ${dbName}`);
 // ------------------------------------------------------------
 // Nettoyage (optionnel, pratique en dev)
 // ------------------------------------------------------------
-["raspberrypis", "badges", "clients", "tables", "categories_produits", "produits", "employes",
+["raspberrypi", "badges", "clients", "tables", "categories_produits", "produits", "employes",
  "visites", "commandes", "transactions_credit", "menu"].forEach(c => {
   db[c].drop();
 });
@@ -22,7 +22,7 @@ print(`>> Initialisation de la base ${dbName}`);
 // Le RPI communique cet ID avec chaque commande.
 // ------------------------------------------------------------
 
-db.createCollection("raspberrypis", {
+db.createCollection("raspberrypi", {
   validator: {
     $jsonSchema: {
       bsonType: "object",
@@ -67,7 +67,7 @@ db.createCollection("raspberrypis", {
   }
 });
 
-db.raspberrypis.createIndex(
+db.raspberrypi.createIndex(
   { rpiId: 1 },
   { unique: true }
 );
