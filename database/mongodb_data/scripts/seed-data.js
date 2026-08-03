@@ -14,7 +14,7 @@ const { randomUUID } = require("crypto");
 // Parc des Raspberry Pi utilisés comme bornes de commande
 // ------------------------------------------------------------
 
-const raspberrypi = [
+const raspberrypis = [
   {
     _id: randomUUID(),
     rpiId: "rpi-002",
@@ -25,7 +25,7 @@ const raspberrypi = [
   },
 ];
 
-db.raspberrypi.insertMany(rpis);
+db.raspberrypi.insertMany(raspberrypis);
 
 // ------------------------------------------------------------
 // BADGES (parc limité, réutilisable, indépendant des clients)
