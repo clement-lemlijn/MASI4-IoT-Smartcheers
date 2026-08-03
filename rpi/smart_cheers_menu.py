@@ -13,12 +13,35 @@ RFID_BAUDRATE = 9600
 
 # --- CONFIG MQTT ---
 #broker_ip = "192.168.68.72"
-broker_ip = "mqtt.smartcheers.local"
-broker_port = 8883
+RPI_ID = "rpi-002"
+# broker_ip = "mqtt.smartcheers.local"
+# broker_port = 8883
 CREATE_ORDER_TOPIC = "smartcheers/order/create"
 DELIVER_ORDER_TOPIC = "smartcheers/order/deliver"
-MQTT_USERNAME = 'rpi-001'
-MQTT_PASSWORD = '29!pSubG'
+# MQTT_USERNAME = 'rpi-001'
+# MQTT_PASSWORD = '29!pSubG'
+
+# --- CHARGEMENT CONFIG ---
+with open("config.json", "r") as f:
+    CONFIG = json.load(f)
+
+RPI_ID = CONFIG["rpiId"]
+broker_ip = CONFIG["mqtt"]["broker"]
+broker_port = CONFIG["mqtt"]["port"]
+MQTT_USERNAME = CONFIG["mqtt"]["username"]
+MQTT_PASSWORD = CONFIG["mqtt"]["password"]
+
+# --- CHARGEMENT PRODUITS ---
+with open("products.json", "r") as f:
+    PRODUCTS = json.load(f)
+
+def get_products_by_category(category):
+    return [
+        p for p in PRODUCTS
+        if p["categorie"] == category
+    ]
+DRINKS = get_products_by_category("Boissons")
+SNACKS = get_products_by_category("Snacks")
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code", rc)
@@ -72,8 +95,8 @@ GPIO.setup(SW_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # --- MENUS ---
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer"]
-DRINKS = ["Coca", "Fanta", "Sprite", "Biere"]
-SNACKS = ["Chips", "Saucisson", "Pizza"]
+# DRINKS = ["Coca", "Fanta", "Sprite", "Biere"]
+# SNACKS = ["Chips", "Saucisson", "Pizza"]
 
 menu_stack = [MAIN_MENU]
 index = 0
@@ -98,14 +121,21 @@ def init_lcd():
 
 init_lcd()
 
-def format_item(item, panier):
-    """Retourne le texte formaté avec la quantité à droite"""
-    qty = panier.get(item, 0)
-    # Espace restant = 16 - longueur nom - longueur xN
-    txt = f"{item}"
+# def format_item(item, panier):
+#     """Retourne le texte formaté avec la quantité à droite"""
+#     qty = panier.get(item, 0)
+#     # Espace restant = 16 - longueur nom - longueur xN
+#     txt = f"{item}"
+#     suffix = f"x{qty}" if qty > 0 else ""
+#     espace = 14 - len(txt) - len(suffix)
+#     return f"{txt}{' '*espace}{suffix}"
+def format_item(product, panier):
+    product_id = product["id"]
+    label = product["label"]
+    qty = panier.get(product_id, 0)
     suffix = f"x{qty}" if qty > 0 else ""
-    espace = 14 - len(txt) - len(suffix)
-    return f"{txt}{' '*espace}{suffix}"
+    espace = 14 - len(label) - len(suffix)
+    return f"{label}{' '*max(espace,1)}{suffix}"
 
 def display_menu(menu, idx, panier):
     """Affiche le menu avec quantité à droite"""
@@ -121,7 +151,13 @@ def display_panier(panier):
     lignes = []
     ligne = ""
     for produit, quantite in panier.items():
-        abr = f"{produit[0]}:{quantite}"  # Ex: 'C:2' pour Coca 2
+        # abr = f"{produit[0]}:{quantite}"  # Ex: 'C:2' pour Coca 2
+        produit = next(
+            p for p in PRODUCTS
+            if p["id"] == produit_id
+        )
+        abr = f"{produit['label'][0]}:{quantite}"
+
         if len(ligne) + len(abr) + 1 <= 16:
             ligne += " " + abr if ligne else abr
         else:
@@ -172,9 +208,21 @@ def wait_for_rfid_deliver():
                 if badge_id:
                     print("📟 Badge détecté :", badge_id)
                     # Afficher livraison et revenir à l'accueil
+                    # payload = json.dumps({
+                    #     "clientUid": client_id,
+                    #     "employeeUid": badge_id
+                    # })
                     payload = json.dumps({
-                        "clientUid": client_id,
-                        "employeeUid": badge_id
+                        "rpiId": RPI_ID,
+                        "badgeUid": client_id,
+                        "command": [
+                            {
+                                "produitId": produit_id,
+                                "quantite": quantite
+                            }
+                            for produit_id, quantite
+                            in panier.items()
+                        ]
                     })
                     mqtt_publish(payload, DELIVER_ORDER_TOPIC)
                     safe_setRGB(0, 128, 255)
@@ -297,8 +345,15 @@ try:
 
                     else:
                         # Ajoute ou incrémente le produit dans le panier
-                        panier[choice] = panier.get(choice, 0) + 1
-                        display_menu(menu_stack[-1], index, panier)
+                        # panier[choice] = panier.get(choice, 0) + 1
+                        # display_menu(menu_stack[-1], index, panier)
+                        produit_id = choice["id"]
+                        panier[produit_id] = panier.get(produit_id, 0) + 1
+                        display_menu(
+                            menu_stack[-1],
+                            index,
+                            panier
+                        )
 
                     time.sleep(0.3)
 

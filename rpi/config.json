@@ -1,0 +1,10 @@
+{
+  "rpiId": "rpi-002",
+  "rpiName": "RaspPi-002",
+  "mqtt": {
+    "broker": "mqtt.smartcheers.local",
+    "port": 8883,
+    "username": "rpi-001",
+    "password": "29!pSubG"
+  }
+}
