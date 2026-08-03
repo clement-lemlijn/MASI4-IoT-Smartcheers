@@ -132,7 +132,7 @@ db.visites.insertOne({
   paiement: null
 }).insertedId;
 
-db.tables.updateOne({ numero: tableNumero }, { $set: { statut: "occupee" } });
+db.tables.updateOne({ numero: 2 }, { $set: { statut: "occupee" } });
 
 // ------------------------------------------------------------
 // COMMANDE d'exemple : le RPI envoie le badgeUid scanné,
