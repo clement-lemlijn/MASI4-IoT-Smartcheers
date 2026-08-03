@@ -124,7 +124,7 @@ db.visites.insertOne({
   badgeId: badgeAttribue._id,
   clientId: clientDupont._id,
   token: "d3775d49",   // <-------------------------------------------------- static token for now 
-  tableNumero: 1,
+  tableNumero: 2,
   dateArrivee: new Date(),
   dateDepart: null,
   statut: "ouverte",
