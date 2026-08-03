@@ -107,6 +107,7 @@ db.createCollection("produits", {
       properties: {
         nom: { bsonType: "string" },
         categorieId: { bsonType: "string" },
+        produitId: { bsonType: "string" },
         prix: { bsonType: "number" },
         tauxTVA: { bsonType: "number" },
         stock: { bsonType: "int" },
