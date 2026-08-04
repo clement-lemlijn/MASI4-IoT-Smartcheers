@@ -2,9 +2,18 @@
 #include <ESP32Servo.h>
 #include <Stepper.h>
 #include <NewPing.h>
+#include <Wire.h>
 #include "HT_SSD1306Wire.h"
 
-SSD1306Wire myOLED(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
+SSD1306Wire myOLED(
+    0x3c,
+    500000,
+    SDA_OLED,
+    SCL_OLED,
+    GEOMETRY_128_64,
+    RST_OLED
+);
+
 Servo monServo;
 
 
@@ -50,14 +59,14 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 
 void updateDisplay(String status, int dist) {
-    myOLED.clear();
-    myOLED.setFont(ArialMT_Plain_16);
-    myOLED.drawString(0, 0, "Train: " + status);
-    myOLED.drawString(0, 20, "Dist: " + String(dist) + " cm");
-    myOLED.setFont(ArialMT_Plain_10);
-    myOLED.drawString(0, 42, "LoRa: " + lastRadioMsg);
-    myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
-    myOLED.display();
+//    myOLED.clear();
+//    myOLED.setFont(ArialMT_Plain_16);
+//    myOLED.drawString(0, 0, "Train: " + status);
+//    myOLED.drawString(0, 20, "Dist: " + String(dist) + " cm");
+//    myOLED.setFont(ArialMT_Plain_10);
+//    myOLED.drawString(0, 42, "LoRa: " + lastRadioMsg);
+//    myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
+//    myOLED.display();
 }
 
 void stopTrain() {
@@ -81,14 +90,14 @@ void startTrain() {
 void IRAM_ATTR onTimer() {
     if (pulseHigh) {
 
-        digitalWrite(21, LOW);
+        digitalWrite(26, LOW);
         pulseHigh = false;
 
         // Attendre le reste des 20ms
         timerAlarm(timer, 20000 - pulseWidth, true, 0);
     } else {
         // Début de l'impulsion HIGH
-        digitalWrite(21, HIGH);
+        digitalWrite(26, HIGH);
         pulseHigh = true;
         // Durée de l'impulsion selon position
         timerAlarm(timer, pulseWidth, true, 0);
@@ -141,23 +150,29 @@ void setup() {
     Mcu.begin(HELTEC_BOARD, SLOW_CLK_TPYE);
     myStepper.setSpeed(10);
 
-    // Setup écran OLED
+    // Alimentation de l'écran OLED
     pinMode(Vext, OUTPUT);
     digitalWrite(Vext, LOW);
     delay(100);
+
     myOLED.init();
     myOLED.flipScreenVertically();
-    updateDisplay("INIT", 0);
+    myOLED.setContrast(255);
+    myOLED.clear();
+    myOLED.display();
 
-    // Setup Servo
-    pinMode(21, OUTPUT);
-    timer = timerBegin(1000000);     // Timer à 1MHz : 1 tick = 1µs
-    timerAttachInterrupt(timer, &onTimer);
-    timerAlarm(timer, 20000, true, 0);     // Démarrage du signal servo
-    setServoAngle(0);
-    Serial.println("Servo position 0°");
+    showStartupScreenStart();
+
+//    // Setup Servo
+//    pinMode(21, OUTPUT);
+//    timer = timerBegin(1000000);     // Timer à 1MHz : 1 tick = 1µs
+//    timerAttachInterrupt(timer, &onTimer);
+//    timerAlarm(timer, 20000, true, 0);     // Démarrage du signal servo
+//    setServoAngle(0);
+//    Serial.println("Servo position 0°");
+
     delay(1000);
-    
+
     // Setup Radio
     RadioEvents.RxDone = OnRxDone;
     RadioEvents.TxDone = OnTxDone;
@@ -191,6 +206,17 @@ void setup() {
     Serial.println("[Smartcheers-Lego-Train.ino] ESP32 Pret : En attente de messages LoRa...");
 
     Radio.Rx(0); 
+    showStartupScreenReady();
+    delay(1000);
+
+    // Setup Servo
+    pinMode(26, OUTPUT);
+    timer = timerBegin(1000000);     // Timer à 1MHz : 1 tick = 1µs
+    timerAttachInterrupt(timer, &onTimer);
+    timerAlarm(timer, 20000, true, 0);     // Démarrage du signal servo
+    setServoAngle(0);
+    Serial.println("Servo position 0°");
+
 }
 
 void loop() {
@@ -263,43 +289,109 @@ void OnRxTimeout(void) {
     Radio.Rx(0);
 }
 
-void showStartupScreen() {
-    myOLED.clear();
+void showStartupScreenStart() {
 
-    // Titre
-    myOLED.setFont(ArialMT_Plain_16);
-    myOLED.drawString(8, 0, "SMARTCHEERS");
+    myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
 
-    // Sous-titre
-    myOLED.setFont(ArialMT_Plain_10);
-    myOLED.drawString(18, 20, "Lego Train v1.0");
-
-    // Petit train
-    myOLED.drawString(6, 34, "o===[####]----");
-
-    // Statut
-    myOLED.drawString(8, 52, "SYSTEME OK - PRET");
-
-    myOLED.display();
-    delay(2500);
-
-    // Animation de chargement
-    myOLED.clear();
-    myOLED.setFont(ArialMT_Plain_10);
-    myOLED.drawString(0, 0, "Initialisation...");
-
-    for (int i = 0; i <= 100; i += 10) {
-        myOLED.drawRect(8, 28, 112, 12);
-        myOLED.fillRect(10, 30, i, 8);
-
-        myOLED.setColor(BLACK);
-        myOLED.fillRect(40, 46, 50, 10);
-        myOLED.setColor(WHITE);
-        myOLED.drawString(48, 46, String(i) + "%");
-
+    // =====================================================
+    // Animation du cadre
+    // =====================================================
+    for (int i = 0; i <= 30; i += 2) {
+        myOLED.clear();
+        myOLED.drawRect(i, i / 2, 128 - 2 * i, 64 - i);
         myOLED.display();
-        delay(120);
+        delay(18);
     }
 
+    delay(150);
+
+    // =====================================================
+    // Logo SmartCheers
+    // =====================================================
+    myOLED.clear();
+
+    // Train
+    myOLED.fillCircle(20, 42, 3);
+    myOLED.fillCircle(40, 42, 3);
+    myOLED.fillCircle(60, 42, 3);
+
+    myOLED.fillRect(14, 28, 52, 12);
+    myOLED.fillRect(46, 18, 18, 10);
+    myOLED.fillRect(18, 18, 5, 10);
+
+    // Fumée
+    myOLED.drawCircle(18, 12, 2);
+    myOLED.drawCircle(23, 8, 2);
+    myOLED.drawCircle(28, 5, 2);
+
+    // Texte centré
+    myOLED.setTextAlignment(TEXT_ALIGN_CENTER);
+
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.drawString(96, 6, "SMART");
+
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(96, 24, "CHEERS");
+    myOLED.drawString(96, 40, "Autonomous");
+    myOLED.drawString(96, 52, "Train");
+
+    myOLED.display();
+
+    delay(1700);
+
+    // =====================================================
+    // Chargement
+    // =====================================================
+    myOLED.clear();
+
+    myOLED.setTextAlignment(TEXT_ALIGN_CENTER);
+
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.drawString(64, 4, "SMARTCHEERS");
+
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(64, 22, "Boot sequence");
+
+
+    // Barre
+    myOLED.drawRect(14, 34, 100, 10);
+    
+    for (int i = 0; i <= 100; i += 4) {
+    
+        myOLED.setColor(BLACK);
+        myOLED.fillRect(16, 36, 96, 6);
+        myOLED.fillRect(46, 44, 40, 8);
+        myOLED.setColor(WHITE);
+    
+        myOLED.fillRect(16, 36, i * 96 / 100, 6);
+    
+        myOLED.drawString(64, 44, String(i) + "%");
+    
+        myOLED.display();
+        delay(35);
+    }
+    
     delay(500);
+
+}
+
+void showStartupScreenReady() {
+
+    // =====================================================
+    // Ready
+    // =====================================================
+    myOLED.clear();
+
+    myOLED.setTextAlignment(TEXT_ALIGN_CENTER);
+
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.drawString(64, 8, "READY");
+
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(64, 30, "SmartCheers Train");
+    myOLED.drawString(64, 44, "Ready for service");
+
+    myOLED.display();
+
+    delay(2000);
 }
