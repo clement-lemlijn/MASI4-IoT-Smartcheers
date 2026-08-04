@@ -31,6 +31,11 @@ unsigned int keepAliveCounter = 0;
 String lastRadioMsg = "Aucun";   // Dernier message reçu OU envoyé, pour l'écran
 bool radioBusySending = false;   // Empêche de renvoyer pendant une transmission en cours
 
+// --- ACK STATUS ---
+bool lastAckOk = false;
+bool waitingForAck = false;
+unsigned long lastAckTime = 0;
+const unsigned long ACK_TIMEOUT = 2500; // 2,5 secondes max pour recevoir l'ACK
 
 // --- CONFIGURATION RADIO ---
 static RadioEvents_t RadioEvents;
@@ -59,14 +64,42 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
 
 void updateDisplay(String status, int dist) {
-//    myOLED.clear();
-//    myOLED.setFont(ArialMT_Plain_16);
-//    myOLED.drawString(0, 0, "Train: " + status);
-//    myOLED.drawString(0, 20, "Dist: " + String(dist) + " cm");
-//    myOLED.setFont(ArialMT_Plain_10);
-//    myOLED.drawString(0, 42, "LoRa: " + lastRadioMsg);
-//    myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
-//    myOLED.display();
+    myOLED.clear();
+
+    // ===== Ligne 1 : Status train =====
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
+    myOLED.drawString(0, 0, "Train: " + status);
+
+    // ===== Haut droite : Icône radio + V / X =====
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.setTextAlignment(TEXT_ALIGN_RIGHT);
+
+    // Gestion du timeout ACK
+    if (waitingForAck && (millis() - lastKeepAlive > ACK_TIMEOUT)) {
+        lastAckOk = false;
+        waitingForAck = false;
+    }
+
+    if (lastAckOk) {
+        myOLED.drawString(128, 0, "LoRa V");   // ACK OK
+    } else {
+        myOLED.drawString(128, 0, "LoRa X");   // Pas d'ACK
+    }
+
+    // ===== Distance =====
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
+    myOLED.drawString(0, 22, "Dist: " + String(dist) + " cm");
+
+    // ===== Dernier message LoRa =====
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(0, 44, lastRadioMsg);
+
+    // ===== Compteur Keepalive =====
+    myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
+
+    myOLED.display();
 }
 
 void stopTrain() {
@@ -130,7 +163,7 @@ int measureCmUltrasound(bool isVerbose = false){
 
 // Construit et envoie un message de keepalive/debug par LoRa
 void sendKeepAlive() {
-    if (radioBusySending) return; // Une transmission est déjà en cours, on attend
+    if (radioBusySending) return;
 
     keepAliveCounter++;
     String status = isRunning ? "RUN" : "STOP";
@@ -140,6 +173,10 @@ void sendKeepAlive() {
 
     Serial.println("[LoRa TX] " + msg);
     lastRadioMsg = "TX> " + msg;
+
+    // On attend un ACK
+    waitingForAck = true;
+    lastAckOk = false;
 
     radioBusySending = true;
     Radio.Send((uint8_t *)msg.c_str(), msg.length());
@@ -247,21 +284,30 @@ void loop() {
 
 void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
     String message = "";
-
-    Serial.print("ASCII : ");
-    for (int i = 0; i < size; i++){
+    for (int i = 0; i < size; i++) {
         message += (char)payload[i];
-        Serial.print((char)payload[i]);
-      }
-    Serial.println();
+    }
+
+    Serial.println("========== RX ==========");
     Serial.println(message);
+    Serial.printf("RSSI: %d | SNR: %d | size: %d\n", rssi, snr, size);
+    Serial.println("========================");
 
-    // Affichage debug sur l'écran (RSSI/SNR utiles pour vérifier la qualité du lien)
     lastRadioMsg = "RX> " + message + " (" + String(rssi) + "dBm)";
-    Serial.printf("RSSI: %d dBm | SNR: %d\r\n", rssi, snr);
 
-    if (message == "TRAINSTART" && !isRunning) startTrain();
-    else if (message == "TRAINSTOP") stopTrain();
+    // Détection de l'ACK (attention : tu reçois "KEEPALIVEACK" sans underscore)
+    if (message == "KEEPALIVEACK" || message == "KEEPALIVE_ACK") {
+        lastAckOk = true;
+        waitingForAck = false;
+        lastAckTime = millis();
+        Serial.println(">>> ACK reçu du Raspberry !");
+    }
+    else if (message == "TRAINSTART" && !isRunning) {
+        startTrain();
+    }
+    else if (message == "TRAINSTOP") {
+        stopTrain();
+    }
 
     Radio.Rx(0);
 }
