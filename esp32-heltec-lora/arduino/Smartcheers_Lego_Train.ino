@@ -4,25 +4,27 @@
 #include <NewPing.h>
 #include "HT_SSD1306Wire.h"
 
-// --- CONFIGURATIONS ---
-#define TRIG_PIN 32
-#define ECHO_PIN 33
-//
-//SSD1306Wire myOLED(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
+SSD1306Wire myOLED(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
 Servo monServo;
-//NewPing sonar(TRIG_PIN, ECHO_PIN, 400);
-static RadioEvents_t RadioEvents;
 
 
 // --- VARIABLES ---
 bool isRunning = false;
 const int stepsPerRevolution = 2048; // Pour le stepper motor
 unsigned long lastDistanceCheck = 0;
-unsigned long lastSerialUpdate = 0; // Nouveau timer pour le série/écran
+unsigned long lastSerialUpdate = 0; // Timer pour le série/écran
 int currentDist = 0;
+
+// --- KEEPALIVE / DEBUG LORA ---
+unsigned long lastKeepAlive = 0;
+const unsigned long KEEPALIVE_INTERVAL = 5000; // ms entre chaque keepalive
+unsigned int keepAliveCounter = 0;
+String lastRadioMsg = "Aucun";   // Dernier message reçu OU envoyé, pour l'écran
+bool radioBusySending = false;   // Empêche de renvoyer pendant une transmission en cours
 
 
 // --- CONFIGURATION RADIO ---
+static RadioEvents_t RadioEvents;
 #define RF_FREQUENCY          868100000 
 #define TX_OUTPUT_POWER       14        
 #define LORA_BANDWIDTH        0         
@@ -40,14 +42,23 @@ hw_timer_t *timer = NULL;
 volatile bool pulseHigh = false;
 volatile int pulseWidth = 500;
 
+// --- INIT ULTRASOUND ---
+#define TRIGGER_PIN  20
+#define ECHO_PIN     20
+#define MAX_DISTANCE 400 // Distance maximale en cm
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
-//void updateDisplay(String status, int dist) {
-//    myOLED.clear();
-//    myOLED.setFont(ArialMT_Plain_16);
-//    myOLED.drawString(0, 0, "Train: " + status);
-//    myOLED.drawString(0, 25, "Dist: " + String(dist) + " cm");
-//    myOLED.display();
-//}
+
+void updateDisplay(String status, int dist) {
+    myOLED.clear();
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.drawString(0, 0, "Train: " + status);
+    myOLED.drawString(0, 20, "Dist: " + String(dist) + " cm");
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(0, 42, "LoRa: " + lastRadioMsg);
+    myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
+    myOLED.display();
+}
 
 void stopTrain() {
     // if(!isRunning) return; // Évite les doubles arrêts // En fait non xD
@@ -90,14 +101,53 @@ void setServoAngle(int angle) {
     pulseWidth = map(angle, 0, 180, 500, 2500);
 }
 
+int measureCmUltrasound(bool isVerbose = false){
+  unsigned int uS = sonar.ping(); // Envoi du ping et mesure du temps
+  // Conversion du temps en distance (en cm)
+  // 0 signifie hors de portée
+  if(isVerbose){
+    Serial.print("Distance: ");
+    if (uS == 0) {
+      Serial.println("Hors de portée");
+      return 0;
+    } else {
+      Serial.print(uS / US_ROUNDTRIP_CM);
+      Serial.println(" cm");
+    }
+  }
+  if(uS == 0) return 0;
+  return uS / US_ROUNDTRIP_CM;
+}
+
+// Construit et envoie un message de keepalive/debug par LoRa
+void sendKeepAlive() {
+    if (radioBusySending) return; // Une transmission est déjà en cours, on attend
+
+    keepAliveCounter++;
+    String status = isRunning ? "RUN" : "STOP";
+    String msg = "KEEPALIVE;CNT=" + String(keepAliveCounter) +
+                 ";STATUS=" + status +
+                 ";DIST=" + String(currentDist);
+
+    Serial.println("[LoRa TX] " + msg);
+    lastRadioMsg = "TX> " + msg;
+
+    radioBusySending = true;
+    Radio.Send((uint8_t *)msg.c_str(), msg.length());
+}
+
 void setup() {
     Serial.begin(115200);
     Mcu.begin(HELTEC_BOARD, SLOW_CLK_TPYE);
     myStepper.setSpeed(10);
 
-//    pinMode(Vext, OUTPUT); digitalWrite(Vext, LOW); delay(100);
-//    myOLED.init(); myOLED.flipScreenVertically();
-//    
+    // Setup écran OLED
+    pinMode(Vext, OUTPUT);
+    digitalWrite(Vext, LOW);
+    delay(100);
+    myOLED.init();
+    myOLED.flipScreenVertically();
+    updateDisplay("INIT", 0);
 
     // Setup Servo
     pinMode(21, OUTPUT);
@@ -110,6 +160,8 @@ void setup() {
     
     // Setup Radio
     RadioEvents.RxDone = OnRxDone;
+    RadioEvents.TxDone = OnTxDone;
+    RadioEvents.TxTimeout = OnTxTimeout;
     // RadioEvents.RxError = OnRxError;
     // RadioEvents.RxTimeout = OnRxTimeout;
     
@@ -143,23 +195,28 @@ void setup() {
 
 void loop() {
     Radio.IrqProcess();
+  
+    // 1. Détection obstacle (chaque 100ms)
+    currentDist = measureCmUltrasound();
+    if (isRunning && currentDist > 0 && currentDist < 15) {
+        stopTrain();
+    }
 
-//    // 1. Détection obstacle (chaque 100ms)
-//    if (millis() - lastDistanceCheck > 100) {
-//        currentDist = sonar.ping_cm();
-//        if (isRunning && currentDist > 0 && currentDist < 15) {
-//            stopTrain();
-//        }
-//        lastDistanceCheck = millis();
-//    }
-//
-//    // 2. Mise à jour écran et Série (chaque 500ms pour ne pas saturer)
-//    if (millis() - lastSerialUpdate > 500) {
-//        String status = isRunning ? "ROULE" : "ARRET";
-//        updateDisplay(status, currentDist);
-//        Serial.printf("Status: %s | Distance: %d cm\r\n", status.c_str(), currentDist);
-//        lastSerialUpdate = millis();
-//    }
+    // 2. Keepalive/debug LoRa (toutes les KEEPALIVE_INTERVAL ms)
+    if (!radioBusySending && millis() - lastKeepAlive > KEEPALIVE_INTERVAL) {
+        sendKeepAlive();
+        lastKeepAlive = millis();
+    }
+
+    // 3. Mise à jour écran et Série (chaque 500ms pour ne pas saturer)
+    if (millis() - lastSerialUpdate > 500) {
+        String status = isRunning ? "ROULE" : "ARRET";
+        updateDisplay(status, currentDist);
+        Serial.printf("Status: %s | Distance: %d cm\r\n", status.c_str(), currentDist);
+        lastSerialUpdate = millis();
+    }
+
+    delay(50);
 }
 
 void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
@@ -172,20 +229,30 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
       }
     Serial.println();
     Serial.println(message);
+
+    // Affichage debug sur l'écran (RSSI/SNR utiles pour vérifier la qualité du lien)
+    lastRadioMsg = "RX> " + message + " (" + String(rssi) + "dBm)";
+    Serial.printf("RSSI: %d dBm | SNR: %d\r\n", rssi, snr);
+
     if (message == "TRAINSTART" && !isRunning) startTrain();
-    else if (message == "TRAINSTOP" && isRunning) stopTrain();
+    else if (message == "TRAINSTOP") stopTrain();
 
     Radio.Rx(0);
 }
 
-//void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
-//    Serial.println("OnRxDone");
-//    String message = "";
-//    for(int i=0; i<size; i++) message += (char)payload[i];
-//    Serial.println("Message : " + message);
-//    if (message == "TRAINSTART" && !isRunning) startTrain();
-//    else if (message == "TRAINSTOP" && isRunning) stopTrain();
-//}
+// Appelé automatiquement quand une transmission (ex: keepalive) est terminée.
+// On repasse en écoute continue pour ne pas rater les commandes TRAINSTART/TRAINSTOP.
+void OnTxDone(void) {
+    Serial.println("[LoRa] Envoi termine, retour en reception");
+    radioBusySending = false;
+    Radio.Rx(0);
+}
+
+void OnTxTimeout(void) {
+    Serial.println("[LoRa] Timeout d'envoi");
+    radioBusySending = false;
+    Radio.Rx(0);
+}
 
 void OnRxError(void) {
     Serial.println("Erreur de reception");
@@ -194,4 +261,45 @@ void OnRxError(void) {
 
 void OnRxTimeout(void) {
     Radio.Rx(0);
+}
+
+void showStartupScreen() {
+    myOLED.clear();
+
+    // Titre
+    myOLED.setFont(ArialMT_Plain_16);
+    myOLED.drawString(8, 0, "SMARTCHEERS");
+
+    // Sous-titre
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(18, 20, "Lego Train v1.0");
+
+    // Petit train
+    myOLED.drawString(6, 34, "o===[####]----");
+
+    // Statut
+    myOLED.drawString(8, 52, "SYSTEME OK - PRET");
+
+    myOLED.display();
+    delay(2500);
+
+    // Animation de chargement
+    myOLED.clear();
+    myOLED.setFont(ArialMT_Plain_10);
+    myOLED.drawString(0, 0, "Initialisation...");
+
+    for (int i = 0; i <= 100; i += 10) {
+        myOLED.drawRect(8, 28, 112, 12);
+        myOLED.fillRect(10, 30, i, 8);
+
+        myOLED.setColor(BLACK);
+        myOLED.fillRect(40, 46, 50, 10);
+        myOLED.setColor(WHITE);
+        myOLED.drawString(48, 46, String(i) + "%");
+
+        myOLED.display();
+        delay(120);
+    }
+
+    delay(500);
 }
