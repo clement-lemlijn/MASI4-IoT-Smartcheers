@@ -13,7 +13,7 @@ Une solution quick & dirty est donc de monter le dossier du Pi avec [WinFsp](htt
   <img src="https://github.com/winfsp/sshfs-win/raw/master/art/sshfs-glow.png" alt="SSHFS-Win Logo" width="400">
 </p>
 
-<img src="../assets/MASI4-IoT-Smartcheers-Remote_Mount_Rpi.png" alt="Remote config RPI" width="800">
+<img src="../../assets/MASI4-IoT-Smartcheers-Remote_Mount_Rpi.png" alt="Remote config RPI" width="800">
 
 ```
 \\sshfs\pi@192.168.68.70
