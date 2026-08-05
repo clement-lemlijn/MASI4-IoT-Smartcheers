@@ -6,6 +6,7 @@ import paho.mqtt.client as paho
 import threading
 
 order_received = threading.Event()
+order_ready = threading.Event()
 received_order_id = None
 from config import BROKER_IP, BROKER_PORT, MQTT_USERNAME, MQTT_PASSWORD
 
@@ -86,27 +87,22 @@ def on_order_created(client, userdata, msg):
 
     except Exception as e:
         print(f"Erreur réception MQTT : {e}")
+def on_order_ready(client, userdata, msg):
+    """Callback appelé lors de la réception d'une commande prête."""
+    global received_order_id
 
-    # try:
-    #     payload = json.loads(msg.payload.decode())
-    #     rpi_id = payload.get("rpiId")
-    #     order_id = payload.get("orderId")
-    #
-    #     print("📦 Nouvelle commande créée")
-    #     print(f"RPI : {rpi_id}")
-    #     print(f"Order ID : {order_id}")
-    #
-    #     # Ici tu peux :
-    #     # - afficher l'ID sur écran
-    #     # - débloquer un état
-    #     # - sauvegarder localement
-    #     # - faire sonner un buzzer
-    #
-    # except Exception as e:
-    #     print(f"❌ Erreur parsing MQTT : {e}")
+    try:
+        payload = json.loads(msg.payload.decode())
+        if payload["orderId"] == received_order_id:
+            return
 
+        print(f"📦 Commande prête : {received_order_id}")
+        order_ready.set()
 
-def mqtt_listen_orders():
+    except Exception as e:
+        print(f"Erreur réception MQTT : {e}")
+
+def mqtt_listen_orders_creation():
     client = create_mqtt_client("smartcheers-sub-001")
     client.on_message = on_order_created
     client.connect(BROKER_IP, BROKER_PORT, 10)
@@ -117,41 +113,14 @@ def mqtt_listen_orders():
     client.loop_start()
     return client
 
+def mqtt_listen_orders_ready():
+    client = create_mqtt_client("smartcheers-sub-001")
+    client.on_message = on_order_ready
+    client.connect(BROKER_IP, BROKER_PORT, 10)
+    client.subscribe(
+        "smartcheers/orders/ready",
+        qos=1
+    )
+    client.loop_start()
+    return client
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def mqtt_publish(payload, mqtt_topic):
-#     """Publie un message MQTT sécurisé. Retourne True/False, ne gère aucun affichage."""
-#     client = paho.Client(client_id="smartcheers-pub-001", protocol=paho.MQTTv311)
-#     client.username_pw_set(username=MQTT_USERNAME, password=MQTT_PASSWORD)
-#     client.tls_set(
-#         ca_certs="/home/pi/mqtt-certs/ca.crt",
-#         certfile="/home/pi/mqtt-certs/client.crt",
-#         keyfile="/home/pi/mqtt-certs/client.key",
-#         tls_version=ssl.PROTOCOL_TLSv1_2
-#     )
-#
-#     try:
-#         # Timeout réduit pour éviter de bloquer le script trop longtemps
-#         client.connect(BROKER_IP, BROKER_PORT, 10)
-#         client.loop_start()
-#         client.publish(mqtt_topic, payload, 0)
-#         time.sleep(1)
-#         client.loop_stop()
-#         client.disconnect()
-#         print("✅ Message envoyé avec succès")
-#         return True
-#     except Exception as e:
-#         print(f"❌ Erreur MQTT : {e}")
-#         return False

@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
 
 from config import RPI_ID, DRINKS, SNACKS
-from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders, order_received
+from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
@@ -70,17 +70,17 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                 time.sleep(2)
 
                 # démarre écoute MQTT
-                mqtt_client = mqtt_listen_orders()
+                mqtt_client = mqtt_listen_orders_creation()
                 print("Attente confirmation serveur...")
-                received = order_received.wait(timeout=10) # attente max 10 secondes
+                is_order_received = order_received.wait(timeout=10) # attente max 10 secondes
 
-                if received:
+                if is_order_received:
                     print("Commande reçue !")
                     setText("Commande recue")
                     time.sleep(2)
 
-                    print("Attente de livraison...")
-                    setText("Attente de livraison...")
+                    print("Commande en préparation...")
+                    setText("Commande en préparation...")
                     # 1. Régler le rail OUVERT
                     open_bifurcation()
                     time.sleep(2)
