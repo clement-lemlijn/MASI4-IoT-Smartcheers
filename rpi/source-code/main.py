@@ -9,7 +9,7 @@ from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
-from rfid import wait_for_rfid, wait_for_rfid_deliver
+from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
