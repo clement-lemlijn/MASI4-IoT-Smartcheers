@@ -78,7 +78,7 @@ def on_order_created(client, userdata, msg):
 
     try:
         payload = json.loads(msg.payload.decode())
-        if payload["rpiId"] != RPI_ID:
+        if payload["rpiId"] != RPI_ID or payload["success"] == False:
             return
         received_order_id = payload["orderId"]
         print(f"📦 Commande reçue : {received_order_id}")
