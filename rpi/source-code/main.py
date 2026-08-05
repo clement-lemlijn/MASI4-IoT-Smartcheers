@@ -76,6 +76,19 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     print("Commande reçue !")
                     setText("Commande recue")
                     time.sleep(2)
+
+                    print("Attente de livraison...")
+                    setText("Attente de livraison...")
+                    # 1. Régler le rail OUVERT
+
+                    # 2. Envoyer le train
+
+                    # 3. Attendre le train (light sensor)
+
+                    # 4. Quand le train est passé, fermer le rail
+
+                    # 5. C'est déjà pas mal pour le moment
+
                 else:
                     print("Pas de confirmation serveur")
                     setText("Serveur absent")
