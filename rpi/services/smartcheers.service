@@ -3,7 +3,7 @@ Description=Service SmartCheers
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 -u /home/pi/smartcheers/rpi/main.py
+ExecStart=/usr/bin/python3 -u /home/pi/smartcheers/rpi/source-code/main.py
 WorkingDirectory=/home/pi/smartcheers/rpi
 Restart=always
 User=pi
