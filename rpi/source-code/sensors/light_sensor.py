@@ -1,3 +1,4 @@
+
 # sensors/light_sensor.py
 def is_train_passing() -> bool:
     # lecture GPIO light sensor
