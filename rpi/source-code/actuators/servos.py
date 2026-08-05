@@ -38,12 +38,14 @@ def set_angle(servo, angle, name):
     servo.angle = angle
     print(f"{name:10} → {angle:6.1f}°")
 
+
+
+
 def open_bifurcation():
     servo_rail = set_servo_rail()
     set_angle(servo_rail, 90, "Rail")
     sleep(2)
     servo_rail.detach()
-
 
 def close_bifurcation():
     servo_rail = set_servo_rail()
