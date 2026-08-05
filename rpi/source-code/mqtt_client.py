@@ -50,25 +50,50 @@ def create_mqtt_client(client_id):
 
 
 def mqtt_publish(payload, mqtt_topic):
-    """Publie un message MQTT sécurisé."""
-    client = create_mqtt_client("smartcheers-pub-001")
+    """Publie un message MQTT sécurisé. Retourne True/False, ne gère aucun affichage."""
+    client = paho.Client(client_id="smartcheers-pub-001", protocol=paho.MQTTv311)
+    client.username_pw_set(username=MQTT_USERNAME, password=MQTT_PASSWORD)
+    client.tls_set(
+        ca_certs="/home/pi/mqtt-certs/ca.crt",
+        certfile="/home/pi/mqtt-certs/client.crt",
+        keyfile="/home/pi/mqtt-certs/client.key",
+        tls_version=ssl.PROTOCOL_TLSv1_2
+    )
+
     try:
+        # Timeout réduit pour éviter de bloquer le script trop longtemps
         client.connect(BROKER_IP, BROKER_PORT, 10)
         client.loop_start()
-        client.publish(
-            mqtt_topic,
-            json.dumps(payload),
-            qos=1
-        )
-        time.sleep(0.5)
+        client.publish(mqtt_topic, payload, 0)
+        time.sleep(1)
         client.loop_stop()
         client.disconnect()
-        print("✅ Message envoyé")
+        print("✅ Message envoyé avec succès")
         return True
-
     except Exception as e:
         print(f"❌ Erreur MQTT : {e}")
         return False
+
+# def mqtt_publish(payload, mqtt_topic):
+#     """Publie un message MQTT sécurisé."""
+#     client = create_mqtt_client("smartcheers-pub-001")
+#     try:
+#         client.connect(BROKER_IP, BROKER_PORT, 10)
+#         client.loop_start()
+#         client.publish(
+#             mqtt_topic,
+#             json.dumps(payload),
+#             qos=1
+#         )
+#         time.sleep(0.5)
+#         client.loop_stop()
+#         client.disconnect()
+#         print("✅ Message envoyé")
+#         return True
+#
+#     except Exception as e:
+#         print(f"❌ Erreur MQTT : {e}")
+#         return False
 
 
 def on_order_created(client, userdata, msg):
