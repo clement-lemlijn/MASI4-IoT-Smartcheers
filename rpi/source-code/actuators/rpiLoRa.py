@@ -13,6 +13,7 @@ MESSAGE = "TRAINSTART"
 _ser = None
 _lock = threading.Lock()
 
+debug = False
 
 def _get_serial():
     """Ouvre le port série une seule fois (thread-safe)."""
@@ -46,7 +47,7 @@ def call_train_start():
     """Envoie la commande TRAINSTART au train."""
     try:
         cmd = f"AT+SEND=1,{MESSAGE},0,3\r\n"
-        print(f"Envoi : {cmd.strip()}")
+        if(debug): print(f"Envoi : {cmd.strip()}")
         _send(cmd)
         print("TRAINSTART envoyé")
     except Exception as e:
@@ -58,7 +59,7 @@ def send_ack():
     try:
         ack_msg = "KEEPALIVEACK"
         cmd = f"AT+SEND=1,{ack_msg},0,3\r\n"
-        print(f"→ ACK envoyé : {ack_msg}")
+        if(debug): print(f"→ ACK envoyé : {ack_msg}")
         _send(cmd)
     except Exception as e:
         print(f"Erreur send_ack : {e}")
@@ -72,7 +73,7 @@ def _keepalive_loop():
             ser = _get_serial()
             if ser.in_waiting > 0:
                 data = ser.readline()
-                print("données reçues:", data)
+                if(debug): print("données reçues:", data)
 
                 if b"Data: (HEX:)" in data:
                     try:
@@ -80,10 +81,10 @@ def _keepalive_loop():
                         raw_hex = data[start:].strip()
                         hex_str = raw_hex.decode("utf-8").replace(" ", "")
                         message = bytes.fromhex(hex_str).decode("utf-8", errors="replace")
-                        print(f"→ Message reçu : {message}")
+                        if(debug): print(f"→ Message reçu : {message}")
 
                         if message.startswith("KEEPALIVE"):
-                            print(" → Keepalive détecté")
+                            if(debug): print(" → Keepalive détecté")
                             send_ack()
                     except Exception as e:
                         print(f"Erreur de parsing : {e}")
