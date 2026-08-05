@@ -82,6 +82,7 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     print("Commande en préparation...")
                     setText("Commande en préparation...")
 
+                    mqtt_client = mqtt_listen_orders_ready()
                     is_order_ready = order_ready.wait(timeout=600) # attente max 10 minutes
 
                     if is_order_ready:
