@@ -11,6 +11,7 @@ from display import safe_setRGB, init_lcd, display_menu, display_panier
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
 from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
+from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
 
@@ -80,6 +81,9 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     print("Attente de livraison...")
                     setText("Attente de livraison...")
                     # 1. Régler le rail OUVERT
+                    open_bifurcation()
+                    time.sleep(2)
+                    print("bifurcation openned")
 
                     # 2. Envoyer le train
 
@@ -87,6 +91,9 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
 
                     # 4. Quand le train est passé, fermer le rail
 
+                    close_bifurcation()
+                    time.sleep(2)
+                    print("bifurcation closed")
                     # 5. C'est déjà pas mal pour le moment
 
                 else:
