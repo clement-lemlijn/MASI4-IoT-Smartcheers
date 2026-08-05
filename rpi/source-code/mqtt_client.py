@@ -28,32 +28,21 @@ with open("../source-code/config.json", "r") as f:
 RPI_ID = CONFIG["rpiId"]
 
 def create_mqtt_client(client_id):
-    """Création d'un client MQTT sécurisé."""
+    client = paho.Client(client_id=client_id, protocol=paho.MQTTv311)
 
-    client = paho.Client(
-        client_id=client_id,
-        protocol=paho.MQTTv311
-    )
-
-    client.username_pw_set(
-        username=MQTT_USERNAME,
-        password=MQTT_PASSWORD
-    )
-
+    client.username_pw_set(username=MQTT_USERNAME, password=MQTT_PASSWORD)
     client.tls_set(
         ca_certs=CA_CERT,
         certfile=CLIENT_CERT,
         keyfile=CLIENT_KEY,
         tls_version=ssl.PROTOCOL_TLSv1_2
     )
-
     return client
 
 
 
 def mqtt_publish(payload, mqtt_topic):
-    """Publie un message MQTT sécurisé."""
-    client = create_mqtt_client("smartcheers-pub-001")
+    client = create_mqtt_client(f"smartcheers-pub-{int(time.time()*1000)}")
     try:
         client.connect(BROKER_IP, BROKER_PORT, 10)
         client.loop_start()
@@ -74,7 +63,6 @@ def mqtt_publish(payload, mqtt_topic):
 
 
 def on_order_created(client, userdata, msg):
-    """Callback appelé lors de la réception d'une commande créée."""
     global received_order_id
 
     try:
@@ -89,23 +77,20 @@ def on_order_created(client, userdata, msg):
         print(f"Erreur réception MQTT : {e}")
 
 def on_order_ready(client, userdata, msg):
-    """Callback appelé lors de la réception d'une commande prête."""
     global received_order_id
-
     try:
         payload = json.loads(msg.payload.decode())
-        print(payload)
-        if payload["orderId"] != received_order_id:
+        print("Message ready reçu :", payload)
+        if payload.get("orderId") != received_order_id:
+            print(f"orderId différent ({payload.get('orderId')} != {received_order_id})")
             return
-
         print(f"📦 Commande prête : {received_order_id}")
         order_ready.set()
-
     except Exception as e:
-        print(f"Erreur réception MQTT : {e}")
+        print(f"Erreur réception MQTT (ready) : {e}")
 
 def mqtt_listen_orders_creation():
-    client = create_mqtt_client("smartcheers-sub-001")
+    client = create_mqtt_client(f"smartcheers-sub-created-{int(time.time()*1000)}")
     client.on_message = on_order_created
     client.connect(BROKER_IP, BROKER_PORT, 10)
     client.subscribe(
@@ -116,7 +101,7 @@ def mqtt_listen_orders_creation():
     return client
 
 def mqtt_listen_orders_ready():
-    client = create_mqtt_client("smartcheers-sub-001")
+    client = create_mqtt_client(f"smartcheers-sub-ready-{int(time.time()*1000)}")
     client.on_message = on_order_ready
     client.connect(BROKER_IP, BROKER_PORT, 10)
     client.subscribe(

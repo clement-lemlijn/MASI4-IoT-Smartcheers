@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
 
 from config import RPI_ID, DRINKS, SNACKS
-from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready
+from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
@@ -69,10 +69,15 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                 setText("Commande envoyee")
                 time.sleep(2)
 
-                # démarre écoute MQTT
-                mqtt_client = mqtt_listen_orders_creation()
+                # Réinitialiser les Events avant d’écouter
+                order_received.clear()
+                order_ready.clear()
+                received_order_id = None          # (si tu l’importes)
+
+                # 1. Écoute de la confirmation de création
+                mqtt_client_created = mqtt_listen_orders_creation()
                 print("Attente confirmation serveur...")
-                is_order_received = order_received.wait(timeout=10) # attente max 10 secondes
+                is_order_received = order_received.wait(timeout=10)
 
                 if is_order_received:
                     print("Commande reçue !")
@@ -82,42 +87,42 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     print("Commande en préparation...")
                     setText("Commande en préparation...")
 
-                    mqtt_client = mqtt_listen_orders_ready()
-                    is_order_ready = order_ready.wait(timeout=600) # attente max 10 minutes
+                    # 2. On peut arrêter le client "created" maintenant
+                    mqtt_client_created.loop_stop()
+                    mqtt_client_created.disconnect()
+
+                    # 3. Écoute de "ready"
+                    mqtt_client_ready = mqtt_listen_orders_ready()
+                    is_order_ready = order_ready.wait(timeout=600)
 
                     if is_order_ready:
-                        # 1. Régler le rail OUVERT
                         open_bifurcation()
                         time.sleep(2)
                         print("bifurcation openned")
 
-                        # 2. Envoyer le train
                         call_train_start()
 
-                        # 3. Attendre le train (light sensor)
-
-                        # 4. Quand le train est passé, fermer le rail
+                        # TODO: attendre le train (light sensor)
 
                         close_bifurcation()
                         time.sleep(2)
                         print("bifurcation closed")
-                        # 5. C'est déjà pas mal pour le moment
-
-
                     else:
                         print("Commande trop lente")
                         setText("Commande trop lente")
                         safe_setRGB(255, 0, 0)
                         blink_led("red", times=2)
 
+                    mqtt_client_ready.loop_stop()
+                    mqtt_client_ready.disconnect()
                 else:
                     print("Pas de confirmation serveur")
                     setText("Serveur absent")
                     safe_setRGB(255, 0, 0)
                     blink_led("red", times=2)
+                    mqtt_client_created.loop_stop()
+                    mqtt_client_created.disconnect()
 
-                mqtt_client.loop_stop()
-                mqtt_client.disconnect()
                 set_leds()
                 return True
             else:
