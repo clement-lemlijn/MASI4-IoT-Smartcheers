@@ -4,7 +4,7 @@
   "mqtt": {
     "broker": "mqtt.smartcheers.local",
     "port": 8883,
-    "username": "rpi-001",
-    "password": "29!pSubG"
+    "username": "clement-lemlijn",
+    "password": "mqtt-pwd"
   }
 }
