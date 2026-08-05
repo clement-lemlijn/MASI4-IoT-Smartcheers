@@ -87,13 +87,14 @@ def on_order_created(client, userdata, msg):
 
     except Exception as e:
         print(f"Erreur réception MQTT : {e}")
+
 def on_order_ready(client, userdata, msg):
     """Callback appelé lors de la réception d'une commande prête."""
     global received_order_id
 
     try:
         payload = json.loads(msg.payload.decode())
-        if payload["orderId"] == received_order_id:
+        if payload["orderId"] != received_order_id:
             return
 
         print(f"📦 Commande prête : {received_order_id}")
