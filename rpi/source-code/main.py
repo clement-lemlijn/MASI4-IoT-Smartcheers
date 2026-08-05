@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
 
 from config import RPI_ID, DRINKS, SNACKS
-from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC
+from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
@@ -66,8 +66,25 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                 set_leds(green=True)
                 setText("Commande envoyee")
                 time.sleep(2)
+
+                # démarre écoute MQTT
+                mqtt_client = mqtt_listen_orders()
+                print("Attente confirmation serveur...")
+                received = order_received.wait(timeout=10) # attente max 10 secondes
+
+                if received:
+                    print("Commande reçue !")
+                    setText("Commande recue")
+                    time.sleep(2)
+                else:
+                    print("Pas de confirmation serveur")
+                    setText("Serveur absent")
+                    safe_setRGB(255, 0, 0)
+                    blink_led("red", times=2)
+
+                mqtt_client.loop_stop()
+                mqtt_client.disconnect()
                 set_leds()
-                # wait_for_rfid_deliver(client_id)
                 return True
             else:
                 print("Échec MQTT : Impossible d'envoyer la commande")
