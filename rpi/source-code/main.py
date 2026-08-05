@@ -67,7 +67,7 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                 setText("Commande envoyee")
                 time.sleep(2)
                 set_leds()
-                wait_for_rfid_deliver(client_id)
+                # wait_for_rfid_deliver(client_id)
                 return True
             else:
                 print("Échec MQTT : Impossible d'envoyer la commande")

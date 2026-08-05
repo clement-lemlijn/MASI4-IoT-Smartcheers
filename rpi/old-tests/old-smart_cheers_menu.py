@@ -22,7 +22,7 @@ DELIVER_ORDER_TOPIC = "smartcheers/orders/deliver"
 # MQTT_PASSWORD = '29!pSubG'
 
 # --- CHARGEMENT CONFIG ---
-with open("../config.json", "r") as f:
+with open("../source-code/config.json", "r") as f:
     CONFIG = json.load(f)
 
 RPI_ID = CONFIG["rpiId"]
@@ -32,7 +32,7 @@ MQTT_USERNAME = CONFIG["mqtt"]["username"]
 MQTT_PASSWORD = CONFIG["mqtt"]["password"]
 
 # --- CHARGEMENT PRODUITS ---
-with open("../products.json", "r") as f:
+with open("../source-code/products.json", "r") as f:
     PRODUCTS = json.load(f)
 
 def get_products_by_category(category):
