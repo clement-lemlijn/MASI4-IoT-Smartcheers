@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
 
 from config import RPI_ID, DRINKS, SNACKS
-from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received
+from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
@@ -13,6 +13,7 @@ from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
 from actuators.rpiLoRa import call_train_start
+from actuators.radio import call_train_start, start_keepalive, close
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
 
@@ -81,22 +82,33 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
 
                     print("Commande en préparation...")
                     setText("Commande en préparation...")
-                    # 1. Régler le rail OUVERT
-                    open_bifurcation()
-                    time.sleep(2)
-                    print("bifurcation openned")
 
-                    # 2. Envoyer le train
-                    call_train_start()
+                    is_order_ready = order_ready.wait(timeout=600) # attente max 10 minutes
 
-                    # 3. Attendre le train (light sensor)
+                    if is_order_ready:
+                        # 1. Régler le rail OUVERT
+                        open_bifurcation()
+                        time.sleep(2)
+                        print("bifurcation openned")
 
-                    # 4. Quand le train est passé, fermer le rail
+                        # 2. Envoyer le train
+                        call_train_start()
 
-                    close_bifurcation()
-                    time.sleep(2)
-                    print("bifurcation closed")
-                    # 5. C'est déjà pas mal pour le moment
+                        # 3. Attendre le train (light sensor)
+
+                        # 4. Quand le train est passé, fermer le rail
+
+                        close_bifurcation()
+                        time.sleep(2)
+                        print("bifurcation closed")
+                        # 5. C'est déjà pas mal pour le moment
+
+
+                    else:
+                        print("Commande trop lente")
+                        setText("Commande trop lente")
+                        safe_setRGB(255, 0, 0)
+                        blink_led("red", times=2)
 
                 else:
                     print("Pas de confirmation serveur")
@@ -129,6 +141,8 @@ def run():
     setup_leds()
     init_lcd()
     set_leds()
+
+    start_keepalive()
 
     while True:
         client_id = wait_for_rfid()
@@ -227,4 +241,5 @@ if __name__ == "__main__":
         safe_setRGB(255, 0, 0)
         set_leds()
     finally:
+        close() # close port série d'écoute LoRa
         GPIO.cleanup()
