@@ -10,7 +10,7 @@ BAUDRATE = 9600
 
 MESSAGE = "TRAINSTART"
 
-def call_train(message):
+def call_train_start():
     try:
         ser = serial.Serial(
             PORT,
@@ -22,7 +22,7 @@ def call_train(message):
 
         # Commande LA66 :
         # AT+SEND=<port>,<payload>,<ack>,<length> non tu es con GEMINI !!!
-        cmd = f"AT+SEND=1,{message},0,{3}\r\n"
+        cmd = f"AT+SEND=1,{MESSAGE},0,{3}\r\n"
 
         print(f"Envoi : {cmd.strip()}")
 

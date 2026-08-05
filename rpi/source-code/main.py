@@ -12,6 +12,7 @@ from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOW
 from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
+from actuators.rpiLoRa import call_train_start
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
 
@@ -86,6 +87,7 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     print("bifurcation openned")
 
                     # 2. Envoyer le train
+                    call_train_start()
 
                     # 3. Attendre le train (light sensor)
 
