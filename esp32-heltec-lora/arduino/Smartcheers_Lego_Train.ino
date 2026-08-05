@@ -261,7 +261,7 @@ void loop() {
   
     // 1. Détection obstacle (chaque 100ms)
     currentDist = measureCmUltrasound();
-    if (isRunning && currentDist > 0 && currentDist < 15) {
+    if (isRunning && currentDist > 2 && currentDist < 10) {
         stopTrain();
     }
 
