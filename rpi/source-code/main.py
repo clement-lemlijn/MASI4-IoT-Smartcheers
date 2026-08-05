@@ -4,6 +4,7 @@ import json
 import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
 
+
 from config import RPI_ID, DRINKS, SNACKS
 from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id
 from leds import setup_leds, set_leds, blink_led
@@ -13,9 +14,9 @@ from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
 from actuators.rpiLoRa import call_train_start, start_keepalive, close
+from sensors.light_sensor import wait_for_train
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
-
 
 def annuler_commande(raison="Commande annulee"):
     """Reset visuel/LED lors d'une annulation (manuelle ou par timeout)."""
@@ -72,7 +73,7 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                 # Réinitialiser les Events avant d’écouter
                 order_received.clear()
                 order_ready.clear()
-                received_order_id = None          # (si tu l’importes)
+                received_order_id = None
 
                 # 1. Écoute de la confirmation de création
                 mqtt_client_created = mqtt_listen_orders_creation()
@@ -84,8 +85,8 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     setText("Commande recue")
                     time.sleep(2)
 
-                    print("Commande en préparation...")
-                    setText("Commande en préparation...")
+                    print("Commande en preparation...")
+                    setText("Commande en preparation...")
 
                     # 2. On peut arrêter le client "created" maintenant
                     mqtt_client_created.loop_stop()
@@ -100,9 +101,14 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                         time.sleep(2)
                         print("bifurcation openned")
 
+                        # 4. Envoyer le train
+
                         call_train_start()
 
                         # TODO: attendre le train (light sensor)
+
+                        # 5. Attendre le train
+                        wait_for_train()
 
                         close_bifurcation()
                         time.sleep(2)
