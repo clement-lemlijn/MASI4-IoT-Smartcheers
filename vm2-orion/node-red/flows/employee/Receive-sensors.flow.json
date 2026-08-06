@@ -1,0 +1,149 @@
+[
+  {
+    "id": "77d61a7c1ec3d7c7",
+    "type": "tab",
+    "label": "Receive sensors",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "26a8e789a7ef102d",
+    "type": "mqtt in",
+    "z": "77d61a7c1ec3d7c7",
+    "name": "input sensors",
+    "topic": "smartcheers/sensors/public",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "43ab0497169fffd3",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 270,
+    "y": 240,
+    "wires": [
+      [
+        "d8ee8141289e17c2",
+        "3c967559a74daae2"
+      ]
+    ]
+  },
+  {
+    "id": "d8ee8141289e17c2",
+    "type": "debug",
+    "z": "77d61a7c1ec3d7c7",
+    "name": "debug 13",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 440,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "3c967559a74daae2",
+    "type": "function",
+    "z": "77d61a7c1ec3d7c7",
+    "name": "function 31",
+    "func": "// Conversion du payload MQTT\nlet data = msg.payload.toString().trim();\n\n// Device:esp32h2-102,Temp:22.0,Hum:50.0,Son:705\n\nlet sensor = {};\ndata.split(\",\").forEach(part => {\n    let [key, value] = part.split(\":\");\n    if (!key || !value) {\n        return;\n    }\n    key = key.trim();\n    value = value.trim();\n    switch (key) {\n\n        case \"Device\":\n            sensor.deviceId = value;\n            break;\n\n        case \"Temp\":\n            sensor.temperature = Number(value);\n            break;\n\n        case \"Hum\":\n            sensor.humidity = Number(value);\n            break;\n\n        case \"Son\":\n            sensor.sound = Number(value);\n            break;\n    }\n});\n\n// Ajout date/heure\nlet now = new Date();\nsensor.timestamp = now;\n\n// Optionnel : format lisible\nsensor.date = now.toISOString();\n\n// Vérification\nif (!sensor.deviceId) {\n    node.error(\"Message capteur invalide : \" + data);\n    return null;\n}\n\n\n// Envoi vers MongoDB\nmsg.payload = sensor;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 510,
+    "y": 320,
+    "wires": [
+      [
+        "f5c393f2e55c8e9a",
+        "31c4e7134d246657"
+      ]
+    ]
+  },
+  {
+    "id": "f5c393f2e55c8e9a",
+    "type": "debug",
+    "z": "77d61a7c1ec3d7c7",
+    "name": "debug 14",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 680,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "31c4e7134d246657",
+    "type": "mongodb out",
+    "z": "77d61a7c1ec3d7c7",
+    "mongodb": "783a5e3707db0d32",
+    "name": "insert in db",
+    "collection": "sensors",
+    "payonly": true,
+    "upsert": false,
+    "multi": false,
+    "operation": "insert",
+    "x": 710,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "43ab0497169fffd3",
+    "type": "mqtt-broker",
+    "name": "raspberrypi-hepl-public",
+    "broker": "192.168.1.12",
+    "port": 1883,
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": 4,
+    "keepalive": 60,
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthRetain": "false",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closeRetain": "false",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willRetain": "false",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "783a5e3707db0d32",
+    "type": "mongodb",
+    "hostname": "mongodb_secondary",
+    "topology": "direct",
+    "connectOptions": "",
+    "port": 27017,
+    "db": "smartpub_db",
+    "name": ""
+  },
+  {
+    "id": "80efe88d05c735f5",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-node-mongodb": "0.2.5"
+    }
+  }
+]

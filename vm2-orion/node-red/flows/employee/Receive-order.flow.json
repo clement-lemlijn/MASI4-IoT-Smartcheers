@@ -1,0 +1,632 @@
+[
+  {
+    "id": "2b65b643ec03a48e",
+    "type": "tab",
+    "label": "Receive order",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "5288c0d878f68542",
+    "type": "junction",
+    "z": "2b65b643ec03a48e",
+    "x": 500,
+    "y": 220,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "1e48704e0d6bf9d7",
+    "type": "junction",
+    "z": "2b65b643ec03a48e",
+    "x": 460,
+    "y": 220,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "52ab60f124ee63c8",
+    "type": "mqtt in",
+    "z": "2b65b643ec03a48e",
+    "name": "",
+    "topic": "smartcheers/orders/new",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "e97212349fb30e64",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 160,
+    "y": 220,
+    "wires": [
+      [
+        "4956a4a0a07c1e5f",
+        "45a762e681610b1e"
+      ]
+    ]
+  },
+  {
+    "id": "4956a4a0a07c1e5f",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "Extract JSON",
+    "func": "node.warn(\"Commande RPI reçue\");\n\n// Parsing JSON MQTT\nif (typeof msg.payload === \"string\") {\n    try {\n        msg.payload = JSON.parse(msg.payload);\n    } catch (e) {\n        node.error(\"JSON invalide : \" + e.message);\n        return null;\n    }\n}\n\nconst data = msg.payload;\n\n// Vérification champs minimum\nif (!data.rpiId || !data.badgeUid || !data.command) {\n    node.error(\"Payload incomplet\");\n    return null;\n}\n\n// Nettoyage badge UID (caractères STX/ETX + espaces éventuels)\ndata.badgeUid = data.badgeUid\n    .replace(/[\\u0002\\u0003]/g, '')\n    .trim();\n\nmsg.receivedPayload = msg.payload;\nmsg.command = data.command;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 220,
+    "wires": [
+      [
+        "c9ada5d6fdf3a85d",
+        "08f695f75f3faae4"
+      ]
+    ]
+  },
+  {
+    "id": "b29e50bcdd64c4e0",
+    "type": "inject",
+    "z": "2b65b643ec03a48e",
+    "name": "",
+    "props": [
+      {
+        "p": "topic",
+        "vt": "str"
+      },
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "smartcheers/orders/new",
+    "payload": "{     \"rpiId\":\"rpi-002\",     \"badgeUid\":\"27004228D09D\",     \"command\":[       {         \"produitId\":\"e24a1365-c421-46a3-960f-462a14580008\",         \"quantite\":2       },       {         \"produitId\":\"35ba79f7-e6a9-4dbf-9e28-0492b249b44e\",         \"quantite\":1       }     ]   }",
+    "payloadType": "str",
+    "x": 130,
+    "y": 320,
+    "wires": [
+      [
+        "4956a4a0a07c1e5f",
+        "45a762e681610b1e"
+      ]
+    ]
+  },
+  {
+    "id": "65a40c520f321b67",
+    "type": "mongodb in",
+    "z": "2b65b643ec03a48e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "check rpi",
+    "collection": "raspberrypi",
+    "operation": "aggregate",
+    "x": 800,
+    "y": 180,
+    "wires": [
+      [
+        "2394dd4a06efb62f"
+      ]
+    ]
+  },
+  {
+    "id": "c9ada5d6fdf3a85d",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 7",
+    "func": "const rpiId = msg.receivedPayload.rpiId;\n\nmsg.rpiId = rpiId;\n\nmsg.payload = [\n    {\n        $match: {\n            rpiId: rpiId\n        }\n    },\n    {\n        // on relie l'_id du raspberry (dans \"raspberrypi\")\n        // au champ \"rpiId\" présent dans chaque document \"tables\"\n        $lookup: {\n            from: \"tables\",\n            localField: \"_id\",\n            foreignField: \"rpiId\",\n            as: \"table\"\n        }\n    },\n    {\n        $unwind: \"$table\"\n    },\n    {\n        // Filtre final : le rpi doit être actif ET la table occupée\n        $match: {\n            statut: \"actif\",\n            \"table.statut\": \"occupee\"\n        }\n    },\n    {\n        // On ne garde que les champs utiles\n        $project: {\n            _id: 0,\n            rpiId: 1,\n            nom: 1,\n            emplacement: 1,\n            tableNumero: \"$table.numero\",\n            tableStatut: \"$table.statut\"\n        }\n    }\n];\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 660,
+    "y": 180,
+    "wires": [
+      [
+        "65a40c520f321b67"
+      ]
+    ]
+  },
+  {
+    "id": "2394dd4a06efb62f",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 8",
+    "func": "// Vérification du résultat MongoDB\n\nmsg.checkRpiSuccess = false;\n\nif (!msg.payload || msg.payload.length === 0) {\n    msg.payload = {\n        success: false,\n        error: \"Raspberry Pi inconnu, inactif ou table non occupée\",\n        rpiId: msg.rpiId || null\n    };\n\n    // Optionnel : pour un traitement d'erreur MQTT\n    msg.error = true;\n\n    return msg;\n}\n\n// Success\nmsg.checkRpiSuccess = true;\nmsg.checkRpi = msg.payload[0];\nnode.warn(\"checkRpi\" + msg.checkRpi);\n\nmsg.payload = {\n    success: true,\n    message: \"Raspberry Pi valide et table occupée\",\n    data: msg.payload[0]\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 960,
+    "y": 180,
+    "wires": [
+      [
+        "4a4236f62c746c2b"
+      ]
+    ]
+  },
+  {
+    "id": "4a4236f62c746c2b",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 9",
+    "func": "const badgeUid = msg.receivedPayload.badgeUid;\n\nmsg.badgeUid = badgeUid;\nnode.warn(\"my warning \" + badgeUid);\n\nmsg.payload = [\n    {\n        $match: {\n            badgeUid: badgeUid\n        }\n    },\n    {\n        // on relie l'_id du raspberry (dans \"raspberrypi\")\n        // au champ \"rpiId\" présent dans chaque document \"tables\"\n        $lookup: {\n            from: \"visites\",\n            localField: \"_id\",\n            foreignField: \"badgeId\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        // Filtre final\n        $match: {\n            statut: \"attribue\",\n            \"visite.statut\": \"ouverte\"\n        }\n    },\n    {\n        // On ne garde que les champs utiles\n        $project: {\n            _id: 0,\n            badgeUid: 1,\n            badgeId: \"$_id\",\n            visiteId: \"$visite._id\",\n            clientId: \"$visite.clientId\",\n            token: \"$visite.token\",\n            tableNumero: \"$visite.tableNumero\",\n            dateArrivee: \"$visite.dateArrivee\",\n            statutVisite: \"$visite.statut\"\n        }\n    }\n];\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 660,
+    "y": 260,
+    "wires": [
+      [
+        "f71524b89d49f00d"
+      ]
+    ]
+  },
+  {
+    "id": "f71524b89d49f00d",
+    "type": "mongodb in",
+    "z": "2b65b643ec03a48e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "check badge",
+    "collection": "badges",
+    "operation": "aggregate",
+    "x": 810,
+    "y": 260,
+    "wires": [
+      [
+        "fc585a508fcbc750",
+        "cd31dfa780e6a513"
+      ]
+    ]
+  },
+  {
+    "id": "fc585a508fcbc750",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 26",
+    "func": "// Vérification du résultat MongoDB\nmsg.checkBadgeSuccess = false;\n\nif (!msg.payload || msg.payload.length === 0) {\n    msg.payload = {\n        success: false,\n        error: \"Badge non attribué, ou visite non ouverte\",\n        rpiId: msg.rpiId || null\n    };\n    msg.error = true;\n    return msg;\n}\n\n// Success\nmsg.checkBadgeSuccess = true;\n\nmsg.checkBadge = msg.payload[0];\nnode.warn(\"checkBadge\" + msg.checkBadge);\n\nmsg.payload = {\n    success: true,\n    message: \"Badge valide et visite ouverte\",\n    data: msg.payload[0]\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 970,
+    "y": 260,
+    "wires": [
+      [
+        "a9fc788e12109fa2"
+      ]
+    ]
+  },
+  {
+    "id": "399a5f3de03cbcbb",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "prep produit lookup",
+    "func": "\nif (!msg.checkRpiSuccess || !msg.checkBadgeSuccess || msg.waitingOrderAlreadyExistsForThisVisit){\n    node.warn(\"smartcheers - error\" + msg.checkRpiSuccess + msg.checkBadgeSuccess);\n    msg.error = true;\n    return msg;\n}\n\nnode.warn(\"valid\");\n\nconst command = msg.command;\nconst produitIds = command.map(c => c.produitId);\n\nmsg.payload = [\n    { $match: { produitId: { $in: produitIds } } },\n    {\n        // suppose une collection \"categories\" contenant le champ \"poste\" (bar/cuisine/...)\n        $lookup: {\n            from: \"categories_produits\",\n            localField: \"categorieId\",\n            foreignField: \"_id\",\n            as: \"categorie\"\n        }\n    },\n    { $unwind: { path: \"$categorie\", preserveNullAndEmptyArrays: true } },\n    {\n        $project: {\n            _id: 0,\n            produitId: 1,\n            nom: 1,\n            prix: 1,\n            disponible: 1,\n            poste: \"$categorie.poste\"\n        }\n    }\n];\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 630,
+    "y": 580,
+    "wires": [
+      [
+        "b6c23cd2537721e8"
+      ]
+    ]
+  },
+  {
+    "id": "08f695f75f3faae4",
+    "type": "debug",
+    "z": "2b65b643ec03a48e",
+    "name": "debug 7",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 580,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "45a762e681610b1e",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "refresh",
+    "func": "\nflow.set(\"checkBadgeSuccess\", false)\nflow.set(\"checkRpiSuccess\", false)\n\nmsg.error = false;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 440,
+    "y": 300,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "b6c23cd2537721e8",
+    "type": "mongodb in",
+    "z": "2b65b643ec03a48e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "prep produits",
+    "collection": "produits",
+    "operation": "aggregate",
+    "x": 830,
+    "y": 580,
+    "wires": [
+      [
+        "8c115d1c7936df9a"
+      ]
+    ]
+  },
+  {
+    "id": "8c115d1c7936df9a",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "build commande",
+    "func": "if(msg.error){\n    return msg;\n}\n\nconst produits = msg.payload;\nconst command = msg.command;\n\nconst produitsMap = {};\nproduits.forEach(p => { produitsMap[p.produitId] = p; });\n\nlet montantTotal = 0;\nconst lignes = [];\n\nfor (const item of command) {\n    const produit = produitsMap[item.produitId];\n\n    if (!produit) {\n        msg.payload = { success: false, error: \"Produit inconnu : \" + item.produitId };\n        msg.error = true;\n        return msg;\n    }\n    if (produit.disponible === false) {\n        msg.payload = { success: false, error: \"Produit indisponible : \" + produit.nom };\n        msg.error = true;\n        return msg;\n    }\n\n    montantTotal += produit.prix * item.quantite;\n\n    lignes.push({\n        produitId: item.produitId,\n        produitNomSnapshot: produit.nom,\n        quantite: item.quantite,\n        prixUnitaireSnapshot: produit.prix,\n        statutPreparation: \"attente\",\n        poste: produit.poste || \"bar\"\n    });\n}\n\nmsg.payload = {\n    visiteId: msg.checkBadge ? msg.checkBadge.visiteId : null,\n    employeId: null,\n    dateCommande: new Date(),\n    statut: \"en_attente\",\n    montantTotal: montantTotal,\n    source: \"rpi\",\n    lignes: lignes\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1020,
+    "y": 580,
+    "wires": [
+      [
+        "d1a7ea2835d95b08",
+        "1da22edd9f1f5e61",
+        "2868c4518beda449"
+      ]
+    ]
+  },
+  {
+    "id": "d1a7ea2835d95b08",
+    "type": "mongodb out",
+    "z": "2b65b643ec03a48e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "insert commande",
+    "collection": "commandes",
+    "payonly": true,
+    "upsert": false,
+    "multi": false,
+    "operation": "insert",
+    "x": 1230,
+    "y": 580,
+    "wires": []
+  },
+  {
+    "id": "cd31dfa780e6a513",
+    "type": "debug",
+    "z": "2b65b643ec03a48e",
+    "name": "debug 9",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 960,
+    "y": 300,
+    "wires": []
+  },
+  {
+    "id": "1da22edd9f1f5e61",
+    "type": "delay",
+    "z": "2b65b643ec03a48e",
+    "name": "",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 1180,
+    "y": 700,
+    "wires": [
+      [
+        "ac6de307297a65d8"
+      ]
+    ]
+  },
+  {
+    "id": "ac6de307297a65d8",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 27",
+    "func": "\nmsg.payload = { statut: \"en_attente\", visiteId: msg.checkBadge.visiteId };\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1330,
+    "y": 700,
+    "wires": [
+      [
+        "1f0b5bc53a1cec1b"
+      ]
+    ]
+  },
+  {
+    "id": "a9fc788e12109fa2",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 28",
+    "func": "\nmsg.payload = { statut: \"en_attente\", visiteId: msg.checkBadge.visiteId };\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 590,
+    "y": 420,
+    "wires": [
+      [
+        "261499264c83da10"
+      ]
+    ]
+  },
+  {
+    "id": "261499264c83da10",
+    "type": "mongodb in",
+    "z": "2b65b643ec03a48e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "is already a command ?",
+    "collection": "commandes",
+    "operation": "count",
+    "x": 810,
+    "y": 420,
+    "wires": [
+      [
+        "138835e5718714e3",
+        "43928e5b1b4989d3"
+      ]
+    ]
+  },
+  {
+    "id": "138835e5718714e3",
+    "type": "debug",
+    "z": "2b65b643ec03a48e",
+    "name": "debug 10",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1180,
+    "y": 380,
+    "wires": []
+  },
+  {
+    "id": "43928e5b1b4989d3",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 29",
+    "func": "\nvar waitingOrderAlreadyExistsForThisVisit = true;\nif(msg.payload == 0){\n    waitingOrderAlreadyExistsForThisVisit = false;\n}\n\nmsg.waitingOrderAlreadyExistsForThisVisit = waitingOrderAlreadyExistsForThisVisit;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1030,
+    "y": 420,
+    "wires": [
+      [
+        "399a5f3de03cbcbb"
+      ]
+    ]
+  },
+  {
+    "id": "1f0b5bc53a1cec1b",
+    "type": "mongodb in",
+    "z": "2b65b643ec03a48e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "command created successfully ?",
+    "collection": "commandes",
+    "operation": "find",
+    "x": 1550,
+    "y": 700,
+    "wires": [
+      [
+        "d76eca62d630a99d",
+        "96588191ca980d27"
+      ]
+    ]
+  },
+  {
+    "id": "d76eca62d630a99d",
+    "type": "function",
+    "z": "2b65b643ec03a48e",
+    "name": "function 30",
+    "func": "\nvar orderId = msg.payload[0]._id;\nvar rpiId = msg.checkRpi.rpiId;\n\nmsg.payload = {\n    success: !msg.error,\n    rpiId: rpiId,\n    orderId: orderId\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1190,
+    "y": 800,
+    "wires": [
+      [
+        "b133add3cb794de1",
+        "661f469ae1e370ca"
+      ]
+    ]
+  },
+  {
+    "id": "b133add3cb794de1",
+    "type": "mqtt out",
+    "z": "2b65b643ec03a48e",
+    "name": "send confirmation + id",
+    "topic": "smartcheers/orders/created",
+    "qos": "0",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "e97212349fb30e64",
+    "x": 1420,
+    "y": 800,
+    "wires": []
+  },
+  {
+    "id": "2868c4518beda449",
+    "type": "debug",
+    "z": "2b65b643ec03a48e",
+    "name": "debug 8",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1240,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "96588191ca980d27",
+    "type": "debug",
+    "z": "2b65b643ec03a48e",
+    "name": "debug 11",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1760,
+    "y": 660,
+    "wires": []
+  },
+  {
+    "id": "661f469ae1e370ca",
+    "type": "debug",
+    "z": "2b65b643ec03a48e",
+    "name": "debug 12",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1460,
+    "y": 920,
+    "wires": []
+  },
+  {
+    "id": "e97212349fb30e64",
+    "type": "mqtt-broker",
+    "name": "raspberrypi-hepl",
+    "broker": "192.168.1.12",
+    "port": "8883",
+    "tls": "6ced756f5ea7330e",
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": true,
+    "protocolVersion": "3",
+    "keepalive": 60,
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthRetain": "false",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closeRetain": "false",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willRetain": "false",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "783a5e3707db0d32",
+    "type": "mongodb",
+    "hostname": "mongodb_secondary",
+    "topology": "direct",
+    "connectOptions": "",
+    "port": 27017,
+    "db": "smartpub_db",
+    "name": ""
+  },
+  {
+    "id": "6ced756f5ea7330e",
+    "type": "tls-config",
+    "name": "",
+    "certType": "files",
+    "cert": "",
+    "key": "",
+    "p12": "",
+    "p12name": "",
+    "ca": "",
+    "certname": "client.crt",
+    "keyname": "client.key",
+    "caname": "ca.crt",
+    "servername": "mqtt.smartcheers.local",
+    "verifyservercert": false,
+    "alpnprotocol": "",
+    "certEnv": "",
+    "keyEnv": "",
+    "caEnv": ""
+  },
+  {
+    "id": "18baed771e0e23fa",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-node-mongodb": "0.2.5"
+    }
+  }
+]

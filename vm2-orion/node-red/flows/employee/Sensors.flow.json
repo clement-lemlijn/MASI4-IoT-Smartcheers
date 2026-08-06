@@ -1,0 +1,487 @@
+[
+  {
+    "id": "accb7e149dc8d74a",
+    "type": "tab",
+    "label": "Sensors",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "a77430f44b745ec4",
+    "type": "mqtt in",
+    "z": "accb7e149dc8d74a",
+    "name": "input sensors",
+    "topic": "smartcheers/sensors/public",
+    "qos": "2",
+    "datatype": "auto-detect",
+    "broker": "43ab0497169fffd3",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 230,
+    "y": 240,
+    "wires": [
+      [
+        "d16764129206a2dc",
+        "e19dbd22bf5460a7"
+      ]
+    ]
+  },
+  {
+    "id": "3514b89f3f4fc30a",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 0,
+    "width": "6",
+    "height": "1",
+    "name": "",
+    "label": "Temperature :",
+    "format": "{{msg.payload.temperature}} °C",
+    "layout": "row-left",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 580,
+    "y": 340,
+    "wires": []
+  },
+  {
+    "id": "dc289764a4a3a63b",
+    "type": "inject",
+    "z": "accb7e149dc8d74a",
+    "name": "refresh",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "str",
+    "x": 200,
+    "y": 360,
+    "wires": [
+      [
+        "d16764129206a2dc",
+        "6b153d4094e5a77e",
+        "86263d48899229a2",
+        "acf6aa167a9bcd1c",
+        "3ea5e00412cf69ad"
+      ]
+    ]
+  },
+  {
+    "id": "d16764129206a2dc",
+    "type": "function",
+    "z": "accb7e149dc8d74a",
+    "name": "function 32",
+    "func": "// Conversion du payload MQTT\nlet data = msg.payload.toString().trim();\n\n// Device:esp32h2-102,Temp:22.0,Hum:50.0,Son:705\n\nlet sensor = {};\ndata.split(\",\").forEach(part => {\n    let [key, value] = part.split(\":\");\n    if (!key || !value) {\n        return;\n    }\n    key = key.trim();\n    value = value.trim();\n    switch (key) {\n\n        case \"Device\":\n            sensor.deviceId = value;\n            break;\n\n        case \"Temp\":\n            sensor.temperature = Number(value);\n            break;\n\n        case \"Hum\":\n            sensor.humidity = Number(value);\n            break;\n\n        case \"Son\":\n            sensor.sound = Number(value);\n            break;\n    }\n});\n\nmsg.payload = sensor;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 390,
+    "y": 340,
+    "wires": [
+      [
+        "3514b89f3f4fc30a",
+        "33f687142513098c",
+        "b4978a4f07683546",
+        "5be1846d032340e4"
+      ]
+    ]
+  },
+  {
+    "id": "33f687142513098c",
+    "type": "debug",
+    "z": "accb7e149dc8d74a",
+    "name": "debug 15",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 560,
+    "y": 300,
+    "wires": []
+  },
+  {
+    "id": "e19dbd22bf5460a7",
+    "type": "debug",
+    "z": "accb7e149dc8d74a",
+    "name": "debug 16",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 420,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "b4978a4f07683546",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 0,
+    "width": "6",
+    "height": "1",
+    "name": "",
+    "label": "Humidity :",
+    "format": "{{msg.payload.humidity}}%",
+    "layout": "row-left",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 560,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "5be1846d032340e4",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 0,
+    "width": "6",
+    "height": "1",
+    "name": "",
+    "label": "Sound level :",
+    "format": "{{msg.payload.sound}}",
+    "layout": "row-left",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 570,
+    "y": 460,
+    "wires": []
+  },
+  {
+    "id": "a560b10b2e563060",
+    "type": "ui_slider",
+    "z": "accb7e149dc8d74a",
+    "name": "",
+    "label": "Temp",
+    "tooltip": "",
+    "group": "765f39e9055208ad",
+    "order": 3,
+    "width": "5",
+    "height": "1",
+    "passthru": true,
+    "outs": "all",
+    "topic": "topic",
+    "topicType": "msg",
+    "min": 0,
+    "max": "50",
+    "step": 1,
+    "className": "",
+    "x": 530,
+    "y": 560,
+    "wires": [
+      [
+        "a101b92e43cd0b23"
+      ]
+    ]
+  },
+  {
+    "id": "a101b92e43cd0b23",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 4,
+    "width": "1",
+    "height": "1",
+    "name": "",
+    "label": "",
+    "format": "{{msg.payload}}°C",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 710,
+    "y": 560,
+    "wires": []
+  },
+  {
+    "id": "850f29f72fc56561",
+    "type": "ui_slider",
+    "z": "accb7e149dc8d74a",
+    "name": "",
+    "label": "Hum :",
+    "tooltip": "",
+    "group": "765f39e9055208ad",
+    "order": 3,
+    "width": "5",
+    "height": "1",
+    "passthru": true,
+    "outs": "all",
+    "topic": "topic",
+    "topicType": "msg",
+    "min": 0,
+    "max": "100",
+    "step": 1,
+    "className": "",
+    "x": 530,
+    "y": 620,
+    "wires": [
+      [
+        "958bb22702e4f907"
+      ]
+    ]
+  },
+  {
+    "id": "958bb22702e4f907",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 4,
+    "width": "1",
+    "height": "1",
+    "name": "",
+    "label": "",
+    "format": "{{msg.payload}}%",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 710,
+    "y": 620,
+    "wires": []
+  },
+  {
+    "id": "af88256e0c6493be",
+    "type": "ui_slider",
+    "z": "accb7e149dc8d74a",
+    "name": "",
+    "label": "Sound :",
+    "tooltip": "",
+    "group": "765f39e9055208ad",
+    "order": 3,
+    "width": "5",
+    "height": "1",
+    "passthru": true,
+    "outs": "all",
+    "topic": "topic",
+    "topicType": "msg",
+    "min": 0,
+    "max": "1500",
+    "step": 1,
+    "className": "",
+    "x": 540,
+    "y": 680,
+    "wires": [
+      [
+        "bf4b14ab453b011c"
+      ]
+    ]
+  },
+  {
+    "id": "bf4b14ab453b011c",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 4,
+    "width": "1",
+    "height": "1",
+    "name": "",
+    "label": "",
+    "format": "{{msg.payload}}",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 710,
+    "y": 680,
+    "wires": []
+  },
+  {
+    "id": "2d4f2dbaad49ee4c",
+    "type": "ui_text",
+    "z": "accb7e149dc8d74a",
+    "group": "765f39e9055208ad",
+    "order": 4,
+    "width": "6",
+    "height": "1",
+    "name": "",
+    "label": "Thresholds :",
+    "format": "",
+    "layout": "row-left",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 550,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "6b153d4094e5a77e",
+    "type": "function",
+    "z": "accb7e149dc8d74a",
+    "name": "function 33",
+    "func": "\nmsg.payload = 30;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 390,
+    "y": 560,
+    "wires": [
+      [
+        "a560b10b2e563060"
+      ]
+    ]
+  },
+  {
+    "id": "86263d48899229a2",
+    "type": "function",
+    "z": "accb7e149dc8d74a",
+    "name": "function 34",
+    "func": "\nmsg.payload = 40;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 390,
+    "y": 620,
+    "wires": [
+      [
+        "850f29f72fc56561"
+      ]
+    ]
+  },
+  {
+    "id": "acf6aa167a9bcd1c",
+    "type": "function",
+    "z": "accb7e149dc8d74a",
+    "name": "function 35",
+    "func": "\nmsg.payload = 800;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 390,
+    "y": 680,
+    "wires": [
+      [
+        "af88256e0c6493be"
+      ]
+    ]
+  },
+  {
+    "id": "3ea5e00412cf69ad",
+    "type": "ui_toast",
+    "z": "accb7e149dc8d74a",
+    "position": "dialog",
+    "displayTime": "10",
+    "highlight": "",
+    "sendall": true,
+    "outputs": 1,
+    "ok": "OK",
+    "cancel": "",
+    "raw": false,
+    "className": "",
+    "topic": "",
+    "name": "",
+    "x": 390,
+    "y": 780,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "43ab0497169fffd3",
+    "type": "mqtt-broker",
+    "name": "raspberrypi-hepl-public",
+    "broker": "192.168.1.12",
+    "port": 1883,
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": 4,
+    "keepalive": 60,
+    "cleansession": true,
+    "autoUnsubscribe": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthRetain": "false",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closeRetain": "false",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willRetain": "false",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "765f39e9055208ad",
+    "type": "ui_group",
+    "name": "Default",
+    "tab": "3065a1d8568a1766",
+    "order": 1,
+    "disp": true,
+    "width": 6,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "3065a1d8568a1766",
+    "type": "ui_tab",
+    "name": "Sensors",
+    "icon": "dashboard",
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "4e1c2e55ad8ece0a",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6"
+    }
+  }
+]

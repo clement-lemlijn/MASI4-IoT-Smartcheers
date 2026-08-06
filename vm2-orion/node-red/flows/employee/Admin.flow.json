@@ -1,0 +1,223 @@
+[
+  {
+    "id": "293abe982ff0166e",
+    "type": "tab",
+    "label": "/!\\ Admin /!\\",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "5ea9645969d7e1ec",
+    "type": "ui_text",
+    "z": "293abe982ff0166e",
+    "group": "dcda49b37bf93768",
+    "order": 0,
+    "width": 0,
+    "height": 0,
+    "name": "",
+    "label": "/!\\ Administration /!\\",
+    "format": "",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 330,
+    "y": 280,
+    "wires": []
+  },
+  {
+    "id": "c079e044eadae80c",
+    "type": "ui_text",
+    "z": "293abe982ff0166e",
+    "group": "dcda49b37bf93768",
+    "order": 0,
+    "width": 0,
+    "height": 0,
+    "name": "",
+    "label": "Be careful of your actions !",
+    "format": "",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 360,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "c7db2a176f46c3af",
+    "type": "ui_button",
+    "z": "293abe982ff0166e",
+    "name": "",
+    "group": "dcda49b37bf93768",
+    "order": 2,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "Cancel all orders",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 330,
+    "y": 420,
+    "wires": [
+      [
+        "78b6be98df7ffa5c"
+      ]
+    ]
+  },
+  {
+    "id": "78b6be98df7ffa5c",
+    "type": "function",
+    "z": "293abe982ff0166e",
+    "name": "function 36",
+    "func": "\nmsg.payload = {\n    statut: {\n        $nin: [\"servie\", \"annulee\"]\n    }\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 530,
+    "y": 420,
+    "wires": [
+      [
+        "1bb8ded83e341a3a"
+      ]
+    ]
+  },
+  {
+    "id": "42a65904b9546d10",
+    "type": "mongodb out",
+    "z": "293abe982ff0166e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "cancel all",
+    "collection": "commandes",
+    "payonly": false,
+    "upsert": false,
+    "multi": true,
+    "operation": "update",
+    "x": 1020,
+    "y": 420,
+    "wires": []
+  },
+  {
+    "id": "1bb8ded83e341a3a",
+    "type": "mongodb in",
+    "z": "293abe982ff0166e",
+    "mongodb": "783a5e3707db0d32",
+    "name": "find",
+    "collection": "commandes",
+    "operation": "find",
+    "x": 690,
+    "y": 420,
+    "wires": [
+      [
+        "c235c6c45026f9a0",
+        "541f08ba7d796627"
+      ]
+    ]
+  },
+  {
+    "id": "c235c6c45026f9a0",
+    "type": "function",
+    "z": "293abe982ff0166e",
+    "name": "function 37",
+    "func": "let commandes = msg.payload;\n\nreturn commandes.map(cmd => {\n    return {\n        payload: {\n            _id: cmd._id,\n            statut: \"annulee\"\n        }\n    };\n});",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 850,
+    "y": 420,
+    "wires": [
+      [
+        "42a65904b9546d10",
+        "dbc51d62ad199dca"
+      ]
+    ]
+  },
+  {
+    "id": "541f08ba7d796627",
+    "type": "debug",
+    "z": "293abe982ff0166e",
+    "name": "debug 17",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 860,
+    "y": 340,
+    "wires": []
+  },
+  {
+    "id": "dbc51d62ad199dca",
+    "type": "debug",
+    "z": "293abe982ff0166e",
+    "name": "debug 18",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1020,
+    "y": 380,
+    "wires": []
+  },
+  {
+    "id": "dcda49b37bf93768",
+    "type": "ui_group",
+    "name": "Default",
+    "tab": "29cd6bdb074ca1cd",
+    "order": 1,
+    "disp": true,
+    "width": 6,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "783a5e3707db0d32",
+    "type": "mongodb",
+    "hostname": "mongodb_secondary",
+    "topology": "direct",
+    "connectOptions": "",
+    "port": 27017,
+    "db": "smartpub_db",
+    "name": ""
+  },
+  {
+    "id": "29cd6bdb074ca1cd",
+    "type": "ui_tab",
+    "name": "/!\\ Admin /!\\",
+    "icon": "dashboard",
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "e455e510e092672c",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6",
+      "node-red-node-mongodb": "0.2.5"
+    }
+  }
+]

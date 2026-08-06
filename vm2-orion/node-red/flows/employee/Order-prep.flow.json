@@ -703,7 +703,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "function 16",
-        "func": "var command_id = flow.get(\"commande\")._id\nmsg.topic = \"smartcheers/orders/ready\"\nmsg.payload = command_id;\nreturn msg;",
+        "func": "var command_id = flow.get(\"commande\")._id\nmsg.topic = \"smartcheers/orders/ready\"\n\nmsg.payload = {\n    orderId: command_id\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -849,7 +849,7 @@
         "caEnv": ""
     },
     {
-        "id": "d86272e2fb43855b",
+        "id": "2e077cb93c84a783",
         "type": "global-config",
         "env": [],
         "modules": {
