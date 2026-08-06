@@ -36,7 +36,7 @@
 
 
 #define TAG "ot_sensor_router"
-
+#define DEVICE_ID "esp32h2-102"
 
 // ================= THREAD DATASET =================
 
@@ -231,7 +231,8 @@ static void send_sensor_data(
     snprintf(
         payload,
         sizeof(payload),
-        "Temp:%.1f,Hum:%.1f,Son:%d",
+        "Device:%s,Temp:%.1f,Hum:%.1f,Son:%d",
+        DEVICE_ID,
         temp,
         hum,
         sound
