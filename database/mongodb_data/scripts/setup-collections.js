@@ -99,12 +99,12 @@ db.createCollection("sensors", {
         },
 
         temperature: {
-          bsonType: "double",
+          bsonType: "number",
           description: "Température en degrés Celsius"
         },
 
         humidity: {
-          bsonType: "double",
+          bsonType: "number",
           description: "Humidité relative en pourcentage"
         },
 
