@@ -11,7 +11,8 @@ print(`>> Initialisation de la base ${dbName}`);
 // Nettoyage (optionnel, pratique en dev)
 // ------------------------------------------------------------
 ["raspberrypi", "badges", "clients", "tables", "categories_produits", "produits", "employes",
- "visites", "commandes", "transactions_credit", "menu"].forEach(c => {
+ "visites", "commandes", "transactions_credit", "menu",
+ "sensors"].forEach(c => {
   db[c].drop();
 });
 
@@ -70,6 +71,64 @@ db.createCollection("raspberrypi", {
 db.raspberrypi.createIndex(
   { rpiId: 1 },
   { unique: true }
+);
+
+// ------------------------------------------------------------
+// SENSORS
+// Mesures remontées par les ESP32 Thread
+// Chaque document correspond à une mesure instantanée.
+// ------------------------------------------------------------
+
+db.createCollection("sensors", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: [
+        "deviceId",
+        "temperature",
+        "humidity",
+        "sound",
+        "timestamp"
+      ],
+
+      properties: {
+
+        deviceId: {
+          bsonType: "string",
+          description: "Identifiant unique du capteur ESP32"
+        },
+
+        temperature: {
+          bsonType: "double",
+          description: "Température en degrés Celsius"
+        },
+
+        humidity: {
+          bsonType: "double",
+          description: "Humidité relative en pourcentage"
+        },
+
+        sound: {
+          bsonType: "int",
+          description: "Niveau sonore mesuré"
+        },
+
+        timestamp: {
+          bsonType: "date",
+          description: "Date de la mesure"
+        }
+      }
+    }
+  }
+});
+
+
+// Historique rapide par capteur
+db.sensors.createIndex(
+  {
+    deviceId: 1,
+    timestamp: -1
+  }
 );
 
 // ------------------------------------------------------------
