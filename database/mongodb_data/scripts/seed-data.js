@@ -31,6 +31,32 @@ const rpi2 = db.raspberrypi.findOne({ rpiId: "rpi-002" });
 const rpi2Id = rpi2._id;
 
 // ------------------------------------------------------------
+// SENSORS
+// Capteurs ESP32-H2 de démonstration
+// ------------------------------------------------------------
+
+const sensors = [
+  {
+    _id: randomUUID(),
+    deviceId: "esp32h2-102",
+    temperature: 22.0,
+    humidity: 50.0,
+    sound: 705,
+    timestamp: new Date()
+  },
+  {
+    _id: randomUUID(),
+    deviceId: "esp32h2-103",
+    temperature: 21.5,
+    humidity: 54.0,
+    sound: 420,
+    timestamp: new Date()
+  }
+];
+
+db.sensors.insertMany(sensors);
+
+// ------------------------------------------------------------
 // BADGES (parc limité, réutilisable, indépendant des clients)
 // ------------------------------------------------------------
 const badges = [
