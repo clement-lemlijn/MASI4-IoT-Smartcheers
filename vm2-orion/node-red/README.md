@@ -107,3 +107,7 @@ sudo chmod 600 ./config/certs/node-red.key
 Les certificats sont auto-signés (CA interne `ca.crt`). Pour éviter l'avertissement "site dangereux", il faudrait importer `ca.crt` dans le magasin de certificats de confiance du navigateur utilisé.
 
 
+## Mongodb 
+`mongosh "mongodb://admin:[admin-pwd]@localhost:27017/admin"`
+`mongosh "mongosh "mongodb://nodered:[pwd]@localhost:27017/smartpub_db?authSource=smartpub_db""`
+
