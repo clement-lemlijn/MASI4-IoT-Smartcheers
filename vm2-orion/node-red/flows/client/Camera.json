@@ -1,0 +1,259 @@
+[
+  {
+    "id": "4f3b7070eeed20b2",
+    "type": "tab",
+    "label": "Camera",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "742ae486a6f83108",
+    "type": "ui_template",
+    "z": "4f3b7070eeed20b2",
+    "group": "8ff7d6b5710cca6a",
+    "name": "",
+    "order": 4,
+    "width": "6",
+    "height": "4",
+    "format": "<div style=\"\n    display: flex;\n    justify-content: center;\n    align-items: center;\n\">\n\n    <img\n        id=\"camera\"\n        src=\"http://192.168.1.10:5000/camera/d3775d49\"\n        width=\"200\"\n        style=\"display:none;\"\n    >\n\n    <img\n        id=\"photo\"\n        width=\"200\"\n        style=\"display:none;\"\n    >\n\n</div>\n\n\n<script>\n    (function(scope) {\n\n    scope.$watch('msg', function(msg) {\n\n        if(!msg)\n            return;\n\n\n        if(msg.payload === \"show\") {\n\n            document.getElementById(\"camera\").style.display = \"block\";\n            document.getElementById(\"photo\").style.display = \"none\";\n\n        }\n\n\n        if(msg.payload === \"hide\") {\n\n            document.getElementById(\"camera\").style.display = \"none\";\n            document.getElementById(\"photo\").style.display = \"none\";\n\n        }\n\n\n        if(msg.payload === \"photo\") {\n\n            document.getElementById(\"camera\").style.display = \"none\";\n\n            document.getElementById(\"photo\").src =\n                \"http://192.168.1.10:5000/take/d3775d49?\"\n                + Date.now();\n\n            document.getElementById(\"photo\").style.display = \"block\";\n\n        }\n\n\n    });\n\n\n})(scope);\n\n</script>",
+    "storeOutMessages": true,
+    "fwdInMessages": true,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 500,
+    "y": 300,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "6f60d7a120eb1c30",
+    "type": "ui_button",
+    "z": "4f3b7070eeed20b2",
+    "name": "",
+    "group": "8ff7d6b5710cca6a",
+    "order": 2,
+    "width": "3",
+    "height": "1",
+    "passthru": false,
+    "label": "Show",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "show",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 330,
+    "y": 400,
+    "wires": [
+      [
+        "742ae486a6f83108"
+      ]
+    ]
+  },
+  {
+    "id": "842f44d6a88b4d23",
+    "type": "ui_button",
+    "z": "4f3b7070eeed20b2",
+    "name": "",
+    "group": "8ff7d6b5710cca6a",
+    "order": 3,
+    "width": "3",
+    "height": "1",
+    "passthru": false,
+    "label": "Hide",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "hide",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 330,
+    "y": 440,
+    "wires": [
+      [
+        "742ae486a6f83108"
+      ]
+    ]
+  },
+  {
+    "id": "5efa9bac534e1bec",
+    "type": "ui_button",
+    "z": "4f3b7070eeed20b2",
+    "name": "",
+    "group": "8ff7d6b5710cca6a",
+    "order": 5,
+    "width": "6",
+    "height": "1",
+    "passthru": false,
+    "label": "Take photo",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "photo",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 350,
+    "y": 480,
+    "wires": [
+      [
+        "742ae486a6f83108",
+        "e41f3e993aaa33b1"
+      ]
+    ]
+  },
+  {
+    "id": "299785aa037fe9c0",
+    "type": "http request",
+    "z": "4f3b7070eeed20b2",
+    "name": "",
+    "method": "GET",
+    "ret": "bin",
+    "paytoqs": "ignore",
+    "url": "http://192.168.1.10:5000/take/d3775d49",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "authType": "",
+    "senderr": false,
+    "headers": [],
+    "x": 650,
+    "y": 480,
+    "wires": [
+      [
+        "919537e39d02be82"
+      ]
+    ]
+  },
+  {
+    "id": "e41f3e993aaa33b1",
+    "type": "function",
+    "z": "4f3b7070eeed20b2",
+    "name": "function 5",
+    "func": "\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 520,
+    "y": 540,
+    "wires": [
+      [
+        "299785aa037fe9c0"
+      ]
+    ]
+  },
+  {
+    "id": "da5ce848227ac249",
+    "type": "file",
+    "z": "4f3b7070eeed20b2",
+    "name": "Save photo",
+    "filename": "imagePath",
+    "filenameType": "msg",
+    "appendNewline": false,
+    "createDir": true,
+    "overwriteFile": "true",
+    "encoding": "setbymsg",
+    "x": 990,
+    "y": 480,
+    "wires": [
+      [
+        "694c8a71457a521d"
+      ]
+    ]
+  },
+  {
+    "id": "919537e39d02be82",
+    "type": "function",
+    "z": "4f3b7070eeed20b2",
+    "name": "function 6",
+    "func": "const visitId = \"d3775d49\";\n\nconst now = new Date();\n\nconst filename =\n    \"smcheers-pict_\" +\n    now.getFullYear().toString() +\n    String(now.getMonth() + 1).padStart(2, \"0\") +\n    String(now.getDate()).padStart(2, \"0\") +\n    \"_\" +\n    String(now.getHours()).padStart(2, \"0\") +\n    String(now.getMinutes()).padStart(2, \"0\") +\n    String(now.getSeconds()).padStart(2, \"0\") +\n    \"_\" +\n    Date.now().toString().slice(-3)\n    + \".jpg\";\n\n\nmsg.encoding = \"none\";\n\nmsg.imagePath =\n    `/smartcheers-photos/${visitId}/${filename}`;\n\nmsg.filename = filename;\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 820,
+    "y": 480,
+    "wires": [
+      [
+        "da5ce848227ac249",
+        "6e094ffd1f27d90e"
+      ]
+    ]
+  },
+  {
+    "id": "694c8a71457a521d",
+    "type": "debug",
+    "z": "4f3b7070eeed20b2",
+    "name": "debug 2",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1200,
+    "y": 480,
+    "wires": []
+  },
+  {
+    "id": "6e094ffd1f27d90e",
+    "type": "debug",
+    "z": "4f3b7070eeed20b2",
+    "name": "debug 3",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1000,
+    "y": 400,
+    "wires": []
+  },
+  {
+    "id": "8ff7d6b5710cca6a",
+    "type": "ui_group",
+    "name": "Default",
+    "tab": "fea007e227c9c589",
+    "order": 1,
+    "disp": true,
+    "width": 6,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "fea007e227c9c589",
+    "type": "ui_tab",
+    "name": "Camera",
+    "icon": "dashboard",
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "075e8d42524becd5",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6"
+    }
+  }
+]

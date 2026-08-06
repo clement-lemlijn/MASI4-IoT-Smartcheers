@@ -1,0 +1,179 @@
+[
+  {
+    "id": "19d04a0260af23f7",
+    "type": "tab",
+    "label": "Menu",
+    "disabled": false,
+    "info": "Affichage seul, la commande se fait via le RPI.",
+    "env": []
+  },
+  {
+    "id": "5abbb89ed756712a",
+    "type": "inject",
+    "z": "19d04a0260af23f7",
+    "name": "Au chargement",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 170,
+    "y": 160,
+    "wires": [
+      [
+        "699192e7599e7111"
+      ]
+    ]
+  },
+  {
+    "id": "d26d41a4e9d8df26",
+    "type": "ui_button",
+    "z": "19d04a0260af23f7",
+    "name": "",
+    "group": "5c8ad1cd9777c881",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "refresh",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 170,
+    "y": 220,
+    "wires": [
+      [
+        "699192e7599e7111"
+      ]
+    ]
+  },
+  {
+    "id": "699192e7599e7111",
+    "type": "function",
+    "z": "19d04a0260af23f7",
+    "name": "prep query",
+    "func": "// filtre sur les items disponibles du menu client\nmsg.payload = { disponible: true };\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 380,
+    "y": 190,
+    "wires": [
+      [
+        "434620cf22ac3d69"
+      ]
+    ]
+  },
+  {
+    "id": "434620cf22ac3d69",
+    "type": "mongodb in",
+    "z": "19d04a0260af23f7",
+    "mongodb": "3cfdbcebb776dcac",
+    "name": "get menu",
+    "collection": "menu",
+    "operation": "find",
+    "x": 580,
+    "y": 190,
+    "wires": [
+      [
+        "07a8f9c61187fe8b"
+      ]
+    ]
+  },
+  {
+    "id": "07a8f9c61187fe8b",
+    "type": "function",
+    "z": "19d04a0260af23f7",
+    "name": "group by categorie",
+    "func": "const items = msg.payload || [];\n\nconst grouped = {};\nitems.forEach(function(item) {\n    const cat = item.categorie || \"Autres\";\n    if (!grouped[cat]) grouped[cat] = [];\n    grouped[cat].push({\n        nom: item.nom,\n        prix: item.prix,\n        description: item.description || \"\",\n        imageUrl: item.imageUrl || \"\"\n    });\n});\n\nmsg.payload = grouped;\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 790,
+    "y": 190,
+    "wires": [
+      [
+        "4ceb279af67ac7d8"
+      ]
+    ]
+  },
+  {
+    "id": "4ceb279af67ac7d8",
+    "type": "ui_template",
+    "z": "19d04a0260af23f7",
+    "group": "5c8ad1cd9777c881",
+    "name": "Affichage menu",
+    "order": 2,
+    "width": "6",
+    "height": "10",
+    "format": "<div style=\"font-family: sans-serif;\">\n  <div ng-repeat=\"(categorie, articles) in msg.payload\">\n    <h2>{{categorie}}</h2>\n    <div ng-repeat=\"item in articles\" style=\"display:flex; align-items:center; gap:12px; border-bottom:1px solid #eee; padding:8px 0;\">\n      <img ng-if=\"item.imageUrl\" ng-src=\"{{item.imageUrl}}\" style=\"width:56px; height:56px; object-fit:cover; border-radius:8px; flex-shrink:0;\">\n      <div style=\"flex:1;\">\n        <b>{{item.nom}}</b>\n        <div style=\"font-size:0.85em; color:#666;\" ng-if=\"item.description\">{{item.description}}</div>\n      </div>\n      <div style=\"white-space:nowrap;\">{{item.prix}} EUR</div>\n    </div>\n  </div>\n</div>",
+    "storeOutMessages": true,
+    "fwdInMessages": false,
+    "resendOnRefresh": false,
+    "templateScope": "local",
+    "className": "",
+    "x": 400,
+    "y": 260,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "5c8ad1cd9777c881",
+    "type": "ui_group",
+    "name": "Menu",
+    "tab": "b27974dcae3be71c",
+    "order": 1,
+    "disp": true,
+    "width": "6",
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "3cfdbcebb776dcac",
+    "type": "mongodb",
+    "hostname": "mongodb_secondary",
+    "topology": "direct",
+    "connectOptions": "",
+    "port": "27017",
+    "db": "smartpub_db",
+    "name": ""
+  },
+  {
+    "id": "b27974dcae3be71c",
+    "type": "ui_tab",
+    "name": "SmartPub - Menu",
+    "icon": "dashboard",
+    "order": 3,
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "9f6e937be05f9fe0",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6",
+      "node-red-node-mongodb": "0.2.5"
+    }
+  }
+]

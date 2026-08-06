@@ -1,0 +1,131 @@
+[
+  {
+    "id": "7b7018c8c81666ae",
+    "type": "tab",
+    "label": "Home - Init Token",
+    "disabled": false,
+    "info": "POC : isolation des tables via token dans l'URL, avec les elements UI de node-red-dashboard.\n\nTest :\nhttp://<host>:1880/ui/?t=<token>#!/1\n\n(Le token est lu cote client via window.location.search, PAS par un http-in cote serveur.\nLe query string DOIT etre place avant le # : ?t=xxx#!/1)\n\nLes reponses restent isolees par client grace a msg._client, ajoute automatiquement\npar node-red-dashboard et propage tel quel a travers les nodes function/mongodb.\n\nNecessite le module 'node-red-dashboard' installe dans Node-RED.",
+    "env": []
+  },
+  {
+    "id": "9f129de6b9a9e8d1",
+    "type": "ui_template",
+    "z": "7b7018c8c81666ae",
+    "group": "88fbe5f32b3f23e6",
+    "name": "Vue table (isolation via token)",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "format": "<div ng-init=\"init()\" style=\"font-family: sans-serif;\">\n  <div ng-if=\"loading\">\n    <p>Chargement...</p>\n  </div>\n  <div ng-if=\"error\" class=\"card\">\n    <h1>Acces refuse</h1>\n    <p>{{errorMessage}}</p>\n  </div>\n  <!-- <div ng-if=\"data\" class=\"card\">\n    <h1>Table {{data.tableNumero}}</h1>\n    <p class=\"info\">Arrivee : {{data.dateArrivee | date:'dd/MM/yyyy HH:mm'}}</p>\n    <p class=\"info\">Total : {{data.montantTotal}} EUR</p>\n    <h3>Commandes</h3>\n    <p ng-if=\"data.commandes.length === 0\">Aucune commande</p>\n    <div class=\"commande\" ng-repeat=\"cmd in data.commandes\">\n      <p>Statut : <span class=\"statut\">{{cmd.statut}}</span></p>\n      <ul>\n        <li ng-repeat=\"a in cmd.articles\">{{a}}</li>\n      </ul>\n    </div>\n  </div> -->\n</div>\n\n<style>\n  .card { background: white; border-radius: 12px; padding: 20px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\n  .info { color: #555; }\n  .commande { border-top: 1px solid #ddd; margin-top: 15px; padding-top: 10px; }\n  .statut { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #ffedcc; color: #a05a00; font-weight: bold; }\n  ul { padding-left: 20px; }\n</style>\n\n<script>\n(function(scope) {\n  scope.loading = true;\n  scope.error = false;\n  scope.errorMessage = \"\";\n  scope.data = null;\n\n  scope.init = function() {\n    var params = new URLSearchParams(window.location.search);\n    var t = params.get('t');\n    if (!t) {\n      scope.loading = false;\n      scope.error = true;\n      scope.errorMessage = \"Aucun token fourni dans l'URL.\";\n      return;\n    }\n    scope.send({ payload: { token: t } });\n  };\n\n  scope.$watch('msg', function(msg) {\n    if (!msg) return;\n    scope.loading = false;\n    if (msg.payload && msg.payload.error) {\n      scope.error = true;\n      scope.errorMessage = msg.payload.message || \"Erreur inconnue.\";\n      scope.data = null;\n    } else {\n      scope.error = false;\n      scope.data = msg.payload;\n    }\n  });\n})(scope);\n</script>\n",
+    "storeOutMessages": true,
+    "fwdInMessages": false,
+    "resendOnRefresh": false,
+    "templateScope": "local",
+    "className": "",
+    "x": 600,
+    "y": 300,
+    "wires": [
+      [
+        "80884efd9aca8433"
+      ]
+    ]
+  },
+  {
+    "id": "80884efd9aca8433",
+    "type": "function",
+    "z": "7b7018c8c81666ae",
+    "name": "function 1 - lookup token",
+    "func": "// Recupere le token envoye par le template UI (cote client)\n// msg._client est preserve automatiquement (on ne le touche pas)\nconst token = msg.payload && msg.payload.token;\n\nif (!token) {\n    msg.payload = { error: true, message: \"Lien invalide ou expire.\" };\n    return [null, msg];\n}\n\nflow.set('lookup_token', token);\n\nmsg.payload = [\n    {\n        $match: {\n            token: token,\n            statut: \"ouverte\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"commandes\",\n            localField: \"_id\",\n            foreignField: \"visiteId\",\n            as: \"commandes\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            badgeId: 1,\n            clientId: 1,\n            dateArrivee: 1,\n            montantTotalVisite: 1,\n            commandes: 1\n        }\n    }\n];\n\nreturn [msg, null];\n",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 190,
+    "y": 160,
+    "wires": [
+      [
+        "1421f3a24931e4fc"
+      ],
+      [
+        "9f129de6b9a9e8d1"
+      ]
+    ]
+  },
+  {
+    "id": "1421f3a24931e4fc",
+    "type": "mongodb in",
+    "z": "7b7018c8c81666ae",
+    "mongodb": "3cfdbcebb776dcac",
+    "name": "get visite",
+    "collection": "visites",
+    "operation": "aggregate",
+    "x": 400,
+    "y": 160,
+    "wires": [
+      [
+        "7a2e649f5971f60d"
+      ]
+    ]
+  },
+  {
+    "id": "7a2e649f5971f60d",
+    "type": "function",
+    "z": "7b7018c8c81666ae",
+    "name": "function 2 - build payload",
+    "func": "const visite = msg.payload[0];\n\nglobal.set(\"visitId\", visite._id);\n\nif (!visite) {\n    msg.payload = { error: true, message: \"Aucune visite trouvee pour ce token.\" };\n    return msg;\n}\n\nmsg.payload = {\n    tableNumero: visite.tableNumero,\n    dateArrivee: visite.dateArrivee,\n    montantTotal: visite.montantTotalVisite,\n    commandes: (visite.commandes || []).map(function(cmd) {\n        return {\n            statut: cmd.statut || \"En attente\",\n            articles: cmd.articles || []\n        };\n    })\n};\n\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 600,
+    "y": 160,
+    "wires": [
+      [
+        "9f129de6b9a9e8d1"
+      ]
+    ]
+  },
+  {
+    "id": "88fbe5f32b3f23e6",
+    "type": "ui_group",
+    "name": "Home",
+    "tab": "8bbfebdace6174cd",
+    "order": 1,
+    "disp": true,
+    "width": "6",
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "3cfdbcebb776dcac",
+    "type": "mongodb",
+    "hostname": "mongodb_secondary",
+    "topology": "direct",
+    "connectOptions": "",
+    "port": "27017",
+    "db": "smartpub_db",
+    "name": ""
+  },
+  {
+    "id": "8bbfebdace6174cd",
+    "type": "ui_tab",
+    "name": "SmartPub - Home",
+    "icon": "dashboard",
+    "order": 1,
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "f16f63bb828b7bbe",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6",
+      "node-red-node-mongodb": "0.2.5"
+    }
+  }
+]

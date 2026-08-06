@@ -1,0 +1,340 @@
+[
+    {
+        "id": "296759a92d9f05a6",
+        "type": "tab",
+        "label": "Home",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "e314cbd2ecc6c896",
+        "type": "function",
+        "z": "296759a92d9f05a6",
+        "name": "function 1",
+        "func": "var visitId = global.get(\"visitId\");\n\nmsg.payload = [\n    { $match: { _id: visitId } },\n    {\n        $lookup: {\n            from: \"clients\",\n            localField: \"clientId\",\n            foreignField: \"_id\",\n            as: \"client\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            montantTotalVisite: 1,\n            client: { $arrayElemAt: [\"$client\", 0] }\n        }\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 220,
+        "wires": [
+            [
+                "c6f89c9cd987578e"
+            ]
+        ]
+    },
+    {
+        "id": "8efec9ecae354c61",
+        "type": "inject",
+        "z": "296759a92d9f05a6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "visitId",
+        "payloadType": "global",
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "e314cbd2ecc6c896"
+            ]
+        ]
+    },
+    {
+        "id": "c6f89c9cd987578e",
+        "type": "mongodb in",
+        "z": "296759a92d9f05a6",
+        "mongodb": "3cfdbcebb776dcac",
+        "name": "find visit",
+        "collection": "visites",
+        "operation": "aggregate",
+        "x": 480,
+        "y": 220,
+        "wires": [
+            [
+                "5179b1702b621d3a",
+                "95658902746da2fb"
+            ]
+        ]
+    },
+    {
+        "id": "5179b1702b621d3a",
+        "type": "function",
+        "z": "296759a92d9f05a6",
+        "name": "function 2",
+        "func": "flow.set(\"visit\", msg.payload[0])\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 220,
+        "wires": [
+            [
+                "f5baa600df9ada7d",
+                "4a2e4e36d64a8eb5"
+            ]
+        ]
+    },
+    {
+        "id": "f5baa600df9ada7d",
+        "type": "ui_text",
+        "z": "296759a92d9f05a6",
+        "group": "88fbe5f32b3f23e6",
+        "order": 2,
+        "width": "2",
+        "height": "1",
+        "name": "",
+        "label": "Table n°",
+        "format": "{{msg.payload[0].tableNumero}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 440,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "4a2e4e36d64a8eb5",
+        "type": "ui_text",
+        "z": "296759a92d9f05a6",
+        "group": "88fbe5f32b3f23e6",
+        "order": 1,
+        "width": "6",
+        "height": "1",
+        "name": "",
+        "label": "",
+        "format": "Bonjour {{msg.payload[0].client.prenom}} {{msg.payload[0].client.nom}} !",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 22,
+        "color": "#000000",
+        "x": 440,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "9e5bfe80a3b8c5f4",
+        "type": "ui_button",
+        "z": "296759a92d9f05a6",
+        "name": "",
+        "group": "88fbe5f32b3f23e6",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "refresh",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 140,
+        "y": 180,
+        "wires": [
+            [
+                "e314cbd2ecc6c896"
+            ]
+        ]
+    },
+    {
+        "id": "95658902746da2fb",
+        "type": "debug",
+        "z": "296759a92d9f05a6",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "799d72db0a7ab91a",
+        "type": "ui_button",
+        "z": "296759a92d9f05a6",
+        "name": "",
+        "group": "88fbe5f32b3f23e6",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Appeler un serveur",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 390,
+        "y": 500,
+        "wires": [
+            [
+                "3d9ee02f9c776898"
+            ]
+        ]
+    },
+    {
+        "id": "f957d2f369ab41bd",
+        "type": "mqtt out",
+        "z": "296759a92d9f05a6",
+        "name": "",
+        "topic": "",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "04edffd6b331dda5",
+        "x": 730,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "3d9ee02f9c776898",
+        "type": "function",
+        "z": "296759a92d9f05a6",
+        "name": "function 4",
+        "func": "\nmsg.topic = \"smartcheers/call-attendant/table/\" + msg.payload.tableNumero\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 500,
+        "wires": [
+            [
+                "f957d2f369ab41bd"
+            ]
+        ]
+    },
+    {
+        "id": "3cfdbcebb776dcac",
+        "type": "mongodb",
+        "hostname": "mongodb_secondary",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": "27017",
+        "db": "smartpub_db",
+        "name": ""
+    },
+    {
+        "id": "88fbe5f32b3f23e6",
+        "type": "ui_group",
+        "name": "Home",
+        "tab": "8bbfebdace6174cd",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "04edffd6b331dda5",
+        "type": "mqtt-broker",
+        "name": "hepl-raspberrypi",
+        "broker": "192.168.1.12",
+        "port": "8883",
+        "tls": "d2a31eae2f40e77a",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "8bbfebdace6174cd",
+        "type": "ui_tab",
+        "name": "SmartPub - Home",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "d2a31eae2f40e77a",
+        "type": "tls-config",
+        "name": "",
+        "certType": "files",
+        "cert": "",
+        "key": "",
+        "p12": "",
+        "p12name": "",
+        "ca": "",
+        "certname": "client.crt",
+        "keyname": "client.key",
+        "caname": "ca.crt",
+        "servername": "",
+        "verifyservercert": true,
+        "alpnprotocol": "",
+        "certEnv": "",
+        "keyEnv": "",
+        "caEnv": ""
+    },
+    {
+        "id": "ac2bda9935a76046",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-node-mongodb": "0.2.5",
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]

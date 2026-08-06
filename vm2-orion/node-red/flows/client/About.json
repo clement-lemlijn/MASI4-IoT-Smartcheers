@@ -1,0 +1,172 @@
+[
+  {
+    "id": "f7f289ecf2ff818b",
+    "type": "tab",
+    "label": "About",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "6db9be644ec359d5",
+    "type": "inject",
+    "z": "f7f289ecf2ff818b",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "visitId",
+    "payloadType": "global",
+    "x": 230,
+    "y": 340,
+    "wires": [
+      [
+        "7d9ee59836674dbe"
+      ]
+    ]
+  },
+  {
+    "id": "9da2fb39174b7a22",
+    "type": "ui_button",
+    "z": "f7f289ecf2ff818b",
+    "name": "",
+    "group": "09fad32b55bd6843",
+    "order": 1,
+    "width": "3",
+    "height": "1",
+    "passthru": false,
+    "label": "refresh",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 220,
+    "y": 300,
+    "wires": [
+      [
+        "7d9ee59836674dbe"
+      ]
+    ]
+  },
+  {
+    "id": "3b8691946a2430ca",
+    "type": "ui_text",
+    "z": "f7f289ecf2ff818b",
+    "group": "09fad32b55bd6843",
+    "order": 2,
+    "width": "6",
+    "height": "2",
+    "name": "",
+    "label": "Smartcheers est une entreprise qui équipe plusieurs bars dans la région Liégeoise dont \"Smartpub\". Smartcheers vous souhaite une bonne dégustation 🍻. ",
+    "format": "",
+    "layout": "row-spread",
+    "className": "",
+    "style": false,
+    "font": "",
+    "fontSize": 16,
+    "color": "#000000",
+    "x": 720,
+    "y": 580,
+    "wires": []
+  },
+  {
+    "id": "7d9ee59836674dbe",
+    "type": "function",
+    "z": "f7f289ecf2ff818b",
+    "name": "function 3",
+    "func": "msg.payload = [\n    {\n        name: \"Le Pot au Lait\",\n        lat: 50.6421,\n        lon: 5.5765,\n        icon: \"glass\",\n        layer: \"Bars\",\n        popup: \"<b>Le Pot au Lait</b><br>Bar emblématique de Liège\"\n    },\n    {\n        name: \"Café Lequet\",\n        lat: 50.6406,\n        lon: 5.5793,\n        icon: \"glass\",\n        layer: \"Bars\",\n        popup: \"<b>Café Lequet</b><br>Boulets à la liégeoise\"\n    },\n    {\n        name: \"Beer Lovers' Café\",\n        lat: 50.6388,\n        lon: 5.5717,\n        icon: \"glass\",\n        layer: \"Bars\",\n        popup: \"<b>Beer Lovers' Café</b><br>Large choix de bières\"\n    },\n    {\n        name: \"Brasserie C\",\n        lat: 50.6458,\n        lon: 5.5810,\n        icon: \"glass\",\n        layer: \"Bars\",\n        popup: \"<b>Brasserie C</b><br>Microbrasserie Curtius\"\n    }\n];\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 480,
+    "wires": [
+      [
+        "b998e45312aeceb3"
+      ]
+    ]
+  },
+  {
+    "id": "b998e45312aeceb3",
+    "type": "ui_worldmap",
+    "z": "f7f289ecf2ff818b",
+    "group": "09fad32b55bd6843",
+    "order": 3,
+    "width": "6",
+    "height": "12",
+    "name": "",
+    "lat": "",
+    "lon": "",
+    "zoom": "",
+    "layer": "OSMG",
+    "cluster": "",
+    "maxage": "",
+    "usermenu": "hide",
+    "layers": "hide",
+    "panit": "false",
+    "panlock": "false",
+    "zoomlock": "false",
+    "hiderightclick": "true",
+    "coords": "none",
+    "showgrid": "false",
+    "showruler": "false",
+    "allowFileDrop": "false",
+    "path": "/worldmap",
+    "overlist": "DR,CO,RA,DN,HM",
+    "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriDG,UKOS",
+    "mapname": "",
+    "mapurl": "",
+    "mapopt": "",
+    "mapwms": false,
+    "x": 500,
+    "y": 480,
+    "wires": []
+  },
+  {
+    "id": "09fad32b55bd6843",
+    "type": "ui_group",
+    "name": "Default",
+    "tab": "a4cde3dd2ea0ea5c",
+    "order": 2,
+    "disp": false,
+    "width": 6,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "a4cde3dd2ea0ea5c",
+    "type": "ui_tab",
+    "name": "Smartpub - About",
+    "icon": "dashboard",
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "a03d589864e1908b",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6",
+      "node-red-contrib-web-worldmap": "5.8.1"
+    }
+  }
+]

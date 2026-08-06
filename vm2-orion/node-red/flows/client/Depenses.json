@@ -1,0 +1,179 @@
+[
+  {
+    "id": "c1de5e0fa5cd6af2",
+    "type": "tab",
+    "label": "Depenses",
+    "disabled": false,
+    "info": "Page separee pour ne pas afficher le montant sur l'accueil.",
+    "env": []
+  },
+  {
+    "id": "a0b6cec496caec40",
+    "type": "inject",
+    "z": "c1de5e0fa5cd6af2",
+    "name": "Au chargement",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 170,
+    "y": 160,
+    "wires": [
+      [
+        "26f5ea29585e7b37"
+      ]
+    ]
+  },
+  {
+    "id": "c56496941ea0c86d",
+    "type": "ui_button",
+    "z": "c1de5e0fa5cd6af2",
+    "name": "",
+    "group": "b78f98b223ec2640",
+    "order": 1,
+    "width": 0,
+    "height": 0,
+    "passthru": false,
+    "label": "refresh",
+    "tooltip": "",
+    "color": "",
+    "bgcolor": "",
+    "className": "",
+    "icon": "",
+    "payload": "",
+    "payloadType": "str",
+    "topic": "topic",
+    "topicType": "msg",
+    "x": 170,
+    "y": 220,
+    "wires": [
+      [
+        "26f5ea29585e7b37"
+      ]
+    ]
+  },
+  {
+    "id": "26f5ea29585e7b37",
+    "type": "function",
+    "z": "c1de5e0fa5cd6af2",
+    "name": "prep aggregate",
+    "func": "var visitId = global.get(\"visitId\");\n\nmsg.payload = [\n    { $match: { _id: visitId } },\n    {\n        $lookup: {\n            from: \"commandes\",\n            localField: \"_id\",\n            foreignField: \"visiteId\",\n            as: \"commandes\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            montantTotalVisite: 1,\n            commandes: 1\n        }\n    }\n];\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 380,
+    "y": 190,
+    "wires": [
+      [
+        "038a9ba4424067bf"
+      ]
+    ]
+  },
+  {
+    "id": "038a9ba4424067bf",
+    "type": "mongodb in",
+    "z": "c1de5e0fa5cd6af2",
+    "mongodb": "3cfdbcebb776dcac",
+    "name": "get visite",
+    "collection": "visites",
+    "operation": "aggregate",
+    "x": 570,
+    "y": 190,
+    "wires": [
+      [
+        "fe2e88050bd41ae1"
+      ]
+    ]
+  },
+  {
+    "id": "fe2e88050bd41ae1",
+    "type": "function",
+    "z": "c1de5e0fa5cd6af2",
+    "name": "build payload",
+    "func": "const visite = msg.payload[0];\n\nif (!visite) {\n    msg.payload = { error: true, message: \"Aucune visite en cours.\" };\n    return msg;\n}\n\nmsg.payload = {\n    total: visite.montantTotalVisite || 0,\n    commandes: (visite.commandes || []).map(function(cmd) {\n        return {\n            statut: cmd.statut || \"En attente\",\n            articles: cmd.articles || []\n        };\n    })\n};\n\nreturn msg;",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 780,
+    "y": 190,
+    "wires": [
+      [
+        "96ec718bf54823ca"
+      ]
+    ]
+  },
+  {
+    "id": "96ec718bf54823ca",
+    "type": "ui_template",
+    "z": "c1de5e0fa5cd6af2",
+    "group": "b78f98b223ec2640",
+    "name": "Affichage depenses",
+    "order": 2,
+    "width": 0,
+    "height": 0,
+    "format": "<div style=\"font-family: sans-serif;\">\n  <div ng-if=\"msg.payload.error\">\n    <p>{{msg.payload.message}}</p>\n  </div>\n  <div ng-if=\"!msg.payload.error\">\n    <h2>Total : {{msg.payload.total}} EUR</h2>\n    <div ng-repeat=\"cmd in msg.payload.commandes\" style=\"border-top:1px solid #ddd; margin-top:10px; padding-top:10px;\">\n      <p>Statut : <b>{{cmd.statut}}</b></p>\n      <ul>\n        <li ng-repeat=\"a in cmd.articles\">{{a}}</li>\n      </ul>\n    </div>\n  </div>\n</div>",
+    "storeOutMessages": true,
+    "fwdInMessages": false,
+    "resendOnRefresh": false,
+    "templateScope": "local",
+    "className": "",
+    "x": 400,
+    "y": 260,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "b78f98b223ec2640",
+    "type": "ui_group",
+    "name": "Depenses",
+    "tab": "1fd93298a2907ef6",
+    "order": 1,
+    "disp": true,
+    "width": "6",
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "3cfdbcebb776dcac",
+    "type": "mongodb",
+    "hostname": "mongodb_secondary",
+    "topology": "direct",
+    "connectOptions": "",
+    "port": "27017",
+    "db": "smartpub_db",
+    "name": ""
+  },
+  {
+    "id": "1fd93298a2907ef6",
+    "type": "ui_tab",
+    "name": "SmartPub - Depenses",
+    "icon": "dashboard",
+    "order": 2,
+    "disabled": false,
+    "hidden": false
+  },
+  {
+    "id": "48b5ffbbc2d136a1",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "node-red-dashboard": "3.6.6",
+      "node-red-node-mongodb": "0.2.5"
+    }
+  }
+]
