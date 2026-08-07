@@ -54,7 +54,7 @@ def mqtt_publish(payload, mqtt_topic):
         time.sleep(0.5)
         client.loop_stop()
         client.disconnect()
-        print("✅ Message envoyé")
+        # print("✅ Message envoyé")
         return True
 
     except Exception as e:
