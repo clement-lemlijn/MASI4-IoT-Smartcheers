@@ -105,23 +105,7 @@
         "y": 340,
         "wires": [
             [
-                "e5262b5db308f501"
-            ]
-        ]
-    },
-    {
-        "id": "e5262b5db308f501",
-        "type": "mongodb in",
-        "z": "5a5712cb8a4e9fe2",
-        "mongodb": "783a5e3707db0d32",
-        "name": "count orders",
-        "collection": "commandes",
-        "operation": "count",
-        "x": 610,
-        "y": 340,
-        "wires": [
-            [
-                "e6b5a2a1ff850f29"
+                "20f70b84d53fe877"
             ]
         ]
     },
@@ -130,7 +114,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "function 12",
-        "func": "msg.payload = \"\";\nmsg.payload = [\n    {\n        $match: {\n            statut: \"en_attente\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            localField: \"visiteId\",\n            foreignField: \"_id\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        $project: {\n            _id: 1,\n            dateCommande: 1,\n            statut: 1,\n            montantTotal: 1,\n            lignes: 1,\n            tableNumero: \"$visite.tableNumero\"\n        }\n    }\n];\n\nreturn msg;",
+        "func": "msg.payload = \"\";\nconst pipeline = [\n    {\n        $match: {\n            statut: \"en_attente\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            localField: \"visiteId\",\n            foreignField: \"_id\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        $project: {\n            _id: 1,\n            dateCommande: 1,\n            statut: 1,\n            montantTotal: 1,\n            lignes: 1,\n            tableNumero: \"$visite.tableNumero\"\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -141,23 +125,7 @@
         "y": 420,
         "wires": [
             [
-                "b5d27908f9e2c8c4"
-            ]
-        ]
-    },
-    {
-        "id": "b5d27908f9e2c8c4",
-        "type": "mongodb in",
-        "z": "5a5712cb8a4e9fe2",
-        "mongodb": "783a5e3707db0d32",
-        "name": "find orders",
-        "collection": "commandes",
-        "operation": "aggregate",
-        "x": 620,
-        "y": 420,
-        "wires": [
-            [
-                "bc5427385503ea66"
+                "855a4f5e8e6e3111"
             ]
         ]
     },
@@ -204,32 +172,7 @@
         "y": 420,
         "wires": [
             [
-                "95952adbebed8b2d"
-            ]
-        ]
-    },
-    {
-        "id": "95952adbebed8b2d",
-        "type": "mongodb in",
-        "z": "5a5712cb8a4e9fe2",
-        "mongodb": "783a5e3707db0d32",
-        "name": "findbyid",
-        "collection": "commandes",
-        "operation": "find",
-        "x": 300,
-        "y": 560,
-        "wires": [
-            [
-                "3d9c50c169413f16",
-                "1339a5260f7b92c4",
-                "8456df9f66d7b036",
-                "1fe9b55664960364",
-                "26136f6358bd07e5",
-                "3f1c7f2020e4ac62",
-                "27222792a71d0c5e",
-                "520f28145f201978",
-                "44427b66ac3e85c9",
-                "be1e1d1da6581e20"
+                "bd4dce9f3fa1532b"
             ]
         ]
     },
@@ -259,7 +202,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb coca",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Coca\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Coca\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -279,7 +222,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb fanta",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Fanta\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Fanta\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -299,7 +242,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb sprite",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Sprite\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Sprite\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -319,7 +262,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb biere",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Biere\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Biere\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -339,7 +282,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb chips",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Chips\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Chips\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -359,7 +302,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb sauci",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Saucisson\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Saucisson\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -379,7 +322,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "f nb pizza",
-        "func": "var nbCocas = 0;\n\nmsg.payload.forEach(commande => {\n    commande.lignes.forEach(ligne => {\n        if (ligne.produitNomSnapshot === \"Pizza\") {\n            nbCocas += ligne.quantite;\n        }\n    });\n});\n\nmsg.payload = \"x\" + nbCocas;\nreturn msg;",
+        "func": "var nbProduits = 0;\n\nmsg.payload.lignes.forEach(ligne => {\n    if (ligne.produitNomSnapshot === \"Pizza\") {\n        nbProduits += ligne.quantite;\n    }\n});\n\nmsg.payload = \"x\" + nbProduits;\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -554,14 +497,14 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "refresh",
-        "func": "msg.payload = \"0x\";\nreturn msg;",
+        "func": "msg.payload = \"x0\";\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 600,
+        "x": 580,
         "y": 520,
         "wires": [
             [
@@ -580,7 +523,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "function 14",
-        "func": "msg.query = {\n    _id: msg.payload._id\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"prete\"\n    }\n};\n\nreturn msg;",
+        "func": "const id = msg.payload._id;\n\nmsg.payload = [\n    {\n        _id: id\n    },\n    {\n        $set: {\n            statut: \"prete\"\n        }\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -592,27 +535,11 @@
         "wires": [
             [
                 "8fd843d7653e479e",
-                "6fe9625a516e04ad",
                 "1ada2be22d569d96",
-                "9e577004a7c332d6"
+                "9e577004a7c332d6",
+                "1c1754b2fada1171"
             ]
         ]
-    },
-    {
-        "id": "520f28145f201978",
-        "type": "debug",
-        "z": "5a5712cb8a4e9fe2",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 260,
-        "y": 720,
-        "wires": []
     },
     {
         "id": "80351c716a03798b",
@@ -636,7 +563,7 @@
         "type": "function",
         "z": "5a5712cb8a4e9fe2",
         "name": "function 15",
-        "func": "flow.set(\"commande\", msg.payload[0])",
+        "func": "flow.set(\"commande\", msg.payload)",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -663,21 +590,6 @@
         "statusType": "auto",
         "x": 980,
         "y": 920,
-        "wires": []
-    },
-    {
-        "id": "6fe9625a516e04ad",
-        "type": "mongodb out",
-        "z": "5a5712cb8a4e9fe2",
-        "mongodb": "783a5e3707db0d32",
-        "name": "set ready",
-        "collection": "commandes",
-        "payonly": false,
-        "upsert": false,
-        "multi": false,
-        "operation": "update",
-        "x": 980,
-        "y": 860,
         "wires": []
     },
     {
@@ -757,6 +669,109 @@
         ]
     },
     {
+        "id": "20f70b84d53fe877",
+        "type": "mongodb4",
+        "z": "5a5712cb8a4e9fe2",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "commandes",
+        "operation": "count",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "count orders",
+        "x": 610,
+        "y": 340,
+        "wires": [
+            [
+                "e6b5a2a1ff850f29"
+            ]
+        ]
+    },
+    {
+        "id": "855a4f5e8e6e3111",
+        "type": "mongodb4",
+        "z": "5a5712cb8a4e9fe2",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "commandes",
+        "operation": "aggregate",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 620,
+        "y": 420,
+        "wires": [
+            [
+                "bc5427385503ea66"
+            ]
+        ]
+    },
+    {
+        "id": "bd4dce9f3fa1532b",
+        "type": "mongodb4",
+        "z": "5a5712cb8a4e9fe2",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "commandes",
+        "operation": "findOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 280,
+        "y": 540,
+        "wires": [
+            [
+                "be1e1d1da6581e20",
+                "3d9c50c169413f16",
+                "1339a5260f7b92c4",
+                "8456df9f66d7b036",
+                "1fe9b55664960364",
+                "26136f6358bd07e5",
+                "3f1c7f2020e4ac62",
+                "27222792a71d0c5e",
+                "e3d9ae90db18fad0",
+                "44427b66ac3e85c9"
+            ]
+        ]
+    },
+    {
+        "id": "e3d9ae90db18fad0",
+        "type": "debug",
+        "z": "5a5712cb8a4e9fe2",
+        "name": "debug 17",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 240,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "1c1754b2fada1171",
+        "type": "mongodb4",
+        "z": "5a5712cb8a4e9fe2",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "commandes",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 1010,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "7b0b0c8708135aea",
         "type": "ui_group",
         "name": "Header",
@@ -766,16 +781,6 @@
         "width": 6,
         "collapse": false,
         "className": ""
-    },
-    {
-        "id": "783a5e3707db0d32",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": 27017,
-        "db": "smartpub_db",
-        "name": ""
     },
     {
         "id": "1197726a177976b6",
@@ -821,6 +826,30 @@
         "sessionExpiry": ""
     },
     {
+        "id": "b441ec75b37a2af8",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
+    },
+    {
         "id": "2b17d02c34e78f35",
         "type": "ui_tab",
         "name": "Order prep",
@@ -849,12 +878,12 @@
         "caEnv": ""
     },
     {
-        "id": "2e077cb93c84a783",
+        "id": "244dfbac04988b15",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-node-mongodb": "0.2.5"
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]

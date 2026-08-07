@@ -91,7 +91,7 @@
         "type": "function",
         "z": "5472442e8b1089cc",
         "name": "function 10",
-        "func": "msg.payload = { statut: \"en_attente\" };\nreturn msg;",
+        "func": "msg.payload = [\n    {\n        statut: \"en_attente\"\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -102,23 +102,7 @@
         "y": 400,
         "wires": [
             [
-                "7b6159260c0159ef"
-            ]
-        ]
-    },
-    {
-        "id": "7b6159260c0159ef",
-        "type": "mongodb in",
-        "z": "5472442e8b1089cc",
-        "mongodb": "783a5e3707db0d32",
-        "name": "count orders",
-        "collection": "commandes",
-        "operation": "count",
-        "x": 570,
-        "y": 400,
-        "wires": [
-            [
-                "5bfd924e40cb939b"
+                "3adace08244fe1c3"
             ]
         ]
     },
@@ -127,7 +111,7 @@
         "type": "function",
         "z": "5472442e8b1089cc",
         "name": "function 3",
-        "func": "msg.payload = [\n    {\n        $match: {\n            statut: \"en_attente\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            localField: \"visiteId\",\n            foreignField: \"_id\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        $project: {\n            _id: 1,\n            dateCommande: 1,\n            statut: 1,\n            montantTotal: 1,\n            lignes: 1,\n            tableNumero: \"$visite.tableNumero\"\n        }\n    }\n];\n\nreturn msg;",
+        "func": "const pipeline = [\n    {\n        $match: {\n            statut: \"en_attente\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            localField: \"visiteId\",\n            foreignField: \"_id\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        $project: {\n            _id: 1,\n            dateCommande: 1,\n            statut: 1,\n            montantTotal: 1,\n            lignes: 1,\n            tableNumero: \"$visite.tableNumero\"\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -138,23 +122,7 @@
         "y": 480,
         "wires": [
             [
-                "28a9eb37c7062630"
-            ]
-        ]
-    },
-    {
-        "id": "28a9eb37c7062630",
-        "type": "mongodb in",
-        "z": "5472442e8b1089cc",
-        "mongodb": "783a5e3707db0d32",
-        "name": "find orders",
-        "collection": "commandes",
-        "operation": "aggregate",
-        "x": 570,
-        "y": 480,
-        "wires": [
-            [
-                "45cb17088028f082"
+                "557e385b18e9d899"
             ]
         ]
     },
@@ -200,6 +168,46 @@
         ]
     },
     {
+        "id": "3adace08244fe1c3",
+        "type": "mongodb4",
+        "z": "5472442e8b1089cc",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "commandes",
+        "operation": "count",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 550,
+        "y": 420,
+        "wires": [
+            [
+                "5bfd924e40cb939b"
+            ]
+        ]
+    },
+    {
+        "id": "557e385b18e9d899",
+        "type": "mongodb4",
+        "z": "5472442e8b1089cc",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "commandes",
+        "operation": "aggregate",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 560,
+        "y": 480,
+        "wires": [
+            [
+                "45cb17088028f082"
+            ]
+        ]
+    },
+    {
         "id": "8cf57eb77e3e49cc",
         "type": "ui_group",
         "name": "Header",
@@ -209,16 +217,6 @@
         "width": 6,
         "collapse": false,
         "className": ""
-    },
-    {
-        "id": "783a5e3707db0d32",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": 27017,
-        "db": "smartpub_db",
-        "name": ""
     },
     {
         "id": "bf930e9b68230c0c",
@@ -232,6 +230,30 @@
         "className": ""
     },
     {
+        "id": "b441ec75b37a2af8",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
+    },
+    {
         "id": "7e09faa410315b5e",
         "type": "ui_tab",
         "name": "Orders",
@@ -240,12 +262,12 @@
         "hidden": false
     },
     {
-        "id": "0c6ad1abc198546c",
+        "id": "679f861aae484b03",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-node-mongodb": "0.2.5"
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]

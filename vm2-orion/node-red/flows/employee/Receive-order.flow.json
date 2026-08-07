@@ -101,27 +101,11 @@
     ]
   },
   {
-    "id": "65a40c520f321b67",
-    "type": "mongodb in",
-    "z": "2b65b643ec03a48e",
-    "mongodb": "783a5e3707db0d32",
-    "name": "check rpi",
-    "collection": "raspberrypi",
-    "operation": "aggregate",
-    "x": 800,
-    "y": 180,
-    "wires": [
-      [
-        "2394dd4a06efb62f"
-      ]
-    ]
-  },
-  {
     "id": "c9ada5d6fdf3a85d",
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "function 7",
-    "func": "const rpiId = msg.receivedPayload.rpiId;\n\nmsg.rpiId = rpiId;\n\nmsg.payload = [\n    {\n        $match: {\n            rpiId: rpiId\n        }\n    },\n    {\n        // on relie l'_id du raspberry (dans \"raspberrypi\")\n        // au champ \"rpiId\" présent dans chaque document \"tables\"\n        $lookup: {\n            from: \"tables\",\n            localField: \"_id\",\n            foreignField: \"rpiId\",\n            as: \"table\"\n        }\n    },\n    {\n        $unwind: \"$table\"\n    },\n    {\n        // Filtre final : le rpi doit être actif ET la table occupée\n        $match: {\n            statut: \"actif\",\n            \"table.statut\": \"occupee\"\n        }\n    },\n    {\n        // On ne garde que les champs utiles\n        $project: {\n            _id: 0,\n            rpiId: 1,\n            nom: 1,\n            emplacement: 1,\n            tableNumero: \"$table.numero\",\n            tableStatut: \"$table.statut\"\n        }\n    }\n];\n\nreturn msg;",
+    "func": "const rpiId = msg.receivedPayload.rpiId;\n\nmsg.rpiId = rpiId;\n\nconst pipeline = [\n    {\n        $match: {\n            rpiId: rpiId\n        }\n    },\n    {\n        // on relie l'_id du raspberry (dans \"raspberrypi\")\n        // au champ \"rpiId\" présent dans chaque document \"tables\"\n        $lookup: {\n            from: \"tables\",\n            localField: \"_id\",\n            foreignField: \"rpiId\",\n            as: \"table\"\n        }\n    },\n    {\n        $unwind: \"$table\"\n    },\n    {\n        // Filtre final : le rpi doit être actif ET la table occupée\n        $match: {\n            statut: \"actif\",\n            \"table.statut\": \"occupee\"\n        }\n    },\n    {\n        // On ne garde que les champs utiles\n        $project: {\n            _id: 0,\n            rpiId: 1,\n            nom: 1,\n            emplacement: 1,\n            tableNumero: \"$table.numero\",\n            tableStatut: \"$table.statut\"\n        }\n    }\n];\n\nmsg.payload = [pipeline]\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -132,7 +116,7 @@
     "y": 180,
     "wires": [
       [
-        "65a40c520f321b67"
+        "333368806409cb43"
       ]
     ]
   },
@@ -161,7 +145,7 @@
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "function 9",
-    "func": "const badgeUid = msg.receivedPayload.badgeUid;\n\nmsg.badgeUid = badgeUid;\nnode.warn(\"my warning \" + badgeUid);\n\nmsg.payload = [\n    {\n        $match: {\n            badgeUid: badgeUid\n        }\n    },\n    {\n        // on relie l'_id du raspberry (dans \"raspberrypi\")\n        // au champ \"rpiId\" présent dans chaque document \"tables\"\n        $lookup: {\n            from: \"visites\",\n            localField: \"_id\",\n            foreignField: \"badgeId\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        // Filtre final\n        $match: {\n            statut: \"attribue\",\n            \"visite.statut\": \"ouverte\"\n        }\n    },\n    {\n        // On ne garde que les champs utiles\n        $project: {\n            _id: 0,\n            badgeUid: 1,\n            badgeId: \"$_id\",\n            visiteId: \"$visite._id\",\n            clientId: \"$visite.clientId\",\n            token: \"$visite.token\",\n            tableNumero: \"$visite.tableNumero\",\n            dateArrivee: \"$visite.dateArrivee\",\n            statutVisite: \"$visite.statut\"\n        }\n    }\n];\n\nreturn msg;",
+    "func": "const badgeUid = msg.receivedPayload.badgeUid;\n\nmsg.badgeUid = badgeUid;\nnode.warn(\"my warning \" + badgeUid);\n\nconst pipeline = [\n    {\n        $match: {\n            badgeUid: badgeUid\n        }\n    },\n    {\n        // on relie l'_id du raspberry (dans \"raspberrypi\")\n        // au champ \"rpiId\" présent dans chaque document \"tables\"\n        $lookup: {\n            from: \"visites\",\n            localField: \"_id\",\n            foreignField: \"badgeId\",\n            as: \"visite\"\n        }\n    },\n    {\n        $unwind: \"$visite\"\n    },\n    {\n        // Filtre final\n        $match: {\n            statut: \"attribue\",\n            \"visite.statut\": \"ouverte\"\n        }\n    },\n    {\n        // On ne garde que les champs utiles\n        $project: {\n            _id: 0,\n            badgeUid: 1,\n            badgeId: \"$_id\",\n            visiteId: \"$visite._id\",\n            clientId: \"$visite.clientId\",\n            token: \"$visite.token\",\n            tableNumero: \"$visite.tableNumero\",\n            dateArrivee: \"$visite.dateArrivee\",\n            statutVisite: \"$visite.statut\"\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -172,24 +156,7 @@
     "y": 260,
     "wires": [
       [
-        "f71524b89d49f00d"
-      ]
-    ]
-  },
-  {
-    "id": "f71524b89d49f00d",
-    "type": "mongodb in",
-    "z": "2b65b643ec03a48e",
-    "mongodb": "783a5e3707db0d32",
-    "name": "check badge",
-    "collection": "badges",
-    "operation": "aggregate",
-    "x": 810,
-    "y": 260,
-    "wires": [
-      [
-        "fc585a508fcbc750",
-        "cd31dfa780e6a513"
+        "969bbbc28b49f017"
       ]
     ]
   },
@@ -218,7 +185,7 @@
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "prep produit lookup",
-    "func": "\nif (!msg.checkRpiSuccess || !msg.checkBadgeSuccess || msg.waitingOrderAlreadyExistsForThisVisit){\n    node.warn(\"smartcheers - error\" + msg.checkRpiSuccess + msg.checkBadgeSuccess);\n    msg.error = true;\n    return msg;\n}\n\nnode.warn(\"valid\");\n\nconst command = msg.command;\nconst produitIds = command.map(c => c.produitId);\n\nmsg.payload = [\n    { $match: { produitId: { $in: produitIds } } },\n    {\n        // suppose une collection \"categories\" contenant le champ \"poste\" (bar/cuisine/...)\n        $lookup: {\n            from: \"categories_produits\",\n            localField: \"categorieId\",\n            foreignField: \"_id\",\n            as: \"categorie\"\n        }\n    },\n    { $unwind: { path: \"$categorie\", preserveNullAndEmptyArrays: true } },\n    {\n        $project: {\n            _id: 0,\n            produitId: 1,\n            nom: 1,\n            prix: 1,\n            disponible: 1,\n            poste: \"$categorie.poste\"\n        }\n    }\n];\n\nreturn msg;",
+    "func": "\nif (!msg.checkRpiSuccess || !msg.checkBadgeSuccess || msg.waitingOrderAlreadyExistsForThisVisit){\n    node.warn(\"smartcheers - error\" + msg.checkRpiSuccess + msg.checkBadgeSuccess);\n    msg.error = true;\n    return msg;\n}\n\nnode.warn(\"valid\");\n\nconst command = msg.command;\nconst produitIds = command.map(c => c.produitId);\n\nconst pipeline = [\n    { $match: { produitId: { $in: produitIds } } },\n    {\n        // suppose une collection \"categories\" contenant le champ \"poste\" (bar/cuisine/...)\n        $lookup: {\n            from: \"categories_produits\",\n            localField: \"categorieId\",\n            foreignField: \"_id\",\n            as: \"categorie\"\n        }\n    },\n    { $unwind: { path: \"$categorie\", preserveNullAndEmptyArrays: true } },\n    {\n        $project: {\n            _id: 0,\n            produitId: 1,\n            nom: 1,\n            prix: 1,\n            disponible: 1,\n            poste: \"$categorie.poste\"\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -229,7 +196,7 @@
     "y": 580,
     "wires": [
       [
-        "b6c23cd2537721e8"
+        "5fc948f746c0b2eb"
       ]
     ]
   },
@@ -268,57 +235,26 @@
     ]
   },
   {
-    "id": "b6c23cd2537721e8",
-    "type": "mongodb in",
-    "z": "2b65b643ec03a48e",
-    "mongodb": "783a5e3707db0d32",
-    "name": "prep produits",
-    "collection": "produits",
-    "operation": "aggregate",
-    "x": 830,
-    "y": 580,
-    "wires": [
-      [
-        "8c115d1c7936df9a"
-      ]
-    ]
-  },
-  {
     "id": "8c115d1c7936df9a",
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "build commande",
-    "func": "if(msg.error){\n    return msg;\n}\n\nconst produits = msg.payload;\nconst command = msg.command;\n\nconst produitsMap = {};\nproduits.forEach(p => { produitsMap[p.produitId] = p; });\n\nlet montantTotal = 0;\nconst lignes = [];\n\nfor (const item of command) {\n    const produit = produitsMap[item.produitId];\n\n    if (!produit) {\n        msg.payload = { success: false, error: \"Produit inconnu : \" + item.produitId };\n        msg.error = true;\n        return msg;\n    }\n    if (produit.disponible === false) {\n        msg.payload = { success: false, error: \"Produit indisponible : \" + produit.nom };\n        msg.error = true;\n        return msg;\n    }\n\n    montantTotal += produit.prix * item.quantite;\n\n    lignes.push({\n        produitId: item.produitId,\n        produitNomSnapshot: produit.nom,\n        quantite: item.quantite,\n        prixUnitaireSnapshot: produit.prix,\n        statutPreparation: \"attente\",\n        poste: produit.poste || \"bar\"\n    });\n}\n\nmsg.payload = {\n    visiteId: msg.checkBadge ? msg.checkBadge.visiteId : null,\n    employeId: null,\n    dateCommande: new Date(),\n    statut: \"en_attente\",\n    montantTotal: montantTotal,\n    source: \"rpi\",\n    lignes: lignes\n};\n\nreturn msg;",
+    "func": "if (msg.error) {\n    return msg;\n}\n\nconst produits = msg.payload;\nconst command = msg.command;\n\nconst produitsMap = {};\nproduits.forEach(p => {\n    produitsMap[p.produitId] = p;\n});\n\nlet montantTotal = 0;\nconst lignes = [];\n\nfor (const item of command) {\n    const produit = produitsMap[item.produitId];\n\n    if (!produit) {\n        msg.payload = { success: false, error: \"Produit inconnu : \" + item.produitId };\n        msg.error = true;\n        return msg;\n    }\n\n    if (produit.disponible === false) {\n        msg.payload = { success: false, error: \"Produit indisponible : \" + produit.nom };\n        msg.error = true;\n        return msg;\n    }\n\n    montantTotal += produit.prix * item.quantite;\n\n    lignes.push({\n        produitId: item.produitId,\n        produitNomSnapshot: produit.nom,\n        quantite: item.quantite,\n        prixUnitaireSnapshot: produit.prix,\n        statutPreparation: \"attente\",\n        poste: produit.poste || \"bar\"\n    });\n}\n\nconst commande = {\n    visiteId: msg.checkBadge ? msg.checkBadge.visiteId : null,\n    employeId: null,\n    dateCommande: new Date(),\n    statut: \"en_attente\",\n    montantTotal: montantTotal,\n    source: \"rpi\",\n    lignes: lignes\n};\n\n// insertOne attend [document]\nmsg.payload = [commande];\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
     "initialize": "",
     "finalize": "",
     "libs": [],
-    "x": 1020,
+    "x": 980,
     "y": 580,
     "wires": [
       [
-        "d1a7ea2835d95b08",
         "1da22edd9f1f5e61",
-        "2868c4518beda449"
+        "2868c4518beda449",
+        "2f258847f31eec67"
       ]
     ]
-  },
-  {
-    "id": "d1a7ea2835d95b08",
-    "type": "mongodb out",
-    "z": "2b65b643ec03a48e",
-    "mongodb": "783a5e3707db0d32",
-    "name": "insert commande",
-    "collection": "commandes",
-    "payonly": true,
-    "upsert": false,
-    "multi": false,
-    "operation": "insert",
-    "x": 1230,
-    "y": 580,
-    "wires": []
   },
   {
     "id": "cd31dfa780e6a513",
@@ -332,8 +268,8 @@
     "complete": "false",
     "statusVal": "",
     "statusType": "auto",
-    "x": 960,
-    "y": 300,
+    "x": 1200,
+    "y": 260,
     "wires": []
   },
   {
@@ -366,7 +302,7 @@
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "function 27",
-    "func": "\nmsg.payload = { statut: \"en_attente\", visiteId: msg.checkBadge.visiteId };\n\nreturn msg;",
+    "func": "msg.payload = [\n    {\n        statut: \"en_attente\",\n        visiteId: msg.checkBadge.visiteId\n    }\n];\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -374,10 +310,10 @@
     "finalize": "",
     "libs": [],
     "x": 1330,
-    "y": 700,
+    "y": 680,
     "wires": [
       [
-        "1f0b5bc53a1cec1b"
+        "a5189e2a8aa8dd14"
       ]
     ]
   },
@@ -386,7 +322,7 @@
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "function 28",
-    "func": "\nmsg.payload = { statut: \"en_attente\", visiteId: msg.checkBadge.visiteId };\n\nreturn msg;",
+    "func": "msg.payload = {\n    statut: \"en_attente\",\n    visiteId: msg.checkBadge.visiteId\n};\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -397,24 +333,7 @@
     "y": 420,
     "wires": [
       [
-        "261499264c83da10"
-      ]
-    ]
-  },
-  {
-    "id": "261499264c83da10",
-    "type": "mongodb in",
-    "z": "2b65b643ec03a48e",
-    "mongodb": "783a5e3707db0d32",
-    "name": "is already a command ?",
-    "collection": "commandes",
-    "operation": "count",
-    "x": 810,
-    "y": 420,
-    "wires": [
-      [
-        "138835e5718714e3",
-        "43928e5b1b4989d3"
+        "14b3c3792aa4f68a"
       ]
     ]
   },
@@ -455,28 +374,11 @@
     ]
   },
   {
-    "id": "1f0b5bc53a1cec1b",
-    "type": "mongodb in",
-    "z": "2b65b643ec03a48e",
-    "mongodb": "783a5e3707db0d32",
-    "name": "command created successfully ?",
-    "collection": "commandes",
-    "operation": "find",
-    "x": 1550,
-    "y": 700,
-    "wires": [
-      [
-        "d76eca62d630a99d",
-        "96588191ca980d27"
-      ]
-    ]
-  },
-  {
     "id": "d76eca62d630a99d",
     "type": "function",
     "z": "2b65b643ec03a48e",
     "name": "function 30",
-    "func": "\nvar orderId = msg.payload[0]._id;\nvar rpiId = msg.checkRpi.rpiId;\n\nmsg.payload = {\n    success: !msg.error,\n    rpiId: rpiId,\n    orderId: orderId\n};\n\nreturn msg;",
+    "func": "\nvar orderId = msg.payload._id;\nvar rpiId = msg.checkRpi.rpiId;\n\nmsg.payload = {\n    success: !msg.error,\n    rpiId: rpiId,\n    orderId: orderId\n};\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -560,6 +462,126 @@
     "wires": []
   },
   {
+    "id": "969bbbc28b49f017",
+    "type": "mongodb4",
+    "z": "2b65b643ec03a48e",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "badges",
+    "operation": "aggregate",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 800,
+    "y": 260,
+    "wires": [
+      [
+        "fc585a508fcbc750"
+      ]
+    ]
+  },
+  {
+    "id": "333368806409cb43",
+    "type": "mongodb4",
+    "z": "2b65b643ec03a48e",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "raspberrypi",
+    "operation": "aggregate",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 800,
+    "y": 180,
+    "wires": [
+      [
+        "2394dd4a06efb62f"
+      ]
+    ]
+  },
+  {
+    "id": "5fc948f746c0b2eb",
+    "type": "mongodb4",
+    "z": "2b65b643ec03a48e",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "produits",
+    "operation": "aggregate",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 800,
+    "y": 580,
+    "wires": [
+      [
+        "8c115d1c7936df9a"
+      ]
+    ]
+  },
+  {
+    "id": "2f258847f31eec67",
+    "type": "mongodb4",
+    "z": "2b65b643ec03a48e",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "commandes",
+    "operation": "insertOne",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 1260,
+    "y": 620,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "a5189e2a8aa8dd14",
+    "type": "mongodb4",
+    "z": "2b65b643ec03a48e",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "commandes",
+    "operation": "findOne",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 1480,
+    "y": 640,
+    "wires": [
+      [
+        "96588191ca980d27",
+        "d76eca62d630a99d"
+      ]
+    ]
+  },
+  {
+    "id": "14b3c3792aa4f68a",
+    "type": "mongodb4",
+    "z": "2b65b643ec03a48e",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "commandes",
+    "operation": "count",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "is already a command ?",
+    "x": 810,
+    "y": 420,
+    "wires": [
+      [
+        "43928e5b1b4989d3",
+        "138835e5718714e3"
+      ]
+    ]
+  },
+  {
     "id": "e97212349fb30e64",
     "type": "mqtt-broker",
     "name": "raspberrypi-hepl",
@@ -592,14 +614,28 @@
     "sessionExpiry": ""
   },
   {
-    "id": "783a5e3707db0d32",
-    "type": "mongodb",
-    "hostname": "mongodb_secondary",
-    "topology": "direct",
-    "connectOptions": "",
-    "port": 27017,
-    "db": "smartpub_db",
-    "name": ""
+    "id": "b441ec75b37a2af8",
+    "type": "mongodb4-client",
+    "name": "smartcheers-mongodb",
+    "protocol": "mongodb",
+    "hostname": "mongodb",
+    "port": "27017",
+    "dbName": "smartpub_db",
+    "appName": "",
+    "authSource": "smartpub_db",
+    "authMechanism": "DEFAULT",
+    "tls": false,
+    "tlsCAFile": "",
+    "tlsCertificateKeyFile": "",
+    "tlsInsecure": false,
+    "connectTimeoutMS": "30000",
+    "socketTimeoutMS": "0",
+    "minPoolSize": "0",
+    "maxPoolSize": "100",
+    "maxIdleTimeMS": "0",
+    "uri": "",
+    "advanced": "{}",
+    "uriTabActive": "tab-uri-simple"
   },
   {
     "id": "6ced756f5ea7330e",
@@ -622,11 +658,11 @@
     "caEnv": ""
   },
   {
-    "id": "18baed771e0e23fa",
+    "id": "fb41783e67da80cb",
     "type": "global-config",
     "env": [],
     "modules": {
-      "node-red-node-mongodb": "0.2.5"
+      "node-red-contrib-mongodb4": "3.4.0"
     }
   }
 ]

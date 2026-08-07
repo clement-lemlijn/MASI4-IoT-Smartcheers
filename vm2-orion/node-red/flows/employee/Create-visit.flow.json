@@ -26,7 +26,7 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 1020,
+        "x": 910,
         "y": 240,
         "wires": [
             [
@@ -46,27 +46,11 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 860,
+        "x": 750,
         "y": 240,
         "wires": [
             [
                 "962085619def393f"
-            ]
-        ]
-    },
-    {
-        "id": "104a53695bca9ef9",
-        "type": "mongodb in",
-        "z": "790d1ef794ba3c12",
-        "mongodb": "783a5e3707db0d32",
-        "name": "",
-        "collection": "clients",
-        "operation": "aggregate",
-        "x": 610,
-        "y": 240,
-        "wires": [
-            [
-                "c4317e69a094c60a"
             ]
         ]
     },
@@ -102,22 +86,6 @@
         ]
     },
     {
-        "id": "d375326a177cd2bc",
-        "type": "mongodb in",
-        "z": "790d1ef794ba3c12",
-        "mongodb": "783a5e3707db0d32",
-        "name": "",
-        "collection": "badges",
-        "operation": "find",
-        "x": 610,
-        "y": 300,
-        "wires": [
-            [
-                "42452c0d1b0f8495"
-            ]
-        ]
-    },
-    {
         "id": "42452c0d1b0f8495",
         "type": "function",
         "z": "790d1ef794ba3c12",
@@ -129,7 +97,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 860,
+        "x": 750,
         "y": 300,
         "wires": [
             [
@@ -156,7 +124,7 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 1030,
+        "x": 920,
         "y": 300,
         "wires": [
             [
@@ -165,27 +133,11 @@
         ]
     },
     {
-        "id": "d84e95943b2f9b96",
-        "type": "mongodb in",
-        "z": "790d1ef794ba3c12",
-        "mongodb": "783a5e3707db0d32",
-        "name": "",
-        "collection": "tables",
-        "operation": "find",
-        "x": 610,
-        "y": 360,
-        "wires": [
-            [
-                "8873d30abd48dd05"
-            ]
-        ]
-    },
-    {
         "id": "0e30f1a93661d133",
         "type": "function",
         "z": "790d1ef794ba3c12",
         "name": "select libre",
-        "func": "msg.payload = { statut: \"libre\" };\nreturn msg;",
+        "func": "msg.payload = [\n    {\n        statut: \"libre\"\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -196,7 +148,7 @@
         "y": 360,
         "wires": [
             [
-                "d84e95943b2f9b96"
+                "ecbff8460299b3d1"
             ]
         ]
     },
@@ -212,7 +164,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 860,
+        "x": 750,
         "y": 360,
         "wires": [
             [
@@ -239,7 +191,7 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 1020,
+        "x": 910,
         "y": 360,
         "wires": [
             [
@@ -259,7 +211,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1200,
+        "x": 1090,
         "y": 240,
         "wires": [
             []
@@ -277,7 +229,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1200,
+        "x": 1090,
         "y": 300,
         "wires": [
             []
@@ -295,7 +247,7 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1200,
+        "x": 1090,
         "y": 360,
         "wires": [
             []
@@ -334,7 +286,7 @@
         "type": "function",
         "z": "790d1ef794ba3c12",
         "name": "build_visite",
-        "func": "const clientId = flow.get('visite_clientId');\nconst badgeId = flow.get('visite_badgeId');\nconst tableNumero = flow.get('visite_tableNumero');\n\nif (!clientId || !badgeId || !tableNumero) {\n    node.warn(\"Formulaire incomplet\" + !clientId + !badgeId + !tableNumero);\n    return null;\n}\n\n// Génère un token unique pour cette visite (accès dashboard client)\nconst crypto = global.get('crypto') || require('crypto');\nconst token = crypto.randomBytes(4).toString('hex');\n\nmsg.payload = {\n    badgeId: String(badgeId),\n    clientId: String(clientId),\n    token: token,\n    tableNumero: Number(tableNumero),\n    dateArrivee: new Date(),\n    dateDepart: null,\n    statut: \"ouverte\",\n    montantTotalVisite: Number(0),\n    paiement: null\n};\n\nflow.set('pending_badgeId', badgeId);\nflow.set('pending_tableNumero', Number(tableNumero));\n\nreturn msg;",
+        "func": "const clientId = flow.get('visite_clientId');\nconst badgeId = flow.get('visite_badgeId');\nconst tableNumero = flow.get('visite_tableNumero');\n\nif (!clientId || !badgeId || !tableNumero) {\n    node.warn(\"Formulaire incomplet\");\n    return null;\n}\n\n// Génère un token unique\nconst crypto = global.get('crypto') || require('crypto');\nconst token = crypto.randomBytes(4).toString('hex');\n\nconst visite = {\n    badgeId: String(badgeId),\n    clientId: String(clientId),\n    token: token,\n    tableNumero: Number(tableNumero),\n    dateArrivee: new Date(),\n    dateDepart: null,\n    statut: \"ouverte\",\n    montantTotalVisite: 0,\n    paiement: null\n};\n\nmsg.payload = [visite];\nmsg.visitToken = token;\n\nflow.set('pending_badgeId', badgeId);\nmsg.pendingBadgeId = badgeId;\n\nflow.set('pending_tableNumero', Number(tableNumero));\nmsg.pendingTableNumero = Number(tableNumero);\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -345,34 +297,19 @@
         "y": 480,
         "wires": [
             [
-                "9a2de516f83545d9",
                 "2e1b184ab833c728",
                 "c3560d0259bf9d68",
-                "fe5e313e9f20b0c1"
+                "fe5e313e9f20b0c1",
+                "ea801ebe06da3acf"
             ]
         ]
-    },
-    {
-        "id": "9a2de516f83545d9",
-        "type": "mongodb out",
-        "z": "790d1ef794ba3c12",
-        "mongodb": "783a5e3707db0d32",
-        "name": "insert visite",
-        "collection": "visites",
-        "payonly": true,
-        "upsert": false,
-        "multi": false,
-        "operation": "insert",
-        "x": 750,
-        "y": 480,
-        "wires": []
     },
     {
         "id": "2e1b184ab833c728",
         "type": "function",
         "z": "790d1ef794ba3c12",
         "name": "function 24",
-        "func": "const badgeId = flow.get('pending_badgeId');\n\nmsg.query = {\n    badgeUid: badgeId\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"attribue\"\n    }\n};\n\nreturn msg;",
+        "func": "const badgeId = msg.pendingBadgeId;\n\nmsg.payload = [\n    {\n        badgeUid: badgeId\n    },\n    {\n        $set: {\n            statut: \"attribue\"\n        }\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -383,7 +320,7 @@
         "y": 540,
         "wires": [
             [
-                "14d84b9f399ec5f4"
+                "5380504f7c82f463"
             ]
         ]
     },
@@ -392,7 +329,7 @@
         "type": "function",
         "z": "790d1ef794ba3c12",
         "name": "function 25",
-        "func": "const tableNumero = flow.get('pending_tableNumero');\n\nmsg.query = {\n    numero: tableNumero\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"occupee\"\n    }\n};\n\nreturn msg;",
+        "func": "const tableNumero = msg.pendingTableNumero;\n\nmsg.payload = [\n    {\n        numero: tableNumero\n    },\n    {\n        $set: {\n            statut: \"occupee\"\n        }\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -403,57 +340,27 @@
         "y": 600,
         "wires": [
             [
-                "851aa3c958d88a36"
+                "6bb9fe34429fbdb3"
             ]
         ]
-    },
-    {
-        "id": "851aa3c958d88a36",
-        "type": "mongodb out",
-        "z": "790d1ef794ba3c12",
-        "mongodb": "783a5e3707db0d32",
-        "name": "update tables",
-        "collection": "tables",
-        "payonly": false,
-        "upsert": false,
-        "multi": false,
-        "operation": "update",
-        "x": 900,
-        "y": 600,
-        "wires": []
-    },
-    {
-        "id": "14d84b9f399ec5f4",
-        "type": "mongodb out",
-        "z": "790d1ef794ba3c12",
-        "mongodb": "783a5e3707db0d32",
-        "name": "update badges",
-        "collection": "badges",
-        "payonly": false,
-        "upsert": false,
-        "multi": false,
-        "operation": "update",
-        "x": 900,
-        "y": 540,
-        "wires": []
     },
     {
         "id": "1b4cb1f5080cf535",
         "type": "function",
         "z": "790d1ef794ba3c12",
-        "name": "select dispo",
-        "func": "msg.payload = { statut: \"disponible\" };\nreturn msg;",
+        "name": "select badges",
+        "func": "msg.payload = [\n    {\n        statut: \"disponible\"\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 350,
+        "x": 360,
         "y": 300,
         "wires": [
             [
-                "d375326a177cd2bc"
+                "208ca72acbcb5ead"
             ]
         ]
     },
@@ -481,9 +388,9 @@
         "y": 180,
         "wires": [
             [
-                "104a53695bca9ef9",
-                "d375326a177cd2bc",
-                "d84e95943b2f9b96"
+                "cec4604e40f50ed9",
+                "1b4cb1f5080cf535",
+                "0e30f1a93661d133"
             ]
         ]
     },
@@ -492,7 +399,7 @@
         "type": "function",
         "z": "790d1ef794ba3c12",
         "name": "select clients",
-        "func": "msg.payload = [\n    {\n        $match: {\n            banni: false\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            let: { clientId: \"$_id\" },\n            pipeline: [\n                {\n                    $match: {\n                        $expr: {\n                            $and: [\n                                { $eq: [\"$clientId\", \"$$clientId\"] },\n                                { $eq: [\"$statut\", \"ouverte\"] }\n                            ]\n                        }\n                    }\n                }\n            ],\n            as: \"visitesActives\"\n        }\n    },\n    {\n        $match: {\n            visitesActives: {\n                $size: 0\n            }\n        }\n    },\n    {\n        $project: {\n            visitesActives: 0\n        }\n    }\n];\n\nreturn msg;",
+        "func": "const pipeline = [\n    {\n        $match: {\n            banni: false\n        }\n    },\n    {\n        $lookup: {\n            from: \"visites\",\n            let: { clientId: \"$_id\" },\n            pipeline: [\n                {\n                    $match: {\n                        $expr: {\n                            $and: [\n                                { $eq: [\"$clientId\", \"$$clientId\"] },\n                                { $eq: [\"$statut\", \"ouverte\"] }\n                            ]\n                        }\n                    }\n                }\n            ],\n            as: \"visitesActives\"\n        }\n    },\n    {\n        $match: {\n            visitesActives: {\n                $size: 0\n            }\n        }\n    },\n    {\n        $project: {\n            visitesActives: 0\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -503,7 +410,7 @@
         "y": 240,
         "wires": [
             [
-                "104a53695bca9ef9"
+                "73555e9fd5e3f855"
             ]
         ]
     },
@@ -517,7 +424,7 @@
         "height": 0,
         "name": "",
         "label": "token à copier au client : ",
-        "format": "https://192.168.1.12:1880/dashboard?t={{msg.payload.token}}",
+        "format": "https://192.168.1.12:1880/ui?t={{msg.visitToken}}",
         "layout": "col-center",
         "className": "",
         "style": false,
@@ -527,6 +434,120 @@
         "x": 790,
         "y": 440,
         "wires": []
+    },
+    {
+        "id": "73555e9fd5e3f855",
+        "type": "mongodb4",
+        "z": "790d1ef794ba3c12",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "clients",
+        "operation": "aggregate",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 560,
+        "y": 240,
+        "wires": [
+            [
+                "c4317e69a094c60a"
+            ]
+        ]
+    },
+    {
+        "id": "208ca72acbcb5ead",
+        "type": "mongodb4",
+        "z": "790d1ef794ba3c12",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "badges",
+        "operation": "find",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 550,
+        "y": 300,
+        "wires": [
+            [
+                "42452c0d1b0f8495"
+            ]
+        ]
+    },
+    {
+        "id": "ecbff8460299b3d1",
+        "type": "mongodb4",
+        "z": "790d1ef794ba3c12",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "tables",
+        "operation": "find",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 550,
+        "y": 360,
+        "wires": [
+            [
+                "8873d30abd48dd05"
+            ]
+        ]
+    },
+    {
+        "id": "ea801ebe06da3acf",
+        "type": "mongodb4",
+        "z": "790d1ef794ba3c12",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "visites",
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 980,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5380504f7c82f463",
+        "type": "mongodb4",
+        "z": "790d1ef794ba3c12",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "badges",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 990,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6bb9fe34429fbdb3",
+        "type": "mongodb4",
+        "z": "790d1ef794ba3c12",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "tables",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 990,
+        "y": 600,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "8b5aad705f2582f7",
@@ -540,14 +561,28 @@
         "className": ""
     },
     {
-        "id": "783a5e3707db0d32",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": 27017,
-        "db": "smartpub_db",
-        "name": ""
+        "id": "b441ec75b37a2af8",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
     },
     {
         "id": "6303e5c26872cab9",
@@ -558,12 +593,12 @@
         "hidden": false
     },
     {
-        "id": "04f94b1478b927c9",
+        "id": "e7113caad9c83647",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-node-mongodb": "0.2.5"
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]

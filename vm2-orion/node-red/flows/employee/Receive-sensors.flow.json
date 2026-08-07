@@ -50,7 +50,7 @@
     "type": "function",
     "z": "77d61a7c1ec3d7c7",
     "name": "function 31",
-    "func": "// Conversion du payload MQTT\nlet data = msg.payload.toString().trim();\n\n// Device:esp32h2-102,Temp:22.0,Hum:50.0,Son:705\n\nlet sensor = {};\ndata.split(\",\").forEach(part => {\n    let [key, value] = part.split(\":\");\n    if (!key || !value) {\n        return;\n    }\n    key = key.trim();\n    value = value.trim();\n    switch (key) {\n\n        case \"Device\":\n            sensor.deviceId = value;\n            break;\n\n        case \"Temp\":\n            sensor.temperature = Number(value);\n            break;\n\n        case \"Hum\":\n            sensor.humidity = Number(value);\n            break;\n\n        case \"Son\":\n            sensor.sound = Number(value);\n            break;\n    }\n});\n\n// Ajout date/heure\nlet now = new Date();\nsensor.timestamp = now;\n\n// Optionnel : format lisible\nsensor.date = now.toISOString();\n\n// Vérification\nif (!sensor.deviceId) {\n    node.error(\"Message capteur invalide : \" + data);\n    return null;\n}\n\n\n// Envoi vers MongoDB\nmsg.payload = sensor;\n\nreturn msg;",
+    "func": "// Conversion du payload MQTT\nlet data = msg.payload.toString().trim();\n\n// Device:esp32h2-102,Temp:22.0,Hum:50.0,Son:705\n\nlet sensor = {};\ndata.split(\",\").forEach(part => {\n    let [key, value] = part.split(\":\");\n    if (!key || !value) {\n        return;\n    }\n    key = key.trim();\n    value = value.trim();\n    switch (key) {\n\n        case \"Device\":\n            sensor.deviceId = value;\n            break;\n\n        case \"Temp\":\n            sensor.temperature = Number(value);\n            break;\n\n        case \"Hum\":\n            sensor.humidity = Number(value);\n            break;\n\n        case \"Son\":\n            sensor.sound = Number(value);\n            break;\n    }\n});\n\n// Ajout date/heure\nlet now = new Date();\nsensor.timestamp = now;\n\n// Optionnel : format lisible\nsensor.date = now.toISOString();\n\n// Vérification\nif (!sensor.deviceId) {\n    node.error(\"Message capteur invalide : \" + data);\n    return null;\n}\n\n\n// Envoi vers MongoDB\nmsg.payload = [sensor];\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -62,7 +62,8 @@
     "wires": [
       [
         "f5c393f2e55c8e9a",
-        "31c4e7134d246657"
+        "31c4e7134d246657",
+        "8bcb3633758ac95e"
       ]
     ]
   },
@@ -95,6 +96,52 @@
     "operation": "insert",
     "x": 710,
     "y": 400,
+    "wires": []
+  },
+  {
+    "id": "8bcb3633758ac95e",
+    "type": "mongodb4",
+    "z": "77d61a7c1ec3d7c7",
+    "clientNode": "b441ec75b37a2af8",
+    "mode": "collection",
+    "collection": "sensors",
+    "operation": "insertOne",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "insert in db",
+    "x": 690,
+    "y": 520,
+    "wires": [
+      [
+        "131ab301c248a3df"
+      ]
+    ]
+  },
+  {
+    "id": "db8488098cb6acc6",
+    "type": "comment",
+    "z": "77d61a7c1ec3d7c7",
+    "name": "",
+    "info": "// Conversion du payload MQTT\nlet data = msg.payload.toString().trim();\n\n// Exemple : Device:esp32h2-102,Temp:22.0,Hum:50.0,Son:705\n\nlet sensor = {};\n\ndata.split(\",\").forEach(part => {\n    let [key, value] = part.split(\":\");\n\n    if (!key || !value) {\n        return;\n    }\n\n    key = key.trim();\n    value = value.trim();\n\n    switch (key) {\n\n        case \"Device\":\n            sensor.deviceId = value;\n            break;\n\n        case \"Temp\":\n            sensor.temperature = Number(value);\n            break;\n\n        case \"Hum\":\n            sensor.humidity = Number(value);\n            break;\n\n        case \"Son\":\n            sensor.sound = Number(value);\n            break;\n    }\n});\n\n// Ajout date/heure\nlet now = new Date();\n\nsensor.timestamp = now;\nsensor.date = now.toISOString();\n\n\n// Vérification\nif (!sensor.deviceId) {\n    node.error(\"Message capteur invalide : \" + data);\n    return null;\n}\n\n\n// MongoDB4 insertOne attend un tableau d'arguments\nmsg.payload = [\n    sensor\n];\n\nreturn msg;",
+    "x": 420,
+    "y": 520,
+    "wires": []
+  },
+  {
+    "id": "131ab301c248a3df",
+    "type": "debug",
+    "z": "77d61a7c1ec3d7c7",
+    "name": "debug 18",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 860,
+    "y": 520,
     "wires": []
   },
   {
@@ -139,11 +186,36 @@
     "name": ""
   },
   {
-    "id": "80efe88d05c735f5",
+    "id": "b441ec75b37a2af8",
+    "type": "mongodb4-client",
+    "name": "smartcheers-mongodb",
+    "protocol": "mongodb",
+    "hostname": "mongodb",
+    "port": "27017",
+    "dbName": "smartpub_db",
+    "appName": "",
+    "authSource": "smartpub_db",
+    "authMechanism": "DEFAULT",
+    "tls": false,
+    "tlsCAFile": "",
+    "tlsCertificateKeyFile": "",
+    "tlsInsecure": false,
+    "connectTimeoutMS": "30000",
+    "socketTimeoutMS": "0",
+    "minPoolSize": "0",
+    "maxPoolSize": "100",
+    "maxIdleTimeMS": "0",
+    "uri": "",
+    "advanced": "{}",
+    "uriTabActive": "tab-uri-simple"
+  },
+  {
+    "id": "095de456550e3da7",
     "type": "global-config",
     "env": [],
     "modules": {
-      "node-red-node-mongodb": "0.2.5"
+      "node-red-node-mongodb": "0.2.5",
+      "node-red-contrib-mongodb4": "3.4.0"
     }
   }
 ]

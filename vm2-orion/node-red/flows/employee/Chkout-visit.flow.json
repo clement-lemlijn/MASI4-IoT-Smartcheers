@@ -69,7 +69,7 @@
         "type": "function",
         "z": "37ad7ff4acb2cba6",
         "name": "select ouvertes",
-        "func": "msg.payload = [\n    {\n        $match: {\n            statut: \"ouverte\"\n        }\n    },\n];\n\nreturn msg;",
+        "func": "const pipeline = [\n    {\n        $match: {\n            statut: \"ouverte\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"clients\",\n            localField: \"clientId\",\n            foreignField: \"_id\",\n            as: \"client\"\n        }\n    },\n    {\n        $unwind: \"$client\"\n    },\n    {\n        $project: {\n            _id: 1,\n            tableNumero: 1,\n            dateArrivee: 1,\n            statut: 1,\n            clientNom: \"$client.nom\",\n            clientPrenom: \"$client.prenom\"\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -80,23 +80,7 @@
         "y": 460,
         "wires": [
             [
-                "0f0afcf7dbc53dd1"
-            ]
-        ]
-    },
-    {
-        "id": "0f0afcf7dbc53dd1",
-        "type": "mongodb in",
-        "z": "37ad7ff4acb2cba6",
-        "mongodb": "783a5e3707db0d32",
-        "name": "get visit",
-        "collection": "visites",
-        "operation": "aggregate",
-        "x": 740,
-        "y": 460,
-        "wires": [
-            [
-                "7d0e550baa91f567"
+                "a7b062b6408e8743"
             ]
         ]
     },
@@ -133,7 +117,7 @@
         "type": "function",
         "z": "37ad7ff4acb2cba6",
         "name": "function 2",
-        "func": "msg.payload = msg.payload.map(visite => {\n\n    const date = new Date(visite.dateArrivee)\n        .toLocaleString(\"fr-BE\", {\n            hour: \"2-digit\",\n            minute: \"2-digit\"\n        });\n\n    visite.affichage =\n        `${date} - Table ${visite.tableNumero} - ${visite.statut}`;\n\n    return visite;\n\n});\n\nmsg.options = msg.payload.map(visite => {\n    return { [visite.affichage]: visite };\n});\n\nreturn msg;",
+        "func": "msg.payload = msg.payload.map(visite => {\n\n    const date = new Date(visite.dateArrivee)\n        .toLocaleString(\"fr-BE\", {\n            hour: \"2-digit\",\n            minute: \"2-digit\"\n        });\n\n    visite.affichage =\n        `${date} - Table ${visite.tableNumero} - Mr(s) ${visite.clientNom}`;\n\n    return visite;\n\n});\n\nmsg.options = msg.payload.map(visite => {\n    return { [visite.affichage]: visite };\n});\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -200,26 +184,11 @@
         ]
     },
     {
-        "id": "8dae0192d66e8f51",
-        "type": "mongodb out",
-        "z": "37ad7ff4acb2cba6",
-        "mongodb": "783a5e3707db0d32",
-        "name": "",
-        "collection": "visites",
-        "payonly": false,
-        "upsert": false,
-        "multi": false,
-        "operation": "update",
-        "x": 1430,
-        "y": 760,
-        "wires": []
-    },
-    {
         "id": "027e921d07cf83b7",
         "type": "function",
         "z": "37ad7ff4acb2cba6",
         "name": "function 5",
-        "func": "const visiteId = flow.get(\"visiteId\");\n\nnode.warn(\"set \" + visiteId + \" to fermee\");\n\nmsg.query = {\n    _id: visiteId\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"fermee\"\n    }\n};\n\nreturn msg;",
+        "func": "const visiteId = flow.get(\"visiteId\");\n\nnode.warn(\"set \" + visiteId + \" to fermee\");\n\nmsg.payload = [\n    {\n        _id: visiteId\n    },\n    {\n        $set: {\n            statut: \"fermee\"\n        }\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -230,7 +199,7 @@
         "y": 660,
         "wires": [
             [
-                "8dae0192d66e8f51"
+                "498b269609d3dd44"
             ]
         ]
     },
@@ -255,7 +224,7 @@
         "type": "function",
         "z": "37ad7ff4acb2cba6",
         "name": "function 6",
-        "func": "var tableNumero = flow.get(\"tableNumero\");\n\nnode.warn(\"set \" + tableNumero + \" to libre\");\n\nmsg.query = {\n    numero: tableNumero\n};\n\nmsg.payload = {\n    $set: {\n        statut: \"libre\"\n    }\n};\n\nreturn msg;",
+        "func": "var tableNumero = flow.get(\"tableNumero\");\n\nnode.warn(\"set \" + tableNumero + \" to libre\");\n\nmsg.payload = [\n    {\n        numero: tableNumero\n    },\n    {\n        $set: {\n            statut: \"libre\"\n        }\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -266,24 +235,9 @@
         "y": 840,
         "wires": [
             [
-                "647097bcb814af8d"
+                "3c5b3591da9a4271"
             ]
         ]
-    },
-    {
-        "id": "647097bcb814af8d",
-        "type": "mongodb out",
-        "z": "37ad7ff4acb2cba6",
-        "mongodb": "783a5e3707db0d32",
-        "name": "",
-        "collection": "tables",
-        "payonly": false,
-        "upsert": false,
-        "multi": false,
-        "operation": "update",
-        "x": 1330,
-        "y": 840,
-        "wires": []
     },
     {
         "id": "9eca2fabf642ec03",
@@ -302,6 +256,79 @@
         "wires": []
     },
     {
+        "id": "a7b062b6408e8743",
+        "type": "mongodb4",
+        "z": "37ad7ff4acb2cba6",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "visites",
+        "operation": "aggregate",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 600,
+        "y": 540,
+        "wires": [
+            [
+                "7d0e550baa91f567",
+                "3415c962be987c3f"
+            ]
+        ]
+    },
+    {
+        "id": "3415c962be987c3f",
+        "type": "debug",
+        "z": "37ad7ff4acb2cba6",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "498b269609d3dd44",
+        "type": "mongodb4",
+        "z": "37ad7ff4acb2cba6",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "visites",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 1550,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3c5b3591da9a4271",
+        "type": "mongodb4",
+        "z": "37ad7ff4acb2cba6",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "tables",
+        "operation": "updateOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 1190,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "7aa864ad2d36d4fc",
         "type": "ui_group",
         "name": "Default",
@@ -313,14 +340,28 @@
         "className": ""
     },
     {
-        "id": "783a5e3707db0d32",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": 27017,
-        "db": "smartpub_db",
-        "name": ""
+        "id": "b441ec75b37a2af8",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
     },
     {
         "id": "073a662ce27912e4",
@@ -331,12 +372,12 @@
         "hidden": false
     },
     {
-        "id": "99cf91529b4eb055",
+        "id": "d2c6da5670184f11",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-node-mongodb": "0.2.5"
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]

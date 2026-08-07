@@ -90,7 +90,7 @@
         "type": "function",
         "z": "c8e2d660105acf62",
         "name": "function 1",
-        "func": "const crypto = global.get(\"crypto\");\n\nlet client = msg.payload;\n\nmsg.payload = {\n    _id: crypto.randomUUID(),\n\n    nom: client.nom,\n    prenom: client.prenom,\n    email: client.email,\n    telephone: client.telephone,\n\n    solde: 0,\n\n    dateCreation: new Date(),\n\n    actif: true,\n    banni: false\n};\n\nreturn msg;",
+        "func": "const crypto = global.get(\"crypto\");\n\nlet client = msg.payload;\n\nlet insertClient = {\n    _id: crypto.randomUUID(),\n\n    nom: client.nom,\n    prenom: client.prenom,\n    email: client.email,\n    telephone: client.telephone,\n\n    solde: 0,\n\n    dateCreation: new Date(),\n\n    actif: true,\n    banni: false\n};\n\nmsg.payload = [insertClient]\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -101,24 +101,27 @@
         "y": 200,
         "wires": [
             [
-                "e7592bf7e882624a"
+                "b32b43ef85b54cb6"
             ]
         ]
     },
     {
-        "id": "e7592bf7e882624a",
-        "type": "mongodb out",
+        "id": "b32b43ef85b54cb6",
+        "type": "mongodb4",
         "z": "c8e2d660105acf62",
-        "mongodb": "783a5e3707db0d32",
-        "name": "insert client",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
         "collection": "clients",
-        "payonly": true,
-        "upsert": false,
-        "multi": false,
-        "operation": "insert",
-        "x": 630,
+        "operation": "insertOne",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 620,
         "y": 200,
-        "wires": []
+        "wires": [
+            []
+        ]
     },
     {
         "id": "3c4d42eebe5627d3",
@@ -132,14 +135,28 @@
         "className": ""
     },
     {
-        "id": "783a5e3707db0d32",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": 27017,
-        "db": "smartpub_db",
-        "name": ""
+        "id": "b441ec75b37a2af8",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
     },
     {
         "id": "bdd9564747ab92a5",
@@ -150,12 +167,12 @@
         "hidden": false
     },
     {
-        "id": "46f88a9dd0206d45",
+        "id": "407288fa502700b1",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-node-mongodb": "0.2.5"
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]

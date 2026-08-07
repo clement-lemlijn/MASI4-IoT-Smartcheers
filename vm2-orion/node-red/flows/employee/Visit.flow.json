@@ -61,7 +61,7 @@
         "seg2": "",
         "diff": false,
         "className": "",
-        "x": 800,
+        "x": 700,
         "y": 240,
         "wires": []
     },
@@ -70,7 +70,7 @@
         "type": "function",
         "z": "bb678ccee4044b0b",
         "name": "select occupation",
-        "func": "msg.payload = { statut: \"occupee\" };\nreturn msg;",
+        "func": "msg.payload = [\n    {\n        statut: \"occupee\"\n    }\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -81,23 +81,7 @@
         "y": 240,
         "wires": [
             [
-                "c5ad1437aa529c8e"
-            ]
-        ]
-    },
-    {
-        "id": "c5ad1437aa529c8e",
-        "type": "mongodb in",
-        "z": "bb678ccee4044b0b",
-        "mongodb": "783a5e3707db0d32",
-        "name": "get occupation count",
-        "collection": "tables",
-        "operation": "count",
-        "x": 580,
-        "y": 240,
-        "wires": [
-            [
-                "abd091274ecd60ce"
+                "a852fc5fffa0a629"
             ]
         ]
     },
@@ -106,7 +90,7 @@
         "type": "function",
         "z": "bb678ccee4044b0b",
         "name": "select ouvertes",
-        "func": "msg.payload = [\n    {\n        $match: {\n            statut: \"ouverte\"\n        }\n    },\n];\n\nreturn msg;",
+        "func": "msg.payload = [\n    [\n        {\n            $match: {\n                statut: \"ouverte\"\n            }\n        }\n    ]\n];\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -117,23 +101,7 @@
         "y": 420,
         "wires": [
             [
-                "2d2dd4e384da05db"
-            ]
-        ]
-    },
-    {
-        "id": "2d2dd4e384da05db",
-        "type": "mongodb in",
-        "z": "bb678ccee4044b0b",
-        "mongodb": "783a5e3707db0d32",
-        "name": "get visit",
-        "collection": "visites",
-        "operation": "aggregate",
-        "x": 540,
-        "y": 420,
-        "wires": [
-            [
-                "35ab1405811d0af1"
+                "7310a929c8b0f487"
             ]
         ]
     },
@@ -152,7 +120,7 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 720,
+        "x": 700,
         "y": 420,
         "wires": [
             []
@@ -188,6 +156,46 @@
         ]
     },
     {
+        "id": "a852fc5fffa0a629",
+        "type": "mongodb4",
+        "z": "bb678ccee4044b0b",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "tables",
+        "operation": "count",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 530,
+        "y": 240,
+        "wires": [
+            [
+                "abd091274ecd60ce"
+            ]
+        ]
+    },
+    {
+        "id": "7310a929c8b0f487",
+        "type": "mongodb4",
+        "z": "bb678ccee4044b0b",
+        "clientNode": "b441ec75b37a2af8",
+        "mode": "collection",
+        "collection": "visites",
+        "operation": "aggregate",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "get visit",
+        "x": 540,
+        "y": 420,
+        "wires": [
+            [
+                "35ab1405811d0af1"
+            ]
+        ]
+    },
+    {
         "id": "4ec9668789d29416",
         "type": "ui_group",
         "name": "Visits list",
@@ -197,16 +205,6 @@
         "width": 6,
         "collapse": false,
         "className": ""
-    },
-    {
-        "id": "783a5e3707db0d32",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": 27017,
-        "db": "smartpub_db",
-        "name": ""
     },
     {
         "id": "116f62efaca14969",
@@ -220,6 +218,30 @@
         "className": ""
     },
     {
+        "id": "b441ec75b37a2af8",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
+    },
+    {
         "id": "46446ff295bbccb2",
         "type": "ui_tab",
         "name": "Visits",
@@ -228,12 +250,12 @@
         "hidden": false
     },
     {
-        "id": "adc77de2c8d7f9d8",
+        "id": "540f08491b10f7c8",
         "type": "global-config",
         "env": [],
         "modules": {
             "node-red-dashboard": "3.6.6",
-            "node-red-node-mongodb": "0.2.5"
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]
