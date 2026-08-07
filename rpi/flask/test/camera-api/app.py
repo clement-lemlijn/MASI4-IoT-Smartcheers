@@ -1,11 +1,12 @@
 from flask import Flask, Response
 from picamera import PiCamera
 from picamera.array import PiRGBArray
+import os
 import json
 import time
 from PIL import Image
 from io import BytesIO
-
+from flask import send_file
 
 app = Flask(__name__)
 
@@ -33,9 +34,9 @@ def generate_frames():
     )
 
     for frame in camera.capture_continuous(
-        raw_capture,
-        format="bgr",
-        use_video_port=True
+            raw_capture,
+            format="bgr",
+            use_video_port=True
     ):
 
         image = frame.array
@@ -55,10 +56,10 @@ def generate_frames():
 
 
         yield (
-            b"--frame\r\n"
-            b"Content-Type: image/jpeg\r\n\r\n"
-            + jpeg
-            + b"\r\n"
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n"
+                + jpeg
+                + b"\r\n"
         )
 
 
@@ -71,14 +72,28 @@ def stream(visit_id):
     if visit_id != VISIT_ID:
         return "Unauthorized", 403
 
-
     return Response(
         generate_frames(),
         mimetype=
         "multipart/x-mixed-replace; boundary=frame"
     )
 
+@app.route("/take/<visit_id>", methods=["GET"])
+def take_photo(visit_id):
+    if visit_id != VISIT_ID:
+        return "Unauthorized", 403
 
+    filename = f"photo_{visit_id}.jpg"
+
+    camera.capture(
+        filename,
+        format="jpeg"
+    )
+
+    return send_file(
+        filename,
+        mimetype="image/jpeg"
+    )
 
 if __name__ == "__main__":
 
