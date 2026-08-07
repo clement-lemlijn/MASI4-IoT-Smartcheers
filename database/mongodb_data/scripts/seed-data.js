@@ -228,7 +228,7 @@ db.menu.insertMany([
     description: "Boisson gazeuse au cola servie fraîche",
     categorie: "Boisson",
     prix: 2.50,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_coca.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/1vdeihY291c5xhvx9CSPRs6SeKSjMuyMP",
     disponible: true
   },
   {
@@ -236,7 +236,7 @@ db.menu.insertMany([
     description: "Boisson gazeuse à l'orange servie fraîche",
     categorie: "Boisson",
     prix: 2.50,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_fanta.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/1ON49dkxScge6-0XxqL154JctPJ2_GjSe",
     disponible: true
   },
   {
@@ -244,7 +244,7 @@ db.menu.insertMany([
     description: "Boisson gazeuse citron-lime servie fraîche",
     categorie: "Boisson",
     prix: 2.50,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_sprite.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/1qkFIt6BS4PJYmsxWSKzuwrUzrf6WwaQQ",
     disponible: true
   },
   {
@@ -252,7 +252,7 @@ db.menu.insertMany([
     description: "Bière belge blonde, 5.2%",
     categorie: "Boisson",
     prix: 4.50,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_jupiler.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/1lG8y59m4zbRgt_BwUrb2uxuF2XeWTeI4",
     disponible: true
   },
   {
@@ -260,7 +260,7 @@ db.menu.insertMany([
     description: "Plat de chips croustillantes",
     categorie: "Snack",
     prix: 2.00,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_chips.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/1e1Ia_qanuedHiv3l-TFFm4s01hmAou2l",
     disponible: true
   },
   {
@@ -268,7 +268,7 @@ db.menu.insertMany([
     description: "Tranches de saucisson sec à partager",
     categorie: "Snack",
     prix: 3.50,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_saucisson.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/14tCIo8wBNjbI3J5dRAnGqQ8YecNLOCX7",
     disponible: true
   },
   {
@@ -276,7 +276,7 @@ db.menu.insertMany([
     description: "Morceaux de pizza à partager pour l'apéritif",
     categorie: "Snack",
     prix: 5.00,
-    imageUrl: "https://github.com/clement-lemlijn/MASI4-IoT-Smartcheers/blob/main/assets/menu/smartcheers-menu_pizza.png",
+    imageUrl: "https://lh3.googleusercontent.com/d/1l8iGiruKAy4QV1vwE2iEK3QbRJlhjYyo",
     disponible: true
   }
 ]);
