@@ -122,7 +122,7 @@ def call_train_stop():
 def _on_train_control(client, userdata, msg):
     """Handler MQTT pour le topic smartcheers/train/control.
 
-    Attends des payloads simples 'START' ou 'STOP' (insensible à la casse).
+    Attends des payloads simples 'START', 'STOP' ou 'STOPDIST:<val>' (insensible à la casse).
     """
     try:
         payload = msg.payload.decode("utf-8", errors="ignore").strip().upper()
@@ -133,6 +133,19 @@ def _on_train_control(client, userdata, msg):
         elif payload == "STOP":
             if debug: print("→ Envoi TRAINSTOP via LoRa (contrôle MQTT)")
             call_train_stop()
+        elif payload.startswith("STOPDIST:"):
+            try:
+                val_str = payload.split(":", 1)[1].strip()
+                dist = int(val_str)
+                # clamp between 3 and 100 cm
+                dist = max(3, min(100, dist))
+                cmd_msg = f"STOPDIST:{dist}"
+                cmd = f"AT+SEND=1,{cmd_msg},0,3\r\n"
+                if debug: print(f"→ Envoi STOPDIST via LoRa : {cmd_msg}")
+                _send(cmd)
+                print(f"STOPDIST {dist} envoyé")
+            except Exception as e:
+                print(f"Erreur parsing STOPDIST : {e}")
         else:
             print(f"Payload inconnu sur {TRAIN_CONTROL_TOPIC} : {payload}")
     except Exception as e:
