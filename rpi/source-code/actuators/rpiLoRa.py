@@ -4,8 +4,9 @@
 import serial
 import time
 import threading
-from mqtt_client import mqtt_publish, RPI_ID
+from mqtt_client import mqtt_publish, RPI_ID, create_mqtt_client, BROKER_IP, BROKER_PORT
 TRAIN_STATUS_TOPIC = "smartcheers/train/status"
+TRAIN_CONTROL_TOPIC = "smartcheers/train/control"
 
 PORT = "/dev/ttyUSB0"
 BAUDRATE = 9600
@@ -104,6 +105,56 @@ def start_keepalive():
     """Démarre le thread keepalive (à appeler une seule fois au démarrage)."""
     t = threading.Thread(target=_keepalive_loop, daemon=True)
     t.start()
+
+
+def call_train_stop():
+    """Envoie la commande TRAINSTOP au train."""
+    try:
+        stop_msg = "TRAINSTOP"
+        cmd = f"AT+SEND=1,{stop_msg},0,3\r\n"
+        if(debug): print(f"Envoi : {cmd.strip()}")
+        _send(cmd)
+        print("TRAINSTOP envoyé")
+    except Exception as e:
+        print(f"Erreur call_train_stop : {e}")
+
+
+def _on_train_control(client, userdata, msg):
+    """Handler MQTT pour le topic smartcheers/train/control.
+
+    Attends des payloads simples 'START' ou 'STOP' (insensible à la casse).
+    """
+    try:
+        payload = msg.payload.decode("utf-8", errors="ignore").strip().upper()
+        if debug: print(f"MQTT control reçu : {payload}")
+        if payload == "START":
+            if debug: print("→ Envoi TRAINSTART via LoRa (contrôle MQTT)")
+            call_train_start()
+        elif payload == "STOP":
+            if debug: print("→ Envoi TRAINSTOP via LoRa (contrôle MQTT)")
+            call_train_stop()
+        else:
+            print(f"Payload inconnu sur {TRAIN_CONTROL_TOPIC} : {payload}")
+    except Exception as e:
+        print(f"Erreur gestion control MQTT : {e}")
+
+
+def start_train_control_listener():
+    """Démarre un client MQTT en fond pour écouter les commandes START/STOP.
+
+    Retourne le client paho (permet de l'arrêter plus tard si besoin).
+    """
+    try:
+        client = create_mqtt_client(f"smartcheers-sub-trainctl-{int(time.time()*1000)}")
+        client.on_message = _on_train_control
+        client.connect(BROKER_IP, BROKER_PORT, 10)
+        client.subscribe(TRAIN_CONTROL_TOPIC, qos=1)
+        client.loop_start()
+        print(f"Écoute control train sur {TRAIN_CONTROL_TOPIC} démarrée")
+        return client
+    except Exception as e:
+        print(f"Erreur démarrage listener control MQTT : {e}")
+        return None
 
 
 def close():

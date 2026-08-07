@@ -13,7 +13,7 @@ from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOW
 from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
-from actuators.rpiLoRa import call_train_start, start_keepalive, close
+from actuators.rpiLoRa import call_train_start, start_keepalive, start_train_control_listener, close
 from sensors.light_sensor import wait_for_train
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
@@ -154,6 +154,8 @@ def run():
     set_leds()
 
     start_keepalive()
+    # Listener MQTT pour commandes START/STOP du train
+    start_train_control_listener()
 
     while True:
         client_id = wait_for_rfid()
