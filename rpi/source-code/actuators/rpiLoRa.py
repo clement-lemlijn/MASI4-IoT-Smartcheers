@@ -4,6 +4,8 @@
 import serial
 import time
 import threading
+from mqtt_client import mqtt_publish, RPI_ID
+TRAIN_STATUS_TOPIC = "smartcheers/train/status"
 
 PORT = "/dev/ttyUSB0"
 BAUDRATE = 9600
@@ -86,6 +88,11 @@ def _keepalive_loop():
                         if message.startswith("KEEPALIVE"):
                             if(debug): print(" → Keepalive détecté")
                             send_ack()
+                            try:
+                                payload = {"rpiId": RPI_ID, "type": "keepalive", "message": message, "ts": int(time.time())}
+                                threading.Thread(target=mqtt_publish, args=(payload, TRAIN_STATUS_TOPIC), daemon=True).start()
+                            except Exception as e:
+                                print(f"Erreur MQTT keepalive : {e}")
                     except Exception as e:
                         print(f"Erreur de parsing : {e}")
         except Exception as e:
