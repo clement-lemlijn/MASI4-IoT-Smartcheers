@@ -35,7 +35,7 @@
     "type": "function",
     "z": "7b7018c8c81666ae",
     "name": "function 1 - lookup token",
-    "func": "// Recupere le token envoye par le template UI (cote client)\n// msg._client est preserve automatiquement (on ne le touche pas)\nconst token = msg.payload && msg.payload.token;\n\nif (!token) {\n    msg.payload = { error: true, message: \"Lien invalide ou expire.\" };\n    return [null, msg];\n}\n\nflow.set('lookup_token', token);\n\nmsg.payload = [\n    {\n        $match: {\n            token: token,\n            statut: \"ouverte\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"commandes\",\n            localField: \"_id\",\n            foreignField: \"visiteId\",\n            as: \"commandes\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            badgeId: 1,\n            clientId: 1,\n            dateArrivee: 1,\n            montantTotalVisite: 1,\n            commandes: 1\n        }\n    }\n];\n\nreturn [msg, null];\n",
+    "func": "// Recupere le token envoye par le template UI (cote client)\n// msg._client est preserve automatiquement (on ne le touche pas)\nconst token = msg.payload && msg.payload.token;\n\nif (!token) {\n    msg.payload = { error: true, message: \"Lien invalide ou expire.\" };\n    return [null, msg];\n}\n\nflow.set('lookup_token', token);\n\n\nconst pipeline = [\n    {\n        $match: {\n            token: token,\n            statut: \"ouverte\"\n        }\n    },\n    {\n        $lookup: {\n            from: \"commandes\",\n            localField: \"_id\",\n            foreignField: \"visiteId\",\n            as: \"commandes\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            badgeId: 1,\n            clientId: 1,\n            dateArrivee: 1,\n            montantTotalVisite: 1,\n            commandes: 1\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;\n",
     "outputs": 2,
     "timeout": 0,
     "noerr": 0,
@@ -46,26 +46,11 @@
     "y": 160,
     "wires": [
       [
-        "1421f3a24931e4fc"
+        "52af684ad2a8cda0",
+        "9c1070bdf4029c9b"
       ],
       [
         "9f129de6b9a9e8d1"
-      ]
-    ]
-  },
-  {
-    "id": "1421f3a24931e4fc",
-    "type": "mongodb in",
-    "z": "7b7018c8c81666ae",
-    "mongodb": "3cfdbcebb776dcac",
-    "name": "get visite",
-    "collection": "visites",
-    "operation": "aggregate",
-    "x": 400,
-    "y": 160,
-    "wires": [
-      [
-        "7a2e649f5971f60d"
       ]
     ]
   },
@@ -85,9 +70,80 @@
     "y": 160,
     "wires": [
       [
-        "9f129de6b9a9e8d1"
+        "9f129de6b9a9e8d1",
+        "49f5c9f3dddf0fb7"
       ]
     ]
+  },
+  {
+    "id": "52af684ad2a8cda0",
+    "type": "mongodb4",
+    "z": "7b7018c8c81666ae",
+    "clientNode": "4718b106eec03932",
+    "mode": "collection",
+    "collection": "visites",
+    "operation": "aggregate",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 380,
+    "y": 100,
+    "wires": [
+      [
+        "7a2e649f5971f60d",
+        "241aae2e1f3a2201"
+      ]
+    ]
+  },
+  {
+    "id": "241aae2e1f3a2201",
+    "type": "debug",
+    "z": "7b7018c8c81666ae",
+    "name": "debug 4",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 540,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "9c1070bdf4029c9b",
+    "type": "debug",
+    "z": "7b7018c8c81666ae",
+    "name": "debug 5",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 220,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "49f5c9f3dddf0fb7",
+    "type": "debug",
+    "z": "7b7018c8c81666ae",
+    "name": "debug 6",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 820,
+    "y": 140,
+    "wires": []
   },
   {
     "id": "88fbe5f32b3f23e6",
@@ -101,14 +157,28 @@
     "className": ""
   },
   {
-    "id": "3cfdbcebb776dcac",
-    "type": "mongodb",
-    "hostname": "mongodb_secondary",
-    "topology": "direct",
-    "connectOptions": "",
+    "id": "4718b106eec03932",
+    "type": "mongodb4-client",
+    "name": "smartcheers-mongodb",
+    "protocol": "mongodb",
+    "hostname": "mongodb",
     "port": "27017",
-    "db": "smartpub_db",
-    "name": ""
+    "dbName": "smartpub_db",
+    "appName": "",
+    "authSource": "smartpub_db",
+    "authMechanism": "DEFAULT",
+    "tls": false,
+    "tlsCAFile": "",
+    "tlsCertificateKeyFile": "",
+    "tlsInsecure": false,
+    "connectTimeoutMS": "30000",
+    "socketTimeoutMS": "0",
+    "minPoolSize": "0",
+    "maxPoolSize": "100",
+    "maxIdleTimeMS": "0",
+    "uri": "",
+    "advanced": "{}",
+    "uriTabActive": "tab-uri-simple"
   },
   {
     "id": "8bbfebdace6174cd",
@@ -120,12 +190,12 @@
     "hidden": false
   },
   {
-    "id": "f16f63bb828b7bbe",
+    "id": "0ff25edf148cc85b",
     "type": "global-config",
     "env": [],
     "modules": {
       "node-red-dashboard": "3.6.6",
-      "node-red-node-mongodb": "0.2.5"
+      "node-red-contrib-mongodb4": "3.4.0"
     }
   }
 ]

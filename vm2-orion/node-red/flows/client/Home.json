@@ -12,7 +12,7 @@
         "type": "function",
         "z": "296759a92d9f05a6",
         "name": "function 1",
-        "func": "var visitId = global.get(\"visitId\");\n\nmsg.payload = [\n    { $match: { _id: visitId } },\n    {\n        $lookup: {\n            from: \"clients\",\n            localField: \"clientId\",\n            foreignField: \"_id\",\n            as: \"client\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            montantTotalVisite: 1,\n            client: { $arrayElemAt: [\"$client\", 0] }\n        }\n    }\n];\n\nreturn msg;",
+        "func": "var visitId = global.get(\"visitId\");\n\nconst pipeline = [\n    { $match: { _id: visitId } },\n    {\n        $lookup: {\n            from: \"clients\",\n            localField: \"clientId\",\n            foreignField: \"_id\",\n            as: \"client\"\n        }\n    },\n    {\n        $project: {\n            tableNumero: 1,\n            montantTotalVisite: 1,\n            client: { $arrayElemAt: [\"$client\", 0] }\n        }\n    }\n];\n\nmsg.payload = [pipeline];\n\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -23,7 +23,7 @@
         "y": 220,
         "wires": [
             [
-                "c6f89c9cd987578e"
+                "fbcb0b88c194f6eb"
             ]
         ]
     },
@@ -53,23 +53,6 @@
         "wires": [
             [
                 "e314cbd2ecc6c896"
-            ]
-        ]
-    },
-    {
-        "id": "c6f89c9cd987578e",
-        "type": "mongodb in",
-        "z": "296759a92d9f05a6",
-        "mongodb": "3cfdbcebb776dcac",
-        "name": "find visit",
-        "collection": "visites",
-        "operation": "aggregate",
-        "x": 480,
-        "y": 220,
-        "wires": [
-            [
-                "5179b1702b621d3a",
-                "95658902746da2fb"
             ]
         ]
     },
@@ -247,14 +230,25 @@
         ]
     },
     {
-        "id": "3cfdbcebb776dcac",
-        "type": "mongodb",
-        "hostname": "mongodb_secondary",
-        "topology": "direct",
-        "connectOptions": "",
-        "port": "27017",
-        "db": "smartpub_db",
-        "name": ""
+        "id": "fbcb0b88c194f6eb",
+        "type": "mongodb4",
+        "z": "296759a92d9f05a6",
+        "clientNode": "4718b106eec03932",
+        "mode": "collection",
+        "collection": "visites",
+        "operation": "aggregate",
+        "output": "toArray",
+        "maxTimeMS": "0",
+        "handleDocId": false,
+        "name": "",
+        "x": 420,
+        "y": 180,
+        "wires": [
+            [
+                "5179b1702b621d3a",
+                "95658902746da2fb"
+            ]
+        ]
     },
     {
         "id": "88fbe5f32b3f23e6",
@@ -300,6 +294,30 @@
         "sessionExpiry": ""
     },
     {
+        "id": "4718b106eec03932",
+        "type": "mongodb4-client",
+        "name": "smartcheers-mongodb",
+        "protocol": "mongodb",
+        "hostname": "mongodb",
+        "port": "27017",
+        "dbName": "smartpub_db",
+        "appName": "",
+        "authSource": "smartpub_db",
+        "authMechanism": "DEFAULT",
+        "tls": false,
+        "tlsCAFile": "",
+        "tlsCertificateKeyFile": "",
+        "tlsInsecure": false,
+        "connectTimeoutMS": "30000",
+        "socketTimeoutMS": "0",
+        "minPoolSize": "0",
+        "maxPoolSize": "100",
+        "maxIdleTimeMS": "0",
+        "uri": "",
+        "advanced": "{}",
+        "uriTabActive": "tab-uri-simple"
+    },
+    {
         "id": "8bbfebdace6174cd",
         "type": "ui_tab",
         "name": "SmartPub - Home",
@@ -329,12 +347,12 @@
         "caEnv": ""
     },
     {
-        "id": "ac2bda9935a76046",
+        "id": "6909a7f46fe08fef",
         "type": "global-config",
         "env": [],
         "modules": {
-            "node-red-node-mongodb": "0.2.5",
-            "node-red-dashboard": "3.6.6"
+            "node-red-dashboard": "3.6.6",
+            "node-red-contrib-mongodb4": "3.4.0"
         }
     }
 ]

@@ -65,7 +65,7 @@
     "type": "function",
     "z": "19d04a0260af23f7",
     "name": "prep query",
-    "func": "// filtre sur les items disponibles du menu client\nmsg.payload = { disponible: true };\nreturn msg;",
+    "func": "// filtre sur les items disponibles du menu client\n\nmsg.payload = [\n    {\n        disponible: true\n    }\n];\n\nreturn msg;",
     "outputs": 1,
     "timeout": 0,
     "noerr": 0,
@@ -76,23 +76,7 @@
     "y": 190,
     "wires": [
       [
-        "434620cf22ac3d69"
-      ]
-    ]
-  },
-  {
-    "id": "434620cf22ac3d69",
-    "type": "mongodb in",
-    "z": "19d04a0260af23f7",
-    "mongodb": "3cfdbcebb776dcac",
-    "name": "get menu",
-    "collection": "menu",
-    "operation": "find",
-    "x": 580,
-    "y": 190,
-    "wires": [
-      [
-        "07a8f9c61187fe8b"
+        "1564113286ce67a2"
       ]
     ]
   },
@@ -138,6 +122,26 @@
     ]
   },
   {
+    "id": "1564113286ce67a2",
+    "type": "mongodb4",
+    "z": "19d04a0260af23f7",
+    "clientNode": "4718b106eec03932",
+    "mode": "collection",
+    "collection": "menu",
+    "operation": "find",
+    "output": "toArray",
+    "maxTimeMS": "0",
+    "handleDocId": false,
+    "name": "",
+    "x": 570,
+    "y": 120,
+    "wires": [
+      [
+        "07a8f9c61187fe8b"
+      ]
+    ]
+  },
+  {
     "id": "5c8ad1cd9777c881",
     "type": "ui_group",
     "name": "Menu",
@@ -149,14 +153,28 @@
     "className": ""
   },
   {
-    "id": "3cfdbcebb776dcac",
-    "type": "mongodb",
-    "hostname": "mongodb_secondary",
-    "topology": "direct",
-    "connectOptions": "",
+    "id": "4718b106eec03932",
+    "type": "mongodb4-client",
+    "name": "smartcheers-mongodb",
+    "protocol": "mongodb",
+    "hostname": "mongodb",
     "port": "27017",
-    "db": "smartpub_db",
-    "name": ""
+    "dbName": "smartpub_db",
+    "appName": "",
+    "authSource": "smartpub_db",
+    "authMechanism": "DEFAULT",
+    "tls": false,
+    "tlsCAFile": "",
+    "tlsCertificateKeyFile": "",
+    "tlsInsecure": false,
+    "connectTimeoutMS": "30000",
+    "socketTimeoutMS": "0",
+    "minPoolSize": "0",
+    "maxPoolSize": "100",
+    "maxIdleTimeMS": "0",
+    "uri": "",
+    "advanced": "{}",
+    "uriTabActive": "tab-uri-simple"
   },
   {
     "id": "b27974dcae3be71c",
@@ -168,12 +186,12 @@
     "hidden": false
   },
   {
-    "id": "9f6e937be05f9fe0",
+    "id": "c7de64e797764bca",
     "type": "global-config",
     "env": [],
     "modules": {
       "node-red-dashboard": "3.6.6",
-      "node-red-node-mongodb": "0.2.5"
+      "node-red-contrib-mongodb4": "3.4.0"
     }
   }
 ]
