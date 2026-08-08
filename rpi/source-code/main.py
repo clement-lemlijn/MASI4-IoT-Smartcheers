@@ -3,7 +3,7 @@ import time
 import json
 import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
-
+import threading
 
 from config import RPI_ID, DRINKS, SNACKS
 from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id, mqtt_listen_orders_preparation, mqtt_listen_orders_sent, order_preparation, order_sent, mqtt_publish_train_passing
@@ -15,8 +15,10 @@ from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
 from actuators.rpiLoRa import call_train_start, start_keepalive, start_train_control_listener, close, send_train_loaded, send_train_passed
 from sensors.light_sensor import wait_for_train
+from camera_api import start_camera_server
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
+
 
 def annuler_commande(raison="Commande annulee"):
     """Reset visuel/LED lors d'une annulation (manuelle ou par timeout)."""
@@ -187,8 +189,13 @@ def run():
     init_lcd()
     set_leds()
 
-    start_keepalive()
+    # Démarrer le serveur Flask pour la caméra dans un thread daemon
+    camera_thread = threading.Thread(target=start_camera_server, daemon=True)
+    camera_thread.start()
+    print("📷 Serveur caméra lancé sur http://0.0.0.0:5000")
+    time.sleep(2)  # Laisser le temps au serveur de démarrer
 
+    start_keepalive()
 
     # TEMP
     open_bifurcation()
