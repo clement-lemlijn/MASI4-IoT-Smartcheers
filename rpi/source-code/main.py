@@ -15,7 +15,7 @@ from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
 from actuators.rpiLoRa import call_train_start, start_keepalive, start_train_control_listener, close, send_train_loaded, send_train_passed
 from sensors.light_sensor import wait_for_train
-from camera-api import start_camera_server
+from camera_api import start_camera_server
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
 
