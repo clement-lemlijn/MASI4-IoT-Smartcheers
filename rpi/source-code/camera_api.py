@@ -16,7 +16,7 @@ def init_camera():
     """Initialise la caméra PiCamera."""
     global camera, VISIT_ID
     try:
-        with open("config.json") as f:
+        with open("config-camera.json") as f:
             config = json.load(f)
         VISIT_ID = config.get("visitId", "default")
         

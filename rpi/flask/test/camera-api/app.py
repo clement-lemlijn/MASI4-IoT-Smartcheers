@@ -11,7 +11,7 @@ from flask import send_file
 app = Flask(__name__)
 
 
-with open("config.json") as f:
+with open("config-camera.json") as f:
     config = json.load(f)
 
 
