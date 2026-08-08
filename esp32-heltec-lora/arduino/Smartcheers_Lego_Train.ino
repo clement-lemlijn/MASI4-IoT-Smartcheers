@@ -31,6 +31,17 @@ unsigned int keepAliveCounter = 0;
 String lastRadioMsg = "Aucun";   // Dernier message reçu OU envoyé, pour l'écran
 bool radioBusySending = false;   // Empêche de renvoyer pendant une transmission en cours
 
+// --- TRAIN STOP AT TABLE / AUTO-RESTART ---
+unsigned long stopTimestamp = 0;
+const unsigned long STOP_DURATION = 60000; // 60 secondes d'arrêt à la table
+bool stoppedAtTable = false;
+
+// --- TRAIN LOADED / COMMANDE ---
+String loadedClientInfo = "";
+String loadedItems = "";
+bool commandeLoaded = false;
+unsigned long commandeReceivedTime = 0;
+
 // --- ACK STATUS ---
 bool lastAckOk = false;
 bool waitingForAck = false;
@@ -66,6 +77,17 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 void updateDisplay(String status, int dist) {
     myOLED.clear();
 
+    // Si une commande vient d'être reçue, afficher "Commande reçue" pendant 1 seconde
+    if (commandeLoaded && (millis() - commandeReceivedTime < 1000)) {
+        myOLED.setTextAlignment(TEXT_ALIGN_CENTER);
+        myOLED.setFont(ArialMT_Plain_16);
+        myOLED.drawString(64, 20, "Commande");
+        myOLED.drawString(64, 40, "recue !");
+        myOLED.display();
+        return;
+    }
+
+    // Sinon, affichage normal avec infos de commande
     // ===== Ligne 1 : Status train =====
     myOLED.setFont(ArialMT_Plain_16);
     myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -87,17 +109,27 @@ void updateDisplay(String status, int dist) {
         myOLED.drawString(128, 0, "LoRa X");   // Pas d'ACK
     }
 
-    // ===== Distance =====
-    myOLED.setFont(ArialMT_Plain_16);
-    myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
-    myOLED.drawString(0, 22, "Dist: " + String(dist) + " cm");
+    // Si une commande est chargée, afficher les infos client et items
+    if (commandeLoaded) {
+        myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
+        myOLED.setFont(ArialMT_Plain_10);
+        myOLED.drawString(0, 16, "Client: " + loadedClientInfo);
+        myOLED.drawString(0, 28, "Items: " + loadedItems);
+        myOLED.drawString(0, 40, "Dist: " + String(dist) + " cm");
+        myOLED.drawString(0, 52, lastRadioMsg);
+    } else {
+        // ===== Distance =====
+        myOLED.setFont(ArialMT_Plain_16);
+        myOLED.setTextAlignment(TEXT_ALIGN_LEFT);
+        myOLED.drawString(0, 22, "Dist: " + String(dist) + " cm");
 
-    // ===== Dernier message LoRa =====
-    myOLED.setFont(ArialMT_Plain_10);
-    myOLED.drawString(0, 44, lastRadioMsg);
+        // ===== Dernier message LoRa =====
+        myOLED.setFont(ArialMT_Plain_10);
+        myOLED.drawString(0, 44, lastRadioMsg);
 
-    // ===== Compteur Keepalive =====
-    myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
+        // ===== Compteur Keepalive =====
+        myOLED.drawString(0, 54, "KA #" + String(keepAliveCounter));
+    }
 
     myOLED.display();
 }
@@ -108,7 +140,6 @@ void stopTrain() {
     setServoAngle(50);
     delay(500);
     setServoAngle(0);
-//    Radio.Send((uint8_t *)"TRAINSTOPPED", 13);
     Serial.println("Train arrete par obstacle ou commande");
 }
 
@@ -180,6 +211,32 @@ void sendKeepAlive() {
 
     radioBusySending = true;
     Radio.Send((uint8_t *)msg.c_str(), msg.length());
+}
+
+// Parse un message TRAINLOADED reçu
+// Format: TRAINLOADED;client_info;item1:qty1;item2:qty2;...
+void parseTrainLoaded(String message) {
+    // Trouver les positions des délimiteurs ";"
+    int firstSemi = message.indexOf(';');   // Position du premier ";"
+    int secondSemi = message.indexOf(';', firstSemi + 1);  // Position du deuxième ";"
+    
+    if (firstSemi == -1 || secondSemi == -1) {
+        Serial.println("Erreur parsing TRAINLOADED : format invalide");
+        return;
+    }
+    
+    // Extraire client_info (entre les 2 premiers ";")
+    loadedClientInfo = message.substring(firstSemi + 1, secondSemi);
+    
+    // Extraire items (après le deuxième ";")
+    loadedItems = message.substring(secondSemi + 1);
+    
+    // Marquer la commande comme chargée
+    commandeLoaded = true;
+    commandeReceivedTime = millis();
+    
+    Serial.println(">>> Client: " + loadedClientInfo);
+    Serial.println(">>> Items: " + loadedItems);
 }
 
 void setup() {
@@ -265,13 +322,20 @@ void loop() {
         stopTrain();
     }
 
-    // 2. Keepalive/debug LoRa (toutes les KEEPALIVE_INTERVAL ms)
+    // 2. Gestion auto-redémarrage après 60 secondes à la table
+    if (stoppedAtTable && (millis() - stopTimestamp >= STOP_DURATION)) {
+        Serial.println("60 secondes écoulées, redémarrage automatique du train");
+        stoppedAtTable = false;
+        startTrain();
+    }
+
+    // 3. Keepalive/debug LoRa (toutes les KEEPALIVE_INTERVAL ms)
     if (!radioBusySending && millis() - lastKeepAlive > KEEPALIVE_INTERVAL) {
         sendKeepAlive();
         lastKeepAlive = millis();
     }
 
-    // 3. Mise à jour écran et Série (chaque 500ms pour ne pas saturer)
+    // 4. Mise à jour écran et Série (chaque 500ms pour ne pas saturer)
     if (millis() - lastSerialUpdate > 500) {
         String status = isRunning ? "ROULE" : "ARRET";
         updateDisplay(status, currentDist);
@@ -301,6 +365,19 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
         waitingForAck = false;
         lastAckTime = millis();
         Serial.println(">>> ACK reçu du Raspberry !");
+    }
+    else if (message == "TRAINPASSED" || message.startsWith("TRAINPASSED")) {
+        // Message du RPi indiquant que le train est arrivé à une table
+        if (!stoppedAtTable) {
+            stoppedAtTable = true;
+            stopTimestamp = millis();
+            Serial.println(">>> Train arrivé à une table, attente de 60 secondes avant redémarrage");
+        }
+    }
+    else if (message.startsWith("TRAINLOADED")) {
+        // Format: TRAINLOADED;client_info;item1:qty1;item2:qty2;...
+        Serial.println(">>> TRAINLOADED reçu !");
+        parseTrainLoaded(message);
     }
     else if (message == "TRAINSTART" && !isRunning) {
         startTrain();
