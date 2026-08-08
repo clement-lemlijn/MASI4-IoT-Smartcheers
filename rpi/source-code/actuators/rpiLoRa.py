@@ -47,7 +47,7 @@ def _send(cmd: str):
 
 
 def send_train_loaded(items: dict = None, client_info: str = None):
-    """Envoie TRAINLOADED avec les items commandés au train. """
+    """Envoie TRAINLOADED avec les items commandés au train."""
     try:
         try:
             client_info, items_str = get_formatted_order_for_lora()
@@ -56,15 +56,23 @@ def send_train_loaded(items: dict = None, client_info: str = None):
             print(f"Erreur récupération données MQTT : {e}")
             client_info = "Client"
             items_str = ""
-        
-        # Format: TRAINLOADED;client_info;item1:qty1;item2:qty2;...
-        msg = f"TRAINLOADED;{client_info};{items_str}"
+
+        # On nettoie un peu les données
+        client_info = str(client_info).strip().replace("|", " ")
+        items_str = str(items_str).strip().replace("|", " ")
+
+        # Nouveau format avec | (beaucoup plus fiable)
+        msg = f"TRAINLOADED|{client_info}|{items_str}"
+
         cmd = f"AT+SEND=1,{msg},0,3\r\n"
-        if(debug): print(f"Envoi TRAINLOADED : {cmd.strip()}")
+        if debug:
+            print(f"Envoi TRAINLOADED : {cmd.strip()}")
         _send(cmd)
         print(f"TRAINLOADED envoyé : {msg}")
+
     except Exception as e:
         print(f"Erreur send_train_loaded : {e}")
+
 
 
 def call_train_start():
