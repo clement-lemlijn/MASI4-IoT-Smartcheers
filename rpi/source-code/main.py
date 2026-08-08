@@ -105,7 +105,11 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                     if is_order_ready:
                         display_order_status("ready")
                         time.sleep(1)
-                        
+
+                        # Envoyer TRAINLOADED avec les données MQTT de commande prête
+                        send_train_loaded()
+                        time.sleep(1)
+
                         # Attendre l'envoi par le train
                         print("Attente envoi par train...")
                         is_order_sent = order_sent.wait(timeout=60)
@@ -117,22 +121,15 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                         time.sleep(2)
                         print("bifurcation openned")
 
-                        # Publier que le train passe
-                        table_numero = int(RPI_ID.split("-")[-1])
-                        mqtt_publish_train_passing(table_numero)
-                        
-                        # Envoyer TRAINPASSED au train via LoRa
-                        send_train_passed()
-                        time.sleep(1)
-                        
-                        # Envoyer TRAINLOADED avec les données MQTT de commande prête
-                        send_train_loaded()
-                        time.sleep(1)
-                        
+                        # Faire démarrer le train automatiquement
                         call_train_start()
 
                         # Attendre le train
                         wait_for_train()
+
+                        # Envoyer TRAINPASSED au train via LoRa
+                        # send_train_passed()
+                        # time.sleep(1)
 
                         close_bifurcation()
                         time.sleep(2)

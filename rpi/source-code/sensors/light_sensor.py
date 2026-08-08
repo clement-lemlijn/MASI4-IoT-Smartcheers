@@ -5,6 +5,7 @@ import grovepi
 from grove_rgb_lcd import setText
 from config import RPI_ID
 from mqtt_client import mqtt_publish_train_passing
+from actuators.rpiLoRa import send_train_passed
 
 # Grove Light Sensor analog port A0
 light_sensor = 2
@@ -59,7 +60,10 @@ def wait_for_train():
                 # Publier le message MQTT une seule fois
                 table_numero = int(RPI_ID.split("-")[-1])
                 mqtt_publish_train_passing(table_numero)
-            
+
+                # Publier le message LoRa une seule fois
+                send_train_passed()
+
             last_detection = time.time()
 
         # Train passé si plus de détection depuis 5 secondes
