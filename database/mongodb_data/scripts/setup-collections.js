@@ -303,7 +303,7 @@ db.createCollection("commandes", {
         employeId: { bsonType: ["string", "null"] },
         dateCommande: { bsonType: "date" },
         statut: {
-          enum: ["en_attente", "acceptee", "en_preparation", "envoyee", "prete", "servie", "annulee"]
+          enum: ["en_attente", "en_preparation", "prete", "envoyee", "servie", "annulee"]
         },
         montantTotal: { bsonType: "number" },
         source: { enum: ["rpi", "caisse", "appli"] },
