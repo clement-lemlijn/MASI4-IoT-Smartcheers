@@ -144,6 +144,7 @@ def mqtt_listen_orders_creation():
         qos=1
     )
     client.loop_start()
+    print(f"Écoute order created sur {ORDER_CREATED_TOPIC} démarrée")
     return client
 
 def mqtt_listen_orders_preparation():
@@ -155,6 +156,7 @@ def mqtt_listen_orders_preparation():
         qos=1
     )
     client.loop_start()
+    print(f"Écoute order preparation sur {ORDER_PREPARATION_TOPIC} démarrée")
     return client
 
 def mqtt_listen_orders_ready():
@@ -166,6 +168,7 @@ def mqtt_listen_orders_ready():
         qos=1
     )
     client.loop_start()
+    print(f"Écoute order ready sur {ORDER_READY_TOPIC} démarrée")
     return client
 
 def mqtt_listen_orders_sent():
@@ -177,6 +180,7 @@ def mqtt_listen_orders_sent():
         qos=1
     )
     client.loop_start()
+    print(f"Écoute order sent sur {ORDER_SENT_TOPIC} démarrée")
     return client
 
 def mqtt_publish_train_passing(table_numero):
