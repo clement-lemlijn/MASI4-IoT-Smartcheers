@@ -193,6 +193,9 @@ def run():
     print("closing bifurcation")
     close_bifurcation()
 
+    # TEMP
+    open_bifurcation()
+
     # Listener MQTT pour commandes START/STOP du train
     start_train_control_listener()
 
