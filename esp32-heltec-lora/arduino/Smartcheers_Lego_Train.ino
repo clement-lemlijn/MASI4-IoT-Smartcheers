@@ -77,16 +77,6 @@ NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 void updateDisplay(String status, int dist) {
     myOLED.clear();
 
-    // Si une commande vient d'être reçue, afficher "Commande reçue" pendant 1 seconde
-    if (commandeLoaded && (millis() - commandeReceivedTime < 1000)) {
-        myOLED.setTextAlignment(TEXT_ALIGN_CENTER);
-        myOLED.setFont(ArialMT_Plain_16);
-        myOLED.drawString(64, 20, "Commande");
-        myOLED.drawString(64, 40, "recue !");
-        myOLED.display();
-        return;
-    }
-
     // Sinon, affichage normal avec infos de commande
     // ===== Ligne 1 : Status train =====
     myOLED.setFont(ArialMT_Plain_16);
@@ -213,30 +203,45 @@ void sendKeepAlive() {
     Radio.Send((uint8_t *)msg.c_str(), msg.length());
 }
 
-// Parse un message TRAINLOADED reçu
-// Format: TRAINLOADED;client_info;item1:qty1;item2:qty2;...
 void parseTrainLoaded(String message) {
-    // Trouver les positions des délimiteurs ";"
-    int firstSemi = message.indexOf(';');   // Position du premier ";"
-    int secondSemi = message.indexOf(';', firstSemi + 1);  // Position du deuxième ";"
-    
-    if (firstSemi == -1 || secondSemi == -1) {
-        Serial.println("Erreur parsing TRAINLOADED : format invalide");
+    message.trim();
+
+    Serial.println("Message brut reçu : [" + message + "]");
+
+    if (!message.startsWith("TRAINLOADED")) {
+        Serial.println("Erreur : ne commence pas par TRAINLOADED");
         return;
     }
-    
-    // Extraire client_info (entre les 2 premiers ";")
-    loadedClientInfo = message.substring(firstSemi + 1, secondSemi);
-    
-    // Extraire items (après le deuxième ";")
-    loadedItems = message.substring(secondSemi + 1);
-    
-    // Marquer la commande comme chargée
+
+    int firstSep  = message.indexOf('-');
+    int secondSep = message.indexOf('-', firstSep + 1);
+
+    if (firstSep == -1) {
+        Serial.println("Erreur parsing : aucun - trouvé");
+        return;
+    }
+
+    if (secondSep == -1) {
+        loadedClientInfo = message.substring(firstSep + 1);
+        loadedItems = "";
+    } else {
+        loadedClientInfo = message.substring(firstSep + 1, secondSep);
+        loadedItems = message.substring(secondSep + 1);
+    }
+
+    loadedClientInfo.trim();
+    loadedItems.trim();
+
+    // Marque la commande comme chargée
     commandeLoaded = true;
     commandeReceivedTime = millis();
-    
-    Serial.println(">>> Client: " + loadedClientInfo);
-    Serial.println(">>> Items: " + loadedItems);
+
+    Serial.println(">>> Client : " + loadedClientInfo);
+    Serial.println(">>> Items  : " + loadedItems);
+
+    // Mise à jour immédiate de l'écran
+    String status = isRunning ? "ROULE" : "ARRET";
+    updateDisplay(status, currentDist);
 }
 
 void setup() {
