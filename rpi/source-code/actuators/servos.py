@@ -43,13 +43,13 @@ def set_angle(servo, angle, name):
 
 def open_bifurcation():
     servo_rail = set_servo_rail()
-    set_angle(servo_rail, -60, "Rail")
+    set_angle(servo_rail, 0, "Rail")
     sleep(2)
     servo_rail.detach()
 
 def close_bifurcation():
     servo_rail = set_servo_rail()
-    set_angle(servo_rail, 0, "Rail")
+    set_angle(servo_rail, -60, "Rail")
     sleep(2)
     servo_rail.detach()
 
