@@ -188,6 +188,11 @@ def run():
     set_leds()
 
     start_keepalive()
+
+
+    print("closing bifurcation")
+    close_bifurcation()
+
     # Listener MQTT pour commandes START/STOP du train
     start_train_control_listener()
 
