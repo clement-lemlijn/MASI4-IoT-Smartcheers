@@ -7,6 +7,8 @@ import threading
 
 order_received = threading.Event()
 order_ready = threading.Event()
+order_preparation = threading.Event()
+order_sent = threading.Event()
 received_order_id = None
 from config import BROKER_IP, BROKER_PORT, MQTT_USERNAME, MQTT_PASSWORD
 
@@ -14,6 +16,8 @@ CREATE_ORDER_TOPIC = "smartcheers/orders/new"
 ORDER_CREATED_TOPIC = "smartcheers/orders/created"
 ORDER_RECEIVED_TOPIC = "smartcheers/orders/received"
 ORDER_READY_TOPIC = "smartcheers/orders/ready"
+ORDER_PREPARATION_TOPIC = "smartcheers/orders/preparation"
+ORDER_SENT_TOPIC = "smartcheers/orders/envoyee"
 DELIVER_ORDER_TOPIC = "smartcheers/orders/deliver"
 
 
@@ -76,6 +80,19 @@ def on_order_created(client, userdata, msg):
     except Exception as e:
         print(f"Erreur réception MQTT : {e}")
 
+def on_order_preparation(client, userdata, msg):
+    global received_order_id
+    try:
+        payload = json.loads(msg.payload.decode())
+        print("Message préparation reçu :", payload)
+        if payload.get("orderId") != received_order_id:
+            print(f"orderId différent ({payload.get('orderId')} != {received_order_id})")
+            return
+        print(f"🔨 Commande en préparation : {received_order_id}")
+        order_preparation.set()
+    except Exception as e:
+        print(f"Erreur réception MQTT (preparation) : {e}")
+
 def on_order_ready(client, userdata, msg):
     global received_order_id
     try:
@@ -84,10 +101,23 @@ def on_order_ready(client, userdata, msg):
         if payload.get("orderId") != received_order_id:
             print(f"orderId différent ({payload.get('orderId')} != {received_order_id})")
             return
-        print(f"📦 Commande prête : {received_order_id}")
+        print(f"✅ Commande prête : {received_order_id}")
         order_ready.set()
     except Exception as e:
         print(f"Erreur réception MQTT (ready) : {e}")
+
+def on_order_sent(client, userdata, msg):
+    global received_order_id
+    try:
+        payload = json.loads(msg.payload.decode())
+        print("Message envoyé reçu :", payload)
+        if payload.get("orderId") != received_order_id:
+            print(f"orderId différent ({payload.get('orderId')} != {received_order_id})")
+            return
+        print(f"🚂 Commande envoyée : {received_order_id}")
+        order_sent.set()
+    except Exception as e:
+        print(f"Erreur réception MQTT (envoyee) : {e}")
 
 def mqtt_listen_orders_creation():
     client = create_mqtt_client(f"smartcheers-sub-created-{int(time.time()*1000)}")
@@ -100,14 +130,37 @@ def mqtt_listen_orders_creation():
     client.loop_start()
     return client
 
+def mqtt_listen_orders_preparation():
+    client = create_mqtt_client(f"smartcheers-sub-prep-{int(time.time()*1000)}")
+    client.on_message = on_order_preparation
+    client.connect(BROKER_IP, BROKER_PORT, 10)
+    client.subscribe(
+        ORDER_PREPARATION_TOPIC,
+        qos=1
+    )
+    client.loop_start()
+    return client
+
 def mqtt_listen_orders_ready():
     client = create_mqtt_client(f"smartcheers-sub-ready-{int(time.time()*1000)}")
     client.on_message = on_order_ready
     client.connect(BROKER_IP, BROKER_PORT, 10)
     client.subscribe(
-        "smartcheers/orders/ready",
+        ORDER_READY_TOPIC,
         qos=1
     )
     client.loop_start()
     return client
+
+def mqtt_listen_orders_sent():
+    client = create_mqtt_client(f"smartcheers-sub-sent-{int(time.time()*1000)}")
+    client.on_message = on_order_sent
+    client.connect(BROKER_IP, BROKER_PORT, 10)
+    client.subscribe(
+        ORDER_SENT_TOPIC,
+        qos=1
+    )
+    client.loop_start()
+    return client
+
 

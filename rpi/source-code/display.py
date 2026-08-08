@@ -60,3 +60,20 @@ def display_panier(panier):
             ligne = abr
     lignes.append(ligne)
     setText("\n".join(lignes[:2]))
+
+
+def display_order_status(status):
+    """Affiche le statut de la commande avec couleur."""
+    status_messages = {
+        "received": ("Commande recue", (0, 255, 0)),
+        "preparation": ("En preparation...", (255, 165, 0)),
+        "ready": ("Commande prete !", (0, 255, 0)),
+        "sent": ("Commande envoyee", (0, 200, 255))
+    }
+    
+    if status in status_messages:
+        message, (r, g, b) = status_messages[status]
+        setText(message)
+        safe_setRGB(r, g, b)
+    else:
+        setText(status)
