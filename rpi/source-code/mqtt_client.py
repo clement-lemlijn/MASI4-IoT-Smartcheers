@@ -163,4 +163,7 @@ def mqtt_listen_orders_sent():
     client.loop_start()
     return client
 
-
+def mqtt_publish_train_passing(table_numero):
+    """Publie que le train passe par cette table."""
+    payload = {"tableNumero": table_numero}
+    return mqtt_publish(payload, "smartcheers/train/passing")

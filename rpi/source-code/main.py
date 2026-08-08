@@ -6,7 +6,7 @@ from grove_rgb_lcd import setText
 
 
 from config import RPI_ID, DRINKS, SNACKS
-from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id, mqtt_listen_orders_preparation, mqtt_listen_orders_sent, order_preparation, order_sent
+from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id, mqtt_listen_orders_preparation, mqtt_listen_orders_sent, order_preparation, order_sent, mqtt_publish_train_passing
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier, display_order_status
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
@@ -117,6 +117,10 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                         time.sleep(2)
                         print("bifurcation openned")
 
+                        # Publier que le train passe
+                        table_numero = int(RPI_ID.split("-")[-1])
+                        mqtt_publish_train_passing(table_numero)
+                        
                         call_train_start()
 
                         # Attendre le train
