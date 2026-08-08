@@ -62,7 +62,7 @@ def send_train_loaded(items: dict = None, client_info: str = None):
         items_str = str(items_str).strip().replace("|", " ")
 
         # Nouveau format avec | (beaucoup plus fiable)
-        msg = f"TRAINLOADED|{client_info}|{items_str}"
+        msg = f"TRAINLOADED|_-:<>&{client_info}|{items_str}"
 
         cmd = f"AT+SEND=1,{msg},0,3\r\n"
         if debug:
