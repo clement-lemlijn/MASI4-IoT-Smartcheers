@@ -57,16 +57,17 @@ def send_train_loaded(items: dict = None, client_info: str = None):
             client_info = "Client"
             items_str = ""
 
-        # On nettoie un peu les données
-        client_info = str(client_info).strip().replace("|", " ")
-        items_str = str(items_str).strip().replace("|", " ")
+        # On nettoie les données
+        client_info = str(client_info).strip().replace("-", " ")
+        items_str = str(items_str).strip().replace("-", " ")
 
-        # Nouveau format avec | (beaucoup plus fiable)
-        msg = f"TRAINLOADED|_-:<>&{client_info}|{items_str}"
+        # Nouveau format avec - comme séparateur
+        msg = f"TRAINLOADED-{client_info}-{items_str}"
 
         cmd = f"AT+SEND=1,{msg},0,3\r\n"
         if debug:
             print(f"Envoi TRAINLOADED : {cmd.strip()}")
+
         _send(cmd)
         print(f"TRAINLOADED envoyé : {msg}")
 
