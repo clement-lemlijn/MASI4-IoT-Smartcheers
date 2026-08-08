@@ -10,6 +10,13 @@ order_ready = threading.Event()
 order_preparation = threading.Event()
 order_sent = threading.Event()
 received_order_id = None
+
+# Données de commande actuellement prête (pour envoyer au train)
+current_ready_order = {
+    "client_nom": "",
+    "client_prenom": "",
+    "lignes": [],  # Liste des items
+}
 from config import BROKER_IP, BROKER_PORT, MQTT_USERNAME, MQTT_PASSWORD
 
 CREATE_ORDER_TOPIC = "smartcheers/orders/new"
@@ -94,14 +101,23 @@ def on_order_preparation(client, userdata, msg):
         print(f"Erreur réception MQTT (preparation) : {e}")
 
 def on_order_ready(client, userdata, msg):
-    global received_order_id
+    global received_order_id, current_ready_order
     try:
         payload = json.loads(msg.payload.decode())
         print("Message ready reçu :", payload)
         if payload.get("orderId") != received_order_id:
             print(f"orderId différent ({payload.get('orderId')} != {received_order_id})")
             return
+        
+        # Stocker les données complètes de la commande
+        current_ready_order["client_nom"] = payload.get("client", {}).get("nom", "Client")
+        current_ready_order["client_prenom"] = payload.get("client", {}).get("prenom", "")
+        current_ready_order["lignes"] = payload.get("lignes", [])
+        
         print(f"✅ Commande prête : {received_order_id}")
+        print(f"   Client : {current_ready_order['client_prenom']} {current_ready_order['client_nom']}")
+        print(f"   Items : {len(current_ready_order['lignes'])} produit(s)")
+        
         order_ready.set()
     except Exception as e:
         print(f"Erreur réception MQTT (ready) : {e}")
@@ -167,3 +183,23 @@ def mqtt_publish_train_passing(table_numero):
     """Publie que le train passe par cette table."""
     payload = {"tableNumero": table_numero}
     return mqtt_publish(payload, "smartcheers/train/passing")
+
+
+def get_formatted_order_for_lora():
+    """Retourne les infos de commande formatées pour envoyer au train via LoRa.
+    
+    Format:
+    - client_info: "Prenom NOM"
+    - items_str: "produit1:qty1;produit2:qty2;..."
+    """
+    global current_ready_order
+    
+    client_info = f"{current_ready_order['client_prenom']} {current_ready_order['client_nom']}"
+    
+    # Construire la liste des items avec nom et quantité
+    items_str = ";".join([
+        f"{ligne['produitNom']}:{ligne['quantite']}" 
+        for ligne in current_ready_order['lignes']
+    ])
+    
+    return client_info, items_str

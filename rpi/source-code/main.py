@@ -13,7 +13,7 @@ from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOW
 from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
-from actuators.rpiLoRa import call_train_start, start_keepalive, start_train_control_listener, close
+from actuators.rpiLoRa import call_train_start, start_keepalive, start_train_control_listener, close, send_train_loaded, send_train_passed
 from sensors.light_sensor import wait_for_train
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
@@ -120,6 +120,14 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                         # Publier que le train passe
                         table_numero = int(RPI_ID.split("-")[-1])
                         mqtt_publish_train_passing(table_numero)
+                        
+                        # Envoyer TRAINPASSED au train via LoRa
+                        send_train_passed()
+                        time.sleep(1)
+                        
+                        # Envoyer TRAINLOADED avec les données MQTT de commande prête
+                        send_train_loaded()
+                        time.sleep(1)
                         
                         call_train_start()
 

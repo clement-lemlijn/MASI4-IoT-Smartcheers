@@ -4,7 +4,7 @@
 import serial
 import time
 import threading
-from mqtt_client import mqtt_publish, RPI_ID, create_mqtt_client, BROKER_IP, BROKER_PORT
+from mqtt_client import mqtt_publish, RPI_ID, create_mqtt_client, BROKER_IP, BROKER_PORT, get_formatted_order_for_lora
 TRAIN_STATUS_TOPIC = "smartcheers/train/status"
 TRAIN_CONTROL_TOPIC = "smartcheers/train/control"
 
@@ -44,6 +44,27 @@ def _send(cmd: str):
         # on vide éventuellement le buffer de réponse
         if ser.in_waiting:
             ser.read_all()
+
+
+def send_train_loaded(items: dict = None, client_info: str = None):
+    """Envoie TRAINLOADED avec les items commandés au train. """
+    try:
+        try:
+            client_info, items_str = get_formatted_order_for_lora()
+            print(f"[LoRa] Utilisation des données MQTT : {client_info}")
+        except Exception as e:
+            print(f"Erreur récupération données MQTT : {e}")
+            client_info = "Client"
+            items_str = ""
+        
+        # Format: TRAINLOADED;client_info;item1:qty1;item2:qty2;...
+        msg = f"TRAINLOADED;{client_info};{items_str}"
+        cmd = f"AT+SEND=1,{msg},0,3\r\n"
+        if(debug): print(f"Envoi TRAINLOADED : {cmd.strip()}")
+        _send(cmd)
+        print(f"TRAINLOADED envoyé : {msg}")
+    except Exception as e:
+        print(f"Erreur send_train_loaded : {e}")
 
 
 def call_train_start():
@@ -117,6 +138,18 @@ def call_train_stop():
         print("TRAINSTOP envoyé")
     except Exception as e:
         print(f"Erreur call_train_stop : {e}")
+
+
+def send_train_passed():
+    """Envoie le message TRAINPASSED au train pour indiquer qu'il est arrivé à une table."""
+    try:
+        msg = "TRAINPASSED"
+        cmd = f"AT+SEND=1,{msg},0,3\r\n"
+        if(debug): print(f"Envoi TRAINPASSED : {cmd.strip()}")
+        _send(cmd)
+        print("TRAINPASSED envoyé")
+    except Exception as e:
+        print(f"Erreur send_train_passed : {e}")
 
 
 def _on_train_control(client, userdata, msg):
