@@ -194,6 +194,9 @@ def run():
     setup_joystick()
     setup_leds()
     init_lcd()
+    # Default: light red
+    safe_setRGB(255, 100, 100)
+    setText("Connexion...")
     set_leds()
 
     #####################################################
@@ -232,8 +235,14 @@ def run():
             safe_setRGB(255, 0, 0)
             return
         else:
-            # CONNECT_INFO stored for future use
-            pass
+            # Connection successful: green for 2 seconds
+            safe_setRGB(0, 255, 0)
+            setText("Connecte !")
+            time.sleep(2)
+            # Now switch to light blue for normal operation
+            safe_setRGB(100, 150, 255)
+            setText("Pret")
+            time.sleep(0.5)
     except Exception as e:
         print("Erreur handshake:", e)
 

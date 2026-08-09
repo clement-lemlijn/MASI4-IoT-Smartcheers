@@ -6,6 +6,7 @@ from config import PRODUCTS
 
 
 def safe_setRGB(r, g, b):
+    """Change la couleur du rétroéclairage sans bloquer le programme."""
     try:
         setRGB(r, g, b)
     except OSError:
@@ -13,15 +14,16 @@ def safe_setRGB(r, g, b):
 
 
 def init_lcd():
+    """Initialise l'écran LCD avec un rétroéclairage cyan."""
     for i in range(5):
         try:
-            safe_setRGB(0, 128, 100)
+            setRGB(0, 128, 100)
             return
         except OSError:
             print(f"I2C failure, retrying... ({i+1}/5)")
             time.sleep(1)
-    print("Could not initialize LCD, continuing anyway...")
 
+    print("Could not initialize LCD, continuing anyway...")
 
 def format_item(item, panier):
     # Menu principal (chaîne simple) ou produit (dict)
