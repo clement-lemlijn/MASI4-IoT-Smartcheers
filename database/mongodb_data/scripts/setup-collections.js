@@ -12,7 +12,7 @@ print(`>> Initialisation de la base ${dbName}`);
 // ------------------------------------------------------------
 ["pub", "raspberrypi", "badges", "clients", "tables", "categories_produits", "produits", "employes",
  "visites", "commandes", "transactions_credit", "menu",
- "sensors"].forEach(c => {
+ "sensors", "smartcheers_pubs"].forEach(c => {
   db[c].drop();
 });
 
@@ -496,5 +496,91 @@ db.createCollection("menu", {
 });
 db.menu.createIndex({ nom: 1 }, { unique: true });
 
+
+// ------------------------------------------------------------
+// SMARTCHEERS_PUBS
+// Liste des autres bars (concurrents / partenaires)
+// Utilisée notamment pour l'affichage sur carte (worldmap)
+// ------------------------------------------------------------
+
+db.createCollection("smartcheers_pubs", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: [
+        "name",
+        "lat",
+        "lon"
+      ],
+      properties: {
+
+        name: {
+          bsonType: "string",
+          description: "Nom du bar"
+        },
+
+        lat: {
+          bsonType: "double",
+          description: "Latitude"
+        },
+
+        lon: {
+          bsonType: "double",
+          description: "Longitude"
+        },
+
+        icon: {
+          bsonType: "string",
+          description: "Icône pour la carte (ex: glass, beer, cocktail...)"
+        },
+
+        layer: {
+          bsonType: "string",
+          description: "Couche / groupe sur la carte"
+        },
+
+        popup: {
+          bsonType: "string",
+          description: "Contenu HTML du popup"
+        },
+
+        // Champs optionnels utiles
+        adresse: {
+          bsonType: ["string", "null"]
+        },
+
+        ville: {
+          bsonType: ["string", "null"]
+        },
+
+        description: {
+          bsonType: ["string", "null"]
+        },
+
+        siteWeb: {
+          bsonType: ["string", "null"]
+        },
+
+        telephone: {
+          bsonType: ["string", "null"]
+        },
+
+        actif: {
+          bsonType: "bool",
+          description: "Permet de masquer un bar sans le supprimer"
+        },
+
+        dateAjout: {
+          bsonType: "date"
+        }
+      }
+    }
+  }
+});
+
+// Index utiles
+db.smartcheers_pubs.createIndex({ name: 1 }, { unique: true });
+db.smartcheers_pubs.createIndex({ lat: 1, lon: 1 });
+db.smartcheers_pubs.createIndex({ layer: 1 });
 
 print(">> Collections et index créés avec succès.");
