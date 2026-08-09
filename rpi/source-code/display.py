@@ -1,6 +1,6 @@
 """Aide à l'affichage sur l'écran LCD Grove (RGB backlight + texte)."""
 import time
-from grove_rgb_lcd import setText, setRGB
+from libs.grove_lcd_rgb_v5 import setText, setRGB
 
 from config import PRODUCTS
 
