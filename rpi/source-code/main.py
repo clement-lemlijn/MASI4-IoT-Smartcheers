@@ -5,8 +5,8 @@ import RPi.GPIO as GPIO
 from grove_rgb_lcd import setText
 import threading
 
-from config import RPI_ID, DRINKS, SNACKS
-from mqtt_client import mqtt_publish, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id, mqtt_listen_orders_preparation, mqtt_listen_orders_sent, order_preparation, order_sent, mqtt_publish_train_passing
+from config import RPI_ID, DRINKS, SNACKS, BROKER_IP, BROKER_PORT
+from mqtt_client import mqtt_publish, create_mqtt_client, CREATE_ORDER_TOPIC, mqtt_listen_orders_creation, order_received, mqtt_listen_orders_ready, order_ready, received_order_id, mqtt_listen_orders_preparation, mqtt_listen_orders_sent, order_preparation, order_sent, mqtt_publish_train_passing
 from leds import setup_leds, set_leds, blink_led
 from display import safe_setRGB, init_lcd, display_menu, display_panier, display_order_status
 from joystick import setup_joystick, read_joystick, X_LEFT, X_RIGHT, Y_UP, Y_DOWN
@@ -18,6 +18,9 @@ from sensors.light_sensor import wait_for_train
 from camera_api import start_camera_server
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
+
+# Info reçu du serveur après handshake MQTT au démarrage
+CONNECT_INFO = None
 
 
 def annuler_commande(raison="Commande annulee"):
@@ -192,6 +195,42 @@ def run():
     setup_leds()
     init_lcd()
     set_leds()
+
+    # Startup MQTT handshake: publish rpiId and wait for server response
+    try:
+        print("🔌 Publishing connect message...")
+        mqtt_publish({"rpiId": RPI_ID}, "smartcheers/rpi/connect")
+        # Listen for success response on smartcheers/rpi/connect/success
+        client_hs = create_mqtt_client(f"smartcheers-hs-sub-{int(time.time()*1000)}")
+        handshake_event = threading.Event()
+        def on_connect_success(client, userdata, msg):
+            global CONNECT_INFO
+            try:
+                payload = json.loads(msg.payload.decode())
+                if payload.get("rpiId") != RPI_ID:
+                    return
+                CONNECT_INFO = payload
+                print("✅ Connect success received:", CONNECT_INFO)
+                handshake_event.set()
+            except Exception as e:
+                print("Erreur handshake MQTT:", e)
+        client_hs.on_message = on_connect_success
+        client_hs.connect(BROKER_IP, BROKER_PORT, 10)
+        client_hs.subscribe("smartcheers/rpi/connect/success", qos=1)
+        client_hs.loop_start()
+        print("Attente réponse serveur sur smartcheers/rpi/connect/success...")
+        got = handshake_event.wait(timeout=30)
+        client_hs.loop_stop()
+        client_hs.disconnect()
+        if not got:
+            print("⚠️ Pas de réponse serveur pour le handshake (timeout).")
+            setText("Serveur absent")
+            safe_setRGB(255, 0, 0)
+        else:
+            # CONNECT_INFO stored for future use
+            pass
+    except Exception as e:
+        print("Erreur handshake:", e)
 
     # Démarrer le serveur Flask pour la caméra dans un thread daemon
     camera_thread = threading.Thread(target=start_camera_server, daemon=True)
