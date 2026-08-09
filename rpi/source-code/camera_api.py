@@ -10,11 +10,13 @@ from io import BytesIO
 app = Flask(__name__)
 camera = None
 VISIT_ID = None
+TOKEN = None
 
 
-def init_camera():
+def init_camera(token=None):
     """Initialise la caméra PiCamera."""
-    global camera, VISIT_ID
+    global camera, VISIT_ID, TOKEN
+    TOKEN = token
     try:
         with open("config-camera.json") as f:
             config = json.load(f)
@@ -62,7 +64,7 @@ def generate_frames():
 @app.route("/camera/<visit_id>")
 def stream(visit_id):
     """Stream vidéo en direct de la caméra."""
-    if visit_id != VISIT_ID:
+    if visit_id != VISIT_ID or (TOKEN and visit_id != VISIT_ID):
         return "Unauthorized", 403
     
     return Response(
@@ -74,7 +76,7 @@ def stream(visit_id):
 @app.route("/take/<visit_id>", methods=["GET"])
 def take_photo(visit_id):
     """Prend une photo et la retourne."""
-    if visit_id != VISIT_ID:
+    if visit_id != VISIT_ID or (TOKEN and visit_id != VISIT_ID):
         return "Unauthorized", 403
     
     if camera is None:
@@ -86,10 +88,10 @@ def take_photo(visit_id):
     return send_file(filename, mimetype="image/jpeg")
 
 
-def start_camera_server():
+def start_camera_server(token=None):
     """Démarre le serveur Flask pour la caméra dans un thread daemon."""
     try:
-        init_camera()
+        init_camera(token=token)
         app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)
     except Exception as e:
         print(f"❌ Erreur serveur caméra : {e}")
