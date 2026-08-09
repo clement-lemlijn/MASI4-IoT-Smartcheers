@@ -119,11 +119,6 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                             display_order_status("sent")
                             time.sleep(1)
 
-
-                        open_barrier() # test
-                        time.sleep(2)
-
-
                         # Make sure the table 2 "STOP" barrier is closed
                         close_barrier()
 
@@ -209,6 +204,14 @@ def run():
     # TEMP
     open_bifurcation()
 
+    open_barrier() # test
+    time.sleep(2)
+
+    # Closing table2's "STOP" barrier
+    print("closing barrier")
+    close_barrier()
+
+    # Closing bifurcation
     print("closing bifurcation")
     close_bifurcation()
 
