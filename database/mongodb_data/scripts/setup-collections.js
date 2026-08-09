@@ -10,11 +10,131 @@ print(`>> Initialisation de la base ${dbName}`);
 // ------------------------------------------------------------
 // Nettoyage (optionnel, pratique en dev)
 // ------------------------------------------------------------
-["raspberrypi", "badges", "clients", "tables", "categories_produits", "produits", "employes",
+["pub", "raspberrypi", "badges", "clients", "tables", "categories_produits", "produits", "employes",
  "visites", "commandes", "transactions_credit", "menu",
  "sensors"].forEach(c => {
   db[c].drop();
 });
+
+// ------------------------------------------------------------
+// PUB
+// Informations spécifiques à l'établissement.
+// Cette collection ne doit contenir qu'un seul document.
+// Pour déployer le système dans un autre bar, il suffit
+// de modifier le contenu de ce document.
+// ------------------------------------------------------------
+
+db.createCollection("pub", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: [
+        "nom",
+        "nomTechnique",
+        "localisation",
+        "gerant",
+        "contact"
+      ],
+      properties: {
+
+        nom: {
+          bsonType: "string",
+          description: "Nom commercial du bar (affiché aux clients)"
+        },
+
+        nomTechnique: {
+          bsonType: "string",
+          description: "Identifiant technique (slug, sans espaces ni accents)"
+        },
+
+        localisation: {
+          bsonType: "object",
+          required: ["adresse", "ville", "codePostal"],
+          properties: {
+            adresse: {
+              bsonType: "string",
+              description: "Adresse complète"
+            },
+            ville: {
+              bsonType: "string"
+            },
+            codePostal: {
+              bsonType: "string"
+            },
+            pays: {
+              bsonType: "string",
+              description: "Par défaut 'France'"
+            },
+            coordonnees: {
+              bsonType: "object",
+              description: "Optionnel – pour cartographie",
+              properties: {
+                lat: { bsonType: "double" },
+                lng: { bsonType: "double" }
+              }
+            }
+          }
+        },
+
+        gerant: {
+          bsonType: "object",
+          required: ["prenom", "nom"],
+          properties: {
+            prenom: { bsonType: "string" },
+            nom:    { bsonType: "string" },
+            email:  { bsonType: ["string", "null"] }
+          }
+        },
+
+        contact: {
+          bsonType: "object",
+          required: ["telephoneOfficiel"],
+          properties: {
+            telephoneOfficiel: {
+              bsonType: "string",
+              description: "Numéro officiel du bar (affiché au public)"
+            },
+            telephoneGerant: {
+              bsonType: ["string", "null"],
+              description: "Numéro personnel du gérant"
+            },
+            email: {
+              bsonType: ["string", "null"],
+              description: "Email de contact officiel"
+            }
+          }
+        },
+
+        // Champs optionnels utiles
+        siret: {
+          bsonType: ["string", "null"]
+        },
+
+        horaires: {
+          bsonType: ["object", "null"],
+          description: "Horaires d'ouverture (libre)"
+        },
+
+        logoUrl: {
+          bsonType: ["string", "null"]
+        },
+
+        dateCreation: {
+          bsonType: "date"
+        },
+
+        actif: {
+          bsonType: "bool",
+          description: "Permet de désactiver rapidement un établissement"
+        }
+      }
+    }
+  }
+});
+db.pub.createIndex(
+    { nomTechnique: 1 },
+    { unique: true }
+);
 
 // ------------------------------------------------------------
 // RPIS
