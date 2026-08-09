@@ -241,6 +241,7 @@ def run():
 
     # Démarrer le serveur Flask pour la caméra dans un thread daemon
     camera_token = CONNECT_INFO.get("activeVisit", {}).get("token") if CONNECT_INFO else None
+    print("camera_token:", camera_token)
     camera_thread = threading.Thread(
         target=start_camera_server, 
         args=(camera_token,), 
