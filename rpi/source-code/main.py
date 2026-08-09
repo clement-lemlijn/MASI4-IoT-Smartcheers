@@ -196,6 +196,10 @@ def run():
     init_lcd()
     set_leds()
 
+    #####################################################
+    ################ CONNECT TO BAR #####################
+    #####################################################
+
     # Startup MQTT handshake: publish rpiId and wait for server response
     try:
         print("🔌 Publishing connect message...")
@@ -226,11 +230,14 @@ def run():
             print("⚠️ Pas de réponse serveur pour le handshake (timeout).")
             setText("Serveur absent")
             safe_setRGB(255, 0, 0)
+            return
         else:
             # CONNECT_INFO stored for future use
             pass
     except Exception as e:
         print("Erreur handshake:", e)
+
+
 
     # Démarrer le serveur Flask pour la caméra dans un thread daemon
     camera_thread = threading.Thread(target=start_camera_server, daemon=True)
