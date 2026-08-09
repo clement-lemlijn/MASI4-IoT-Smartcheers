@@ -9,6 +9,64 @@ db = db.getSiblingDB("smartpub_db");
 
 const { randomUUID } = require("crypto");
 
+
+// ============================================================
+// 02_seed_pub.js
+// ============================================================
+
+const dbName = "smartpub_db";
+db = db.getSiblingDB(dbName);
+
+print(">> Insertion des informations de l'établissement...");
+
+db.pub.deleteMany({});
+
+db.pub.insertOne({
+  nom: "Le Smart Pub",
+  nomTechnique: "le-smart-pub",
+
+  localisation: {
+    adresse: "15 rue Hors-Château",
+    ville: "Liège",
+    codePostal: "4000",
+    pays: "Belgique",
+    coordonnees: {
+      lat: 50.6452,
+      lng: 5.5758
+    }
+  },
+
+  gerant: {
+    prenom: "Thomas",
+    nom: "Martin",
+    email: "thomas.martin@mail.be"
+  },
+
+  contact: {
+    telephoneOfficiel: "+32 4 123 45 67",
+    telephoneGerant: "+32 499 84 69 91",
+    email: "contact@lesmartpub.be"
+  },
+
+  siret: null,
+  horaires: {
+    lundi:    "Fermé",
+    mardi:    "16h - 01h",
+    mercredi: "16h - 01h",
+    jeudi:    "16h - 02h",
+    vendredi: "16h - 03h",
+    samedi:   "14h - 03h",
+    dimanche: "14h - 00h"
+  },
+
+  logoUrl: null,
+  actif: true,
+  dateCreation: new Date()
+});
+
+print(">> Document 'pub' inséré avec succès.");
+
+
 // ------------------------------------------------------------
 // RPIS
 // Parc des Raspberry Pi utilisés comme bornes de commande
@@ -280,6 +338,65 @@ db.menu.insertMany([
     disponible: true
   }
 ]);
+
+// ============================================================
+// seed_smartcheers_pubs
+// ============================================================
+
+db.smartcheers_pubs.deleteMany({});
+
+const bars = [
+  {
+    name: "Le Pot au Lait",
+    lat: 50.6421,
+    lon: 5.5765,
+    icon: "glass",
+    layer: "Bars",
+    popup: "<b>Le Pot au Lait</b><br>Bar emblématique de Liège",
+    ville: "Liège",
+    description: "Bar emblématique de Liège",
+    actif: true,
+    dateAjout: new Date()
+  },
+  {
+    name: "Café Lequet",
+    lat: 50.6406,
+    lon: 5.5793,
+    icon: "glass",
+    layer: "Bars",
+    popup: "<b>Café Lequet</b><br>Boulets à la liégeoise",
+    ville: "Liège",
+    description: "Boulets à la liégeoise",
+    actif: true,
+    dateAjout: new Date()
+  },
+  {
+    name: "Beer Lovers' Café",
+    lat: 50.6388,
+    lon: 5.5717,
+    icon: "glass",
+    layer: "Bars",
+    popup: "<b>Beer Lovers' Café</b><br>Large choix de bières",
+    ville: "Liège",
+    description: "Large choix de bières",
+    actif: true,
+    dateAjout: new Date()
+  },
+  {
+    name: "Brasserie C",
+    lat: 50.6458,
+    lon: 5.5810,
+    icon: "glass",
+    layer: "Bars",
+    popup: "<b>Brasserie C</b><br>Microbrasserie Curtius",
+    ville: "Liège",
+    description: "Microbrasserie Curtius",
+    actif: true,
+    dateAjout: new Date()
+  }
+];
+
+db.smartcheers_pubs.insertMany(bars);
 
 
 print(">> Données de seed insérées avec succès.");
