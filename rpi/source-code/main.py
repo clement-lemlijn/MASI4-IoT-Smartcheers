@@ -118,7 +118,16 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
                         if is_order_sent:
                             display_order_status("sent")
                             time.sleep(1)
-                        
+
+
+                        open_barrier() # test
+                        time.sleep(2)
+
+
+                        # Make sure the table 2 "STOP" barrier is closed
+                        close_barrier()
+
+                        # Open the table 2 bifurcation
                         open_bifurcation()
                         time.sleep(2)
                         print("bifurcation openned")
