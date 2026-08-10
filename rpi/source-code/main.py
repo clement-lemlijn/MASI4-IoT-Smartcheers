@@ -190,7 +190,7 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
         time.sleep(0.05)
 
 def wait_for_server_response(timeout=5):
-    """Attend la réponse du serveur sur le topic de succès. Retourne True si reçue."""
+    """Attend la réponse du serveur. Retourne True si reçue, False sinon."""
     handshake_event = threading.Event()
 
     def on_connect_success(client, userdata, msg):
@@ -213,29 +213,34 @@ def wait_for_server_response(timeout=5):
         client_hs.subscribe("smartcheers/rpi/connect/success", qos=1)
         client_hs.loop_start()
 
-        print("Attente réponse serveur sur smartcheers/rpi/connect/success...")
+        print("Attente réponse serveur...")
         got = handshake_event.wait(timeout=timeout)
-
         return got
+
+    except Exception as e:
+        print(f"❌ Impossible de se connecter au broker : {e}")
+        return False
+
     finally:
-        client_hs.loop_stop()
-        client_hs.disconnect()
+        try:
+            client_hs.loop_stop()
+            client_hs.disconnect()
+        except Exception:
+            pass
 
 
 def connect_to_bar():
     """Boucle infinie de connexion MQTT jusqu'à ce que le serveur réponde."""
     setText("Connexion...")
-    safe_setRGB(255, 100, 100)  # rouge clair
+    safe_setRGB(255, 100, 100)
 
     attempt = 0
     while True:
         attempt += 1
         print(f"🔌 Tentative de connexion #{attempt}...")
 
-        try:
-            mqtt_publish({"rpiId": RPI_ID}, "smartcheers/rpi/connect")
-        except Exception as e:
-            print("Erreur publication MQTT:", e)
+        # On envoie le message (même s'il échoue, on continue)
+        mqtt_publish({"rpiId": RPI_ID}, "smartcheers/rpi/connect")
 
         if wait_for_server_response(timeout=5):
             # Succès
@@ -243,17 +248,15 @@ def connect_to_bar():
             setText("Connecte !")
             time.sleep(2)
 
-            safe_setRGB(100, 150, 255)  # bleu clair mode normal
+            safe_setRGB(100, 150, 255)
             time.sleep(0.5)
             return
 
-        # Échec → on réessaie dans 5 secondes
+        # Échec → on attend 5 secondes puis on réessaie
         print("⚠️ Pas de réponse serveur, nouvelle tentative dans 5s...")
         setText("Serveur absent")
         safe_setRGB(255, 0, 0)
         time.sleep(5)
-
-
 
 
 def run():
@@ -263,6 +266,8 @@ def run():
     set_leds()
 
     connect_to_bar()
+
+    # Suite du programme...
 
     # Démarrer le serveur Flask pour la caméra dans un thread daemon
     camera_token = CONNECT_INFO.get("activeVisit", {}).get("token") if CONNECT_INFO else None
