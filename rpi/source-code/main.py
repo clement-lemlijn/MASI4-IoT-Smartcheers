@@ -189,64 +189,80 @@ def _handle_confirmation(client_id, panier, menu_stack, index):
 
         time.sleep(0.05)
 
+def wait_for_server_response(timeout=5):
+    """Attend la réponse du serveur sur le topic de succès. Retourne True si reçue."""
+    handshake_event = threading.Event()
+
+    def on_connect_success(client, userdata, msg):
+        global CONNECT_INFO
+        try:
+            payload = json.loads(msg.payload.decode())
+            if payload.get("rpiId") != RPI_ID:
+                return
+            CONNECT_INFO = payload
+            print("✅ Connect success received:", CONNECT_INFO)
+            handshake_event.set()
+        except Exception as e:
+            print("Erreur handshake MQTT:", e)
+
+    client_hs = create_mqtt_client(f"smartcheers-hs-sub-{int(time.time()*1000)}")
+    client_hs.on_message = on_connect_success
+
+    try:
+        client_hs.connect(BROKER_IP, BROKER_PORT, 10)
+        client_hs.subscribe("smartcheers/rpi/connect/success", qos=1)
+        client_hs.loop_start()
+
+        print("Attente réponse serveur sur smartcheers/rpi/connect/success...")
+        got = handshake_event.wait(timeout=timeout)
+
+        return got
+    finally:
+        client_hs.loop_stop()
+        client_hs.disconnect()
+
+
+def connect_to_bar():
+    """Boucle infinie de connexion MQTT jusqu'à ce que le serveur réponde."""
+    setText("Connexion...")
+    safe_setRGB(255, 100, 100)  # rouge clair
+
+    attempt = 0
+    while True:
+        attempt += 1
+        print(f"🔌 Tentative de connexion #{attempt}...")
+
+        try:
+            mqtt_publish({"rpiId": RPI_ID}, "smartcheers/rpi/connect")
+        except Exception as e:
+            print("Erreur publication MQTT:", e)
+
+        if wait_for_server_response(timeout=5):
+            # Succès
+            safe_setRGB(0, 255, 0)
+            setText("Connecte !")
+            time.sleep(2)
+
+            safe_setRGB(100, 150, 255)  # bleu clair mode normal
+            time.sleep(0.5)
+            return
+
+        # Échec → on réessaie dans 5 secondes
+        print("⚠️ Pas de réponse serveur, nouvelle tentative dans 5s...")
+        setText("Serveur absent")
+        safe_setRGB(255, 0, 0)
+        time.sleep(5)
+
+
+
 
 def run():
     setup_joystick()
     setup_leds()
     init_lcd()
-    # Default: light red
-    safe_setRGB(255, 100, 100)
-    setText("Connexion...")
     set_leds()
 
-    #####################################################
-    ################ CONNECT TO BAR #####################
-    #####################################################
-
-    # Startup MQTT handshake: publish rpiId and wait for server response
-    try:
-        print("🔌 Publishing connect message...")
-        mqtt_publish({"rpiId": RPI_ID}, "smartcheers/rpi/connect")
-        # Listen for success response on smartcheers/rpi/connect/success
-        client_hs = create_mqtt_client(f"smartcheers-hs-sub-{int(time.time()*1000)}")
-        handshake_event = threading.Event()
-        def on_connect_success(client, userdata, msg):
-            global CONNECT_INFO
-            try:
-                payload = json.loads(msg.payload.decode())
-                if payload.get("rpiId") != RPI_ID:
-                    return
-                CONNECT_INFO = payload
-                print("✅ Connect success received:", CONNECT_INFO)
-                handshake_event.set()
-            except Exception as e:
-                print("Erreur handshake MQTT:", e)
-        client_hs.on_message = on_connect_success
-        client_hs.connect(BROKER_IP, BROKER_PORT, 10)
-        client_hs.subscribe("smartcheers/rpi/connect/success", qos=1)
-        client_hs.loop_start()
-        print("Attente réponse serveur sur smartcheers/rpi/connect/success...")
-        got = handshake_event.wait(timeout=30)
-        client_hs.loop_stop()
-        client_hs.disconnect()
-        if not got:
-            print("⚠️ Pas de réponse serveur pour le handshake (timeout).")
-            setText("Serveur absent")
-            safe_setRGB(255, 0, 0)
-            return
-        else:
-            # Connection successful: green for 2 seconds
-            safe_setRGB(0, 255, 0)
-            setText("Connecte !")
-            time.sleep(2)
-            # Now switch to light blue for normal operation
-            safe_setRGB(100, 150, 255)
-            setText("Pret")
-            time.sleep(0.5)
-    except Exception as e:
-        print("Erreur handshake:", e)
-
-
+    connect_to_bar()
 
     # Démarrer le serveur Flask pour la caméra dans un thread daemon
     camera_token = CONNECT_INFO.get("activeVisit", {}).get("token") if CONNECT_INFO else None
