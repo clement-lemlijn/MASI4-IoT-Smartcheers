@@ -248,8 +248,6 @@ def connect_to_bar():
             safe_setRGB(0, 255, 0)
             setText("Connecte !")
             time.sleep(2)
-
-            safe_setRGB(100, 150, 255)
             time.sleep(0.5)
             return
 
@@ -260,6 +258,48 @@ def connect_to_bar():
         safe_setRGB(255, 0, 0)
         time.sleep(2)
 
+def extract_connection_info():
+    """Extrait les informations importantes de CONNECT_INFO."""
+    if not CONNECT_INFO:
+        return None, None, None
+
+    table_numero = CONNECT_INFO.get("tableNumero")
+    pub_info = CONNECT_INFO.get("pub")
+    active_visit = CONNECT_INFO.get("activeVisit")
+
+    print(f"📋 Table n°{table_numero}")
+    if pub_info:
+        print(f"🍺 Pub : {pub_info.get('nom')}")
+
+    return table_numero, pub_info, active_visit
+
+
+def wait_for_active_visit():
+    """
+    Mode attente : tant qu'il n'y a pas de visite active,
+    on republie un message toutes les 5 secondes.
+    """
+    setText("En attente...")
+    safe_setRGB(255, 150, 0)  # orange = en attente de visite
+
+    attempt = 0
+    while True:
+        attempt += 1
+        print(f"⏳ En attente d'une visite active... (#{attempt})")
+
+        # On republie le message de connexion
+        mqtt_publish({"rpiId": RPI_ID}, "smartcheers/rpi/connect")
+
+        # On réécoute une éventuelle réponse
+        if wait_for_server_response(timeout=5):
+            active_visit = CONNECT_INFO.get("activeVisit")
+            if active_visit and isinstance(active_visit, dict):
+                print("✅ Visite active reçue !")
+                return active_visit
+
+        setText("En attente...")
+        safe_setRGB(255, 150, 0)
+        time.sleep(5)
 
 def run():
     setup_joystick()
@@ -269,19 +309,27 @@ def run():
 
     connect_to_bar()
 
-    # Suite du programme...
+    # 2. Récupération des infos importantes
+    table_numero, pub_info, active_visit = extract_connection_info()
 
-    # Démarrer le serveur Flask pour la caméra dans un thread daemon
-    camera_token = CONNECT_INFO.get("activeVisit", {}).get("token") if CONNECT_INFO else None
+    # 3. Si pas de visite active → on se met en attente
+    if not active_visit or not isinstance(active_visit, dict):
+        print("⚠️ Aucune visite active pour le moment")
+        active_visit = wait_for_active_visit()
+
+    # 4. À partir d'ici on a forcément une visite active
+    camera_token = active_visit.get("token")
     print("camera_token:", camera_token)
+
+    # Démarrer le serveur Flask pour la caméra
     camera_thread = threading.Thread(
-        target=start_camera_server, 
-        args=(camera_token,), 
+        target=start_camera_server,
+        args=(camera_token,),
         daemon=True
     )
     camera_thread.start()
     print("📷 Serveur caméra lancé sur http://0.0.0.0:5000")
-    time.sleep(2)  # Laisser le temps au serveur de démarrer
+    time.sleep(2)
 
     start_keepalive()
 
