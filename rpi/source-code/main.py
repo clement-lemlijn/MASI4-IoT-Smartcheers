@@ -230,12 +230,13 @@ def wait_for_server_response(timeout=5):
 
 
 def connect_to_bar():
-    """Boucle infinie de connexion MQTT jusqu'à ce que le serveur réponde."""
-    setText("Connexion...")
-    safe_setRGB(255, 100, 100)
+
 
     attempt = 0
     while True:
+        """Boucle infinie de connexion MQTT jusqu'à ce que le serveur réponde."""
+        setText("Connexion...")
+        safe_setRGB(255, 100, 100)
         attempt += 1
         print(f"🔌 Tentative de connexion #{attempt}...")
 
@@ -252,11 +253,12 @@ def connect_to_bar():
             time.sleep(0.5)
             return
 
+        time.sleep(3)
         # Échec → on attend 5 secondes puis on réessaie
         print("⚠️ Pas de réponse serveur, nouvelle tentative dans 5s...")
         setText("Serveur absent")
         safe_setRGB(255, 0, 0)
-        time.sleep(5)
+        time.sleep(2)
 
 
 def run():
