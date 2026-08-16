@@ -4,12 +4,11 @@ services:
     image: mongo:latest
     container_name: mongodb-smartcheers
     restart: always
-    command: [ "--bind_ip_all" ]
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
     ports:
-      - "27017:27017"
+    - "127.0.0.1:27017:27017"
     volumes:
       - mongo_smartcheers_data:/data/db
     env_file:
