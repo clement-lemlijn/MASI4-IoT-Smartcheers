@@ -3,7 +3,7 @@ import time
 import json
 import serial
 
-from grove_rgb_lcd import setText
+from grove_rgb_lcd_v5 import setText
 from display import safe_setRGB
 from leds import set_leds
 from mqtt_client import mqtt_publish, DELIVER_ORDER_TOPIC
@@ -17,7 +17,7 @@ ser = serial.Serial(port=RFID_SERIAL_PORT, baudrate=RFID_BAUDRATE, timeout=1)
 def wait_for_rfid():
     """Attend le scan du badge client et retourne son ID."""
     set_leds(blue=True)
-    safe_setRGB(255, 255, 0)
+    safe_setRGB(100, 150, 255)
     setText("Scannez votre badge")
     print("🟢 En attente d'un badge RFID...")
     while True:
