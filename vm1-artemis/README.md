@@ -11,3 +11,9 @@ Password : ""
 
 ## Creation user mdp & init depuis shell conteneur
 `sudo docker exec -it mongodb-smartcheers mongosh -u admin -p 'TON_MOT_DE_PASSE_ROOT' --authenticationDatabase admin`
+
+## Install mongodb compass on VM 
+```
+wget https://downloads.mongodb.com/compass/mongodb-compass_1.44.4_amd64.deb
+sudo apt install ./mongodb-compass_1.44.4_amd64.deb
+```
