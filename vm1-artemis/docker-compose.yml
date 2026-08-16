@@ -2,7 +2,7 @@
 services:
   mongodb-smartcheers:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongodb-smartcheers
     restart: always
     command: [ "--bind_ip_all" ]
     environment:
