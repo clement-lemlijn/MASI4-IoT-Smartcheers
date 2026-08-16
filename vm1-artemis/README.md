@@ -8,3 +8,6 @@ Ubuntu64-bit
 ## Connexion
 User : "LEMLIJN Clément"
 Password : ""
+
+## Creation user mdp & init depuis shell conteneur
+`sudo docker exec -it mongodb-smartcheers mongosh -u admin -p 'TON_MOT_DE_PASSE_ROOT' --authenticationDatabase admin`
