@@ -1,14 +1,15 @@
 # docker-compose.yml sur Artemis
 services:
   mongodb-smartcheers:
-    image: mongo:7
-    container_name: mongo-smartcheers
-    restart: unless-stopped
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    command: [ "--bind_ip_all" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PWD}
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
     ports:
-      - "127.0.0.1:27018:27017"
+      - "27017:27017"
     volumes:
       - mongo_smartcheers_data:/data/db
     env_file:
