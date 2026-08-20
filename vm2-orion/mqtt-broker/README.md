@@ -49,6 +49,13 @@ sudo docker exec -it mosquitto mosquitto_pub   -t "smartcheers/orders/new"   -m 
 
 ```
 
+### Public : 
+
+```
+mosquitto_sub -h "test.mosquitto.org" -p 1883 -t "test/clem"
+mosquitto_pub -h "test.mosquitto.org" -p 1883 -t "test/clem" -m "salut Justin"
+```
+
 ### QoS 2 : 
 ```
 sudo docker exec -it mosquitto mosquitto_sub -t "test/qos2" -q 2 -u clement-lemlijn -P mqtt-pwd -v
