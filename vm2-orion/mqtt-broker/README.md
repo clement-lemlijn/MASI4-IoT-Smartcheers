@@ -56,6 +56,13 @@ mosquitto_sub -h "test.mosquitto.org" -p 1883 -t "test/clem"
 mosquitto_pub -h "test.mosquitto.org" -p 1883 -t "test/clem" -m "salut Justin"
 ```
 
+### HiveMQ - debug
+
+```
+mosquitto_sub -h broker.hivemq.com -p 1883 -t "test/clem" -d -v
+mosquitto_pub -h broker.hivemq.com -p 1883 -t "test/clem" -m "Salut Justin !" -d
+```
+
 ### QoS 2 : 
 ```
 sudo docker exec -it mosquitto mosquitto_sub -t "test/qos2" -q 2 -u clement-lemlijn -P mqtt-pwd -v
