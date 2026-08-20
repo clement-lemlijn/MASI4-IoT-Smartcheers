@@ -1,0 +1,33 @@
+body {
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+.container { max-width: 900px; margin: 0 auto; }
+h1 { text-align: center; }
+.search { display: flex; gap: 10px; margin-bottom: 30px; }
+input { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 16px; }
+button { padding: 12px 24px; background: #00c853; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+.weather-card {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.weather-card h2 { margin: 0 0 10px; font-size: 2.2em; }
+.temp { font-size: 4em; font-weight: bold; }
+.desc { font-size: 1.4em; text-transform: capitalize; }
+.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-top: 25px; }
+.detail { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; }
+.forecast { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
+.day {
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
