@@ -19,3 +19,7 @@ curl -X POST https://webexapis.com/v1/messages \
     "roomId": "ROOM_ID",
     "markdown": "🔴 **TEST** — Bot Smartcheers connecté avec succès"
   }'
+
+  links : 
+  https://developer.webex.com/my-apps/smartcheers-webex
+  https://web.webex.com/spaces/aHR0cHM6Ly9jb252LWsud2J4Mi5jb20vY29udmVyc2F0aW9uL2FwaS92MS9jb252ZXJzYXRpb25zLzg1OGEwMmMwLTlmZmUtMTFmMS04MmU4LWM3MTQzNDgxYTNlNA==?noFetch=true
