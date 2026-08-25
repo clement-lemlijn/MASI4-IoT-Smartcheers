@@ -209,7 +209,9 @@ module.exports = {
     functionTimeout: 0,
 
     functionGlobalContext: {
-        mongodb: require('mongodb')
+        crypto: require("crypto"),
+        mongodb: require('mongodb'),
+        twilio: require("twilio")
         // os:require('os'),
     },
 
