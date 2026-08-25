@@ -21,7 +21,9 @@ def verify_password(username, password):
     return None
 
 # Connexion MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(
+    "mongodb://nodered:pwd-to-mongo19@mongodb:27017/?authSource=smartpub_db"
+)
 db = client["smartpub_db"]
 collection = db["sensors"]
 
