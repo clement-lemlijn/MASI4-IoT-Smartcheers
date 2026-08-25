@@ -211,7 +211,10 @@ module.exports = {
     functionGlobalContext: {
         crypto: require("crypto"),
         mongodb: require('mongodb'),
-        twilio: require("twilio")
+        twilio: require("twilio"),
+        twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
+        twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
+        twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER
         // os:require('os'),
     },
 
