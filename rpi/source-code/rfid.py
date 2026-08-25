@@ -3,7 +3,7 @@ import time
 import json
 import serial
 
-from grove_rgb_lcd_v5 import setText
+from libs.grove_rgb_lcd_v5 import setText
 from display import safe_setRGB
 from leds import set_leds
 from mqtt_client import mqtt_publish, DELIVER_ORDER_TOPIC

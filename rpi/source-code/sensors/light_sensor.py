@@ -2,7 +2,7 @@
 
 import time
 import grovepi
-from grove_rgb_lcd_v5 import setText
+from libs.grove_rgb_lcd_v5 import setText
 from config import RPI_ID
 from mqtt_client import mqtt_publish_train_passing
 from actuators.rpiLoRa import send_train_passed
