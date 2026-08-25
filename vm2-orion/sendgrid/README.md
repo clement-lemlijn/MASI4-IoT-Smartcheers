@@ -13,3 +13,6 @@ docker exec -it node-red-employee bash
 cd /data
 npm install @sendgrid/mail
 ```
+
+# 4. Setup single sender 
+https://app.sendgrid.com/settings/sender_auth/senders
