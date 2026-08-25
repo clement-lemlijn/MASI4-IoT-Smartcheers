@@ -55,6 +55,10 @@ services:
       - ./employee_data:/data
       - ./config/certs:/config/certs:ro
       - ./certs/employee:/certs
+    command: >
+      sh -c "cd /data &&
+             npm install twilio &&
+             exec npm start -- --userDir /data"
     environment:
       - TZ=Europe/Brussels
     networks:
