@@ -214,7 +214,8 @@ module.exports = {
         twilio: require("twilio"),
         twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
         twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
-        twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER
+        twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER,
+        sendgrid: require('@sendgrid/mail'),
         // os:require('os'),
     },
 
