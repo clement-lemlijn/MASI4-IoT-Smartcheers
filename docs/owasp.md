@@ -39,6 +39,9 @@
 | **8** | **Lack of Device Management** | Chaque Raspberry Pi est identifié par un **`rpiId` unique** et associé à une table/emplacement. Le système publie notamment des informations de connexion (`smartcheers/rpi/connect/success`) contenant le `rpiId` et le `tableNumero`. Cela permet à Node-RED de savoir quel appareil est associé à quelle table et de contrôler les échanges MQTT. |
 | **9** | **Insecure Default Settings** | Les services ne reposent pas sur les identifiants par défaut de MongoDB : un compte administrateur et un mot de passe sont configurés via les variables d'environnement. Node-RED dispose également d'une **authentification pour le portail employé**. Les services MongoDB sont exécutés dans Docker plutôt que d'être directement installés et exposés sans configuration de sécurité. |
 | **10** | **Lack of Physical Hardening** | Le Raspberry Pi est utilisé comme équipement IoT dédié et les interfaces matérielles nécessaires au projet sont limitées aux composants utilisés (RFID, caméra, LCD, joystick, buzzer, etc.). Cependant, **aucun mécanisme avancé de hardening physique**, tel que Secure Boot, chiffrement complet du stockage, désactivation des interfaces de debug ou protection contre l'accès physique au Raspberry Pi, n'a été implémenté. Cette vulnérabilité reste donc principalement à améliorer. |
+
+
+
 | Niveau de couverture | Vulnérabilités |
 |---|---|
 | 🟢 **Bien couvertes** | 1, 2, 3, 7, 8, 9 |
