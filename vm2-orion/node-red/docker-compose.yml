@@ -82,6 +82,18 @@ services:
     depends_on:
       - mongo
 
+  api-odata:
+    build:
+      context: ../flask-odata
+    container_name: api-odata
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - mqtt_network
+    depends_on:
+      - mongo
+
 networks:
   mqtt_network:
     driver: bridge
