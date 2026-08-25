@@ -56,9 +56,16 @@ services:
       - ./config/certs:/config/certs:ro
       - ./certs/employee:/certs
     command: >
-      sh -c "cd /data &&
-             npm install twilio &&
-             exec npm start -- --userDir /data"
+      sh -c "
+        cd /data &&
+        if [ ! -d node_modules/twilio ]; then
+          echo 'Installation de Twilio...' &&
+          npm install twilio;
+        else
+          echo 'Twilio déjà installé';
+        fi &&
+        exec /usr/src/node-red/entrypoint.sh
+      "
     environment:
       - TZ=Europe/Brussels
     networks:
