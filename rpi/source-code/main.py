@@ -2,7 +2,7 @@
 import time
 import json
 import RPi.GPIO as GPIO
-from grove_rgb_lcd_v5 import setText
+from grove_lcd_rgb_v5 import setText
 import threading
 
 from config import RPI_ID, DRINKS, SNACKS, BROKER_IP, BROKER_PORT
