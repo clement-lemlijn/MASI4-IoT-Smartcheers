@@ -6,3 +6,10 @@ signup.sendgrid.com
 
 # 2. dashboard 
 https://app.sendgrid.com/guide
+
+# 3. Install sendgrid in container
+```bash
+docker exec -it node-red-employee bash
+cd /data
+npm install @sendgrid/mail
+```
