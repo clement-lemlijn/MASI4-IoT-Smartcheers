@@ -13,10 +13,21 @@ light_sensor = 2
 # LED to digital port D4
 led = 4
 
+# Buzzer to digital port D8
+buzzer = 8
+
 threshold = 10
 
 grovepi.pinMode(light_sensor, "INPUT")
 grovepi.pinMode(led, "OUTPUT")
+grovepi.pinMode(buzzer, "OUTPUT")
+
+
+def beep_buzzer(duration=2.0):
+    """Emet un bip de 2 secondes lors de la détection du train."""
+    grovepi.digitalWrite(buzzer, 1)
+    time.sleep(duration)
+    grovepi.digitalWrite(buzzer, 0)
 
 
 def _get_resistance():
@@ -55,6 +66,7 @@ def wait_for_train():
             if not train_detected:
                 print("🚂 Train détecté !")
                 train_detected = True
+                beep_buzzer()
                 setText("Train passing...")
                 
                 # Publier le message MQTT une seule fois

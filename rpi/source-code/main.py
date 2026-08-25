@@ -14,7 +14,7 @@ from rfid import wait_for_rfid
 from activity import touch_activity, is_timed_out
 from actuators.servos import open_bifurcation, close_bifurcation, open_barrier, close_barrier
 from actuators.rpiLoRa import call_train_start, start_keepalive, start_train_control_listener, close, send_train_loaded, send_train_passed
-from sensors.light_sensor import wait_for_train
+from sensors.light_sensor import wait_for_train, beep_buzzer
 from camera_api import start_camera_server
 
 MAIN_MENU = ["Boissons", "Snacks", "Confirmer", "Annuler"]
@@ -245,6 +245,8 @@ def connect_to_bar():
 
         if wait_for_server_response(timeout=5):
             # Succès
+            if CONNECT_INFO and CONNECT_INFO.get("activeVisit"):
+                beep_buzzer(0.5)
             safe_setRGB(0, 255, 0)
             setText("Connecte !")
             time.sleep(2)
@@ -295,6 +297,7 @@ def wait_for_active_visit():
             active_visit = CONNECT_INFO.get("activeVisit")
             if active_visit and isinstance(active_visit, dict):
                 print("✅ Visite active reçue !")
+                beep_buzzer(0.5)
                 return active_visit
 
         setText("En attente...")
