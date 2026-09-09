@@ -78,6 +78,9 @@ sudo systemctl status actions.runner.clement-lemlijn-MASI4-IoT-Smartcheers.raspb
 ```
 systemctl status smartcheers.service
 ```
+```
+sudo journalctl -u smartcheers.service -f
+```
 
 ## Avant de débrancher :
 ```

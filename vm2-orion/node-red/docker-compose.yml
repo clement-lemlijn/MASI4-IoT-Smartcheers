@@ -55,6 +55,7 @@ services:
       - ./employee_data:/data
       - ./config/certs:/config/certs:ro
       - ./certs/employee:/certs
+      - /home/lemlijn-clement/smartcheers-photos:/smartcheers-photos
     environment:
       - TZ=Europe/Brussels
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
